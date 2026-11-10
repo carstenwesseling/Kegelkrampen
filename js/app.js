@@ -357,8 +357,34 @@ function aus(){
  const kSec=`<h2 id="a-kon">Könige-Rangliste <span class="mu">Sortiert nach Gesamtzahl der Titel. Geteilte Titel zählen für jeden.</span></h2>${kCtl}${T(['Rang',...KL.map(k=>k.replace(' - König',''))],K.map(x=>`<tr><td>${x.rang}. ${x.n}</td>${x.v.map(v=>`<td>${v||''}</td>`).join('')}</tr>`))}`;
  const aSec=`<h2 id="a-anw">Anwesenheit</h2>${T(['Name','Typ','Abende','Quote','','zuletzt dabei'],A2.map(x=>{const q=H.length?x.a/H.length:0;return`<tr><td>${x.rang}. ${x.n}</td><td>${typ(x.n)}</td><td>${x.a}</td><td>${Math.round(q*100)} %</td><td style="text-align:left"><span class="bar" style="width:${Math.round(q*100)}px"></span></td><td>${dd(x.l)}</td></tr>`}))}`;
  const eSec=`<h2 id="a-ein">Einzelergebnisse <span class="mu">${MODE=='avg'?'Ø pro anwesendem Abend':'Summe über alle anwesenden Abende'}; Lotterie in €.</span></h2>${eCtl}${T(['Name','Abende',...'defghij'.split('').map(k=>COLS.find(c=>c[0]==k)[1])],E.map(x=>`<tr><td>${x.n}</td><td>${x.a}</td>${'defghij'.split('').map(k=>{const v=MODE=='avg'?x[k]/x.a:x[k];return`<td>${k=='j'?eu(v):MODE=='avg'?fx(v):iv(v)}</td>`}).join('')}</tr>`))}`;
- $('#aus').innerHTML=aTop+`${dmSec}${kSec}${eSec}${aSec}${vSec}${jSec}`;sub()}
+ $('#aus').innerHTML=aTop+`${dmSec}${kSec}${eSec}${aSec}${vSec}${jSec}`;sortTables();sub()}
 $('#aus').addEventListener('change',e=>{const t=e.target;if(t.id=='yr')YR=t.value;if(t.id=='md')MODE=t.value;if(t.dataset.s)ST[t.dataset.s]=t.value;aus()});
+// Auswertung: Spalten per Klick auf die Überschrift absteigend sortieren (große Werte zuerst)
+const SRT={};
+const sortVal=(c,rank)=>{const t=(c?c.textContent:'').trim();if(!t)return{e:1};
+ if(rank){const m=t.match(/^(\d+)\./);if(m)return{n:+m[1]}}
+ const d=t.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);if(d)return{n:+(d[3]+d[2]+d[1])};
+ const u=t.replace(/[€%\s ]/g,'').replace(/^[×x]/,'');
+ if(/^-?\d[\d.]*(,\d+)?$/.test(u)||/^-?\d+(\.\d+)?$/.test(u)&&!/\./.test(u))return{n:parseFloat(u.replace(/\./g,'').replace(',','.'))};
+ return{s:t.replace(/^\d+\.\s*/,'').toLowerCase()}};
+function sortTables(){
+ document.querySelectorAll('#aus table').forEach(tb=>{
+  let el=tb.closest('.w'),id='';while(el&&!id){el=el.previousElementSibling;if(el&&el.tagName=='H2')id=el.id}
+  const ths=[...tb.rows[0].cells];
+  ths.forEach((th,j)=>{
+   if(!th.textContent.trim())return;
+   th.tabIndex=0;th.setAttribute('role','button');th.classList.add('srt');
+   th.setAttribute('aria-sort',SRT[id]===j?'descending':'none');
+   const go=()=>{SRT[id]=j;sortTables()};
+   th.onclick=go;th.onkeydown=e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();go()}}});
+  const j=SRT[id];if(j==null||j>=ths.length)return;
+  const rank=/^Rang/.test(ths[j].textContent.trim()),body=[...tb.rows].slice(1);
+  const key=body.map((r,i)=>({r,i,v:sortVal(r.cells[j],rank)}));
+  key.sort((x,y)=>{if(x.v.e||y.v.e)return(x.v.e||0)-(y.v.e||0)||x.i-y.i;
+   if(x.v.n!=null&&y.v.n!=null)return y.v.n-x.v.n||x.i-y.i;
+   if(x.v.n!=null)return-1;if(y.v.n!=null)return 1;
+   return y.v.s.localeCompare(x.v.s,'de')||x.i-y.i});
+  key.forEach(k=>tb.tBodies[0].appendChild(k.r))})}
 function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0]}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
