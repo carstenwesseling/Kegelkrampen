@@ -179,3 +179,8 @@ details{margin:8px 0}summary{cursor:pointer;min-height:32px}
 .tt.sel{outline:4px solid #000;outline-offset:-4px}
 .tt.sel img{opacity:.7}
 .tt.sel .ck{background:var(--lime);color:#000}
+
+/* Auswertung: sortierbare Spaltenköpfe */
+th.srt{cursor:pointer;user-select:none}
+th.srt:hover{background:var(--soft-lime)}
+th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
