@@ -39,6 +39,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 - Gespeicherte Abende sind nicht mehr änderbar, außer über „Bearbeiten“ durch den Besitzer.
 - Anzeige: Ergebnisse (verl. Spiele bis Kranz Hand) als ganze Zahlen; nur Preis, Summe und Lotterie in Euro; übrige Geldspalten mit Cent.
+- Eingabe: Die Preise (Preiszeile) kann nur der Besitzer ändern; für alle anderen wird sie nur angezeigt.
 
 ## Auswertung
 

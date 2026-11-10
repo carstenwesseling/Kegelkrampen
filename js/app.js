@@ -55,7 +55,7 @@ const chips=()=>`<h2 id="s-anw">Anwesenheit <span class="mu">${S.rows.filter(r=>
 <div class="top"><input type="text" id="gn" placeholder="Name des Gastes"><button type="button" id="gadd">Gast hinzufügen</button><span class="mu" id="gm"></span></div><h2 id="s-ein">Eingabe</h2>`;
 function eingabe(){
  const P=S.preise,K='defghij'.split(''),L=k=>COLS.find(c=>c[0]==k)[1];
- let h='<table class="stack"><tr class="hd"><th>Name</th>'+K.map(k=>`<th>${L(k)}</th>`).join('')+'<th></th></tr><tr><td>Preis</td>'+'defghi'.split('').map(k=>`<td data-l="${L(k)}">${A('p',0,k,P[k],1)}</td>`).join('')+'<td></td><td></td></tr>';
+ let h='<table class="stack"><tr class="hd"><th>Name</th>'+K.map(k=>`<th>${L(k)}</th>`).join('')+'<th></th></tr><tr><td>Preis</td>'+'defghi'.split('').map(k=>`<td data-l="${L(k)}">${A('p',0,k,P[k],OWN)}</td>`).join('')+'<td></td><td></td></tr>';
  byOrd(S.rows).forEach(([r,i])=>{if(!r.c)return;h+=`<tr><td>${r.name}${r.gast?' <span class="mu">(Gast)</span>':''}</td>`+K.map(k=>r.gast&&!'hij'.includes(k)?'<td></td>':`<td data-l="${L(k)}">${A('r',i,k,r[k]||'',1)}</td>`).join('')+`<td>${r.gast?`<button type="button" data-rm="${i}" aria-label="Gast entfernen">✕ Gast entfernen</button>`:''}</td></tr>`});
  return(S.rows.some(r=>r.c)?'':'<p class="mu">Noch niemand ausgewählt – bitte oben die Anwesenden antippen.</p>')+`<div class="w">${h}</table></div>`}
 function stat(W,C){
@@ -92,7 +92,7 @@ const onIn=e=>{
  if(a=='rk'){RK[i][k]=k=='pt'?(t.value===''?null:+t.value):t.value;return}
  const v=t.dataset.e?eur(t.value):t.type=='number'?(t.value===''?0:+t.value):t.value;
  if(t.dataset.e&&e.type=='change')t.value=v?fx(v):'';
- if(a=='r')S.rows[i][k]=v;else if(a=='p')S.preise[k]=v;else if(a=='k')S.kasse[k]=v;else if(a=='d')S.date=v;
+ if(a=='r')S.rows[i][k]=v;else if(a=='p'){if(!OWN)return;S.preise[k]=v}else if(a=='k')S.kasse[k]=v;else if(a=='d')S.date=v;
  else if(a=='kn')S.koenige[i].name=v;else if(a=='kp')S.koenige[i].pt=t.value===''?null:+t.value;
  if(a=='r'&&k=='e')autoKoenige();
  upd();draft()};
