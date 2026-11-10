@@ -1,0 +1,15 @@
+# Lokale Konfiguration und Zugangsdaten niemals committen
+.env
+.env.*
+firebase-service-account*.json
+serviceAccount*.json
+
+# Export-Dateien aus der bisherigen Datenbank
+export/
+*.csv
+
+# Betriebssystem und Editoren
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
