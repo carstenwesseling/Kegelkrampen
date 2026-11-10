@@ -25,8 +25,8 @@ async function who(){
  else t.textContent='Nicht angemeldet';
  e.append(t);
  const g=$('#gate');
- if(!db){g.hidden=false;g.textContent='Bitte anmelden: Öffne die Seite über deinen Einladungslink und melde dich bei Claude an. Ohne Anmeldung sind keine Daten sichtbar, und Eingaben werden nicht gespeichert.'}
- else if(!OWN&&w===false){g.hidden=false;g.textContent='Du bist angemeldet, hast aber nur Leserechte. Für Eingaben muss der Besitzer dich im Teilen-Menü der Seite als Mitwirkende/n eintragen.'}
+ if(!db){g.hidden=false;g.textContent='Keine Datenbank verbunden. Die Seite kann nicht geladen werden; bitte später noch einmal versuchen.'}
+ else if(!OWN&&w===false){g.hidden=false;g.textContent='Du bist mit Google angemeldet, hast aber nur Leserechte. Eingaben kann nur der Besitzer speichern. Mit dem Knopf oben kannst du dich wieder abmelden.'}
  else g.hidden=true}
 const GRP=['#b1','#b5','#b6'];
 function grp(){const g=GRP.includes(CUR);$('#eg').hidden=!g;if(g){$('#b1').classList.add('on');$('#b1').setAttribute('aria-current',CUR=='#b1'?'page':'true')}$('#b1a').classList.toggle('on',CUR=='#b1');$('#b1a').setAttribute('aria-current',CUR=='#b1'?'page':'false')}

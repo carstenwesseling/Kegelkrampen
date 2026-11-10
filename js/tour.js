@@ -13,7 +13,7 @@ async function tour(){
   el.innerHTML='<h2 id="t-tab">Kegeltouren</h2><p class="mu">Bilder werden geladen …</p>';
   let list=null;
   if(db){try{const s=await tT(db.collection('touren').get());if(s)list=s.docs.map(x=>({...clean(x.data()),id:x.id}))}catch(e){}}
-  if(list===null){el.innerHTML='<h2 id="t-tab">Kegeltouren</h2><p class="note">'+(db?'Die Bilder konnten nicht geladen werden. Bitte den Menüpunkt später noch einmal öffnen.':'Keine Datenbank verbunden – bitte über den Einladungslink anmelden.')+'</p>';return}
+  if(list===null){el.innerHTML='<h2 id="t-tab">Kegeltouren</h2><p class="note">'+(db?'Die Bilder konnten nicht geladen werden. Bitte den Menüpunkt später noch einmal öffnen.':'Keine Datenbank verbunden. Bitte später noch einmal versuchen.')+'</p>';return}
   TO=list}
  if(OWN&&AS===undefined){try{AS=window.claude?await tT(window.claude.use('assets')):null}catch(e){AS=null}}
  tourView()}
