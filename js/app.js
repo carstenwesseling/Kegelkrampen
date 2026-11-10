@@ -60,7 +60,7 @@ function eingabe(){
  return(S.rows.some(r=>r.c)?'':'<p class="mu">Noch niemand ausgewählt – bitte oben die Anwesenden antippen.</p>')+`<div class="w">${h}</table></div>`}
 function stat(W,C){
  const L=k=>COLN(k);
- let h='<table class="stack t"><tr class="hd"><th>Name</th><th>Anwesend</th><th>Beitrag</th><th>Runde bezahlt</th><th>Summe</th><th>Rest letztes Kegeln</th><th>soll zahlen</th><th>Hat gezahlt</th><th>Noch zu zahlen</th></tr><tr><td>Preis</td><td></td><td data-l="Beitrag">'+A('p',0,'k',S.preise.k,1)+'</td><td colspan="6"></td></tr>';
+ let h='<table class="stack t"><tr class="hd"><th>Name</th><th>Anwesend</th><th>Beitrag</th><th>Runde bezahlt</th><th>Summe</th><th>Rest letztes Kegeln</th><th>soll zahlen</th><th>Hat gezahlt</th><th>Noch zu zahlen</th></tr><tr><td>Preis</td><td></td><td data-l="Beitrag">'+A('p',0,'k',S.preise.k,OWN)+'</td><td colspan="6"></td></tr>';
  byOrd(W.rows).forEach(([r,i])=>{if(r.gast)return;const o=C.out[i],cv=k=>`<td class="cv${o[k]<0?' neg':''}" data-l="${L(k)}" id="v${i}${k}">${k=='k'&&!r.c?'x':fx(o[k])}</td>`;
   h+=`<tr><td>${r.name}</td><td data-l="Anwesend">${r.c?'x':''}</td>${cv('k')}<td data-l="Runde bezahlt">${A('r',i,'l',r.l||'',1)}</td>${cv('m')}<td class="cv" data-l="Rest letztes Kegeln">${fx(r.n)}</td>${cv('o')}<td data-l="Hat gezahlt">${A('r',i,'p',r.p||'',1)}</td>${cv('q')}</tr>`});
  h+=`<tr class="sum"><td>Summe</td><td id="tc" data-l="Anwesend">${C.t.c}</td>`+'klmnopq'.split('').map(k=>`<td id="t${k}" data-l="${L(k)}">${fx(C.t[k])}</td>`).join('')+'</tr></table>';
