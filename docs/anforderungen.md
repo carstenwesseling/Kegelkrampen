@@ -46,7 +46,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Könige-Rangliste und Einzelergebnisse pro Spalte, wahlweise als Balken- oder Tortendiagramm.
 - Verlaufsdiagramm über alle historischen Spieltage pro Spalte.
 - Anwesenheiten, Jahresübersicht, Dortmunder-Auswertung.
-- CSV-Export für Teilnahmen und Könige.
+- Kein CSV-Export mehr (die Schaltflächen „CSV Teilnahmen“ und „CSV Könige“ wurden entfernt).
 
 ## Mitglieder
 
