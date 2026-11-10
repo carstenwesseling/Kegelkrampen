@@ -1,0 +1,20 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == 'carsten.wesseling@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    // Fotos der Kegeltouren: lesbar für alle, schreibbar nur für den Besitzer.
+    // Die Pfade sind zufällig, sie lassen sich nicht erraten, aber über den Link abrufen.
+    match /touren/{file} {
+      allow read: if true;
+      allow write: if isOwner() && request.resource.size < 20 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+  }
+}

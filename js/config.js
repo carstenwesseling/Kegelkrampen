@@ -1,0 +1,13 @@
+// Firebase-Projekt "kegelkrampen-67e7f". Diese Werte sind nicht geheim; die Sicherheit
+// regeln firestore.rules und storage.rules, nicht der Schlüssel.
+const firebaseConfig = {
+  apiKey: "AIzaSyBqORR5P0pknkkYEyU87aKBDF3dM3xr03U",
+  authDomain: "kegelkrampen-67e7f.firebaseapp.com",
+  projectId: "kegelkrampen-67e7f",
+  storageBucket: "kegelkrampen-67e7f.firebasestorage.app",
+  messagingSenderId: "904854848235",
+  appId: "1:904854848235:web:a812a3073f65e6e824b4ae"
+};
+
+// Nur dieses Google-Konto darf schreiben (Speichern, Mitglieder, Fotos).
+const KK_OWNER_EMAIL = "carsten.wesseling@gmail.com";

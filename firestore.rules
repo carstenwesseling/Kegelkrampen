@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Nur der Besitzer, mit verifizierter Google-Adresse, darf schreiben.
+    function isOwner() {
+      return request.auth != null
+        && request.auth.token.email == 'carsten.wesseling@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    // Die Webseite ist für alle lesbar (Historie, Auswertungen, Kegeltouren).
+    match /{document=**} {
+      allow read: if true;
+      allow write: if isOwner();
+    }
+  }
+}

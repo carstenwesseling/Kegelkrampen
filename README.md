@@ -23,7 +23,22 @@ Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `tour.js`, `i
 
 ## Status
 
-Der Code ist eine 1:1-Übernahme der bisherigen Artifact-Version. Die Datenanbindung nutzt dort die Laufzeit von claude.ai (`window.claude.use('db' | 'user' | 'assets' | 'downloads')`). Außerhalb von claude.ai funktioniert das nicht. Die Umstellung auf Firebase (Firestore für Daten, Storage für Fotos, Google-Anmeldung) ist der nächste Schritt.
+Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Google-Anmeldung. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
+
+- Lesen: für alle. Schreiben (Abende, Mitglieder, Rekorde, Fotos): nur für `carsten.wesseling@gmail.com` nach Google-Anmeldung.
+- Der Datenimport aus dem Artifact ist noch offen. Solange er fehlt, ist die Datenbank leer.
+
+### Einrichtung (einmalig)
+
+1. In der Firebase-Konsole unter Authentication → Settings → „Autorisierte Domains“ die Domain eintragen, auf der die Seite läuft (z. B. `localhost` und später `<nutzer>.github.io`).
+2. Regeln veröffentlichen: `firebase deploy --only firestore:rules,storage` (Firebase CLI nötig, Login mit `firebase login`).
+3. Die Seite über GitHub Pages veröffentlichen (Settings → Pages → Branch `main`, Ordner `/ (root)`).
+
+### Dateien für Firebase
+
+- `js/config.js`: Projektkonfiguration und Besitzer-E-Mail
+- `js/backend.js`: Anbindung an Firestore, Auth und Storage
+- `firestore.rules`, `storage.rules`, `firebase.json`: Zugriffsregeln
 
 ## Datenmodell (bisher)
 

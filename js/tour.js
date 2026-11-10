@@ -1,7 +1,7 @@
 //TOUR-START
 let TO=null,TYR='',TUY='',TUP=false,TNOTE='',TCT=0,TMV=null,TNY=false,AS;const TEY=new Set(),TSEL=new Set();
 const tT=(p,ms=10000)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
-const tsrc=id=>'/_blob/'+id;
+const tsrc=id=>window.kkBlobUrl(id);
 const tSort=(a,b)=>(a.taken||0)-(b.taken||0)||String(a.name||'').localeCompare(String(b.name||''),'de',{numeric:true});
 const tYears=()=>[...new Set(TO.map(t=>+t.year))].sort((a,b)=>b-a);
 const tList=y=>TO.filter(t=>t.aid&&+t.year==+y).sort(tSort);
