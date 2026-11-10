@@ -13,3 +13,6 @@ export/
 Thumbs.db
 .idea/
 .vscode/
+
+# Export aus dem Artifact (enthält Vereinsdaten)
+kegelkrampen-daten.json
