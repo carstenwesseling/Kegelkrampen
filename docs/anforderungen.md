@@ -49,7 +49,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Verlaufsdiagramm über alle historischen Spieltage pro Spalte.
 - Anwesenheiten, Jahresübersicht, Dortmunder-Auswertung.
 - Kein CSV-Export mehr (die Schaltflächen „CSV Teilnahmen“ und „CSV Könige“ wurden entfernt).
-- Auswertung: Alle Tabellenspalten lassen sich per Klick auf die Überschrift absteigend (groß nach klein, Text Z–A) sortieren; die Sortierung bleibt beim Neuaufbau der Seite erhalten.
+- Auswertung: Alle Tabellenspalten lassen sich per Klick auf die Überschrift absteigend (groß nach klein, Text Z–A) sortieren; die Sortierung bleibt beim Neuaufbau der Seite erhalten. Summenzeilen (z. B. „Alle Beteiligten“ in der Dortmunder-Auswertung) werden nie mitsortiert und bleiben fest am Tabellenende; neue Summenzeilen bekommen die Klasse `sum`.
 
 ## Mitglieder
 

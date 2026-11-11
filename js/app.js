@@ -341,7 +341,7 @@ function aus(){
  const DMr=rk(Object.values(dm).map(o=>({...o,avg:o.s/o.a})).sort((a,b)=>b.avg-a.avg||b.s-a.s||a.n.localeCompare(b.n)),'avg'),dmT=DMr.reduce((t,o)=>{t.a+=o.a;t.s+=o.s;o.v.forEach((x,i)=>t.v[i]+=x);return t},{a:0,s:0,v:[0,0,0,0,0,0,0]});
  const dmSec=`<h2 id="a-dm">Dortmunder <span class="mu">${YR?'Zeitraum '+YR:'Alle Jahre'}. Summen aus allen Dortmunder-Blättern; Ø pro Teilnahme = Summe ÷ Teilnahmen. Als Teilnahme zählt jeder Eintrag in einem Dortmunder-Blatt, auch ohne Punkte.</span></h2>`
   +(DMr.length?`<p class="note">Ø aller Teilnahmen: <b>${fx(dmT.s/dmT.a)}</b> Punkte (${dmT.a} Teilnahmen von ${DMr.length} Beteiligten an ${dmN} ${dmN==1?'Abend':'Abenden'}${YR?' in '+YR:''})</p><div class="top"><label>Diagramm ${sel('dt',TYPES,ST.dt)}</label></div>`+(ST.dt!='none'?chart(ST.dt,DMr.map(x=>({n:x.n,v:x.avg})),fx,'Dortmunder – Ø pro Teilnahme'+(YR?' '+YR:'')):'')
-   +T(['Name','Teilnahmen',...[1,2,3,4,5,6,7].map(i=>`${i} <span class="mu">(×${i})</span>`),'Summe','Ø pro Teilnahme'],[...DMr.map(x=>`<tr><td>${x.rang}. ${esc(x.n)}${typ(x.n)=='Gast'?' <span class="mu">(Gast)</span>':''}</td><td>${x.a}</td>${x.v.map(v=>`<td>${v?n0(v):''}</td>`).join('')}<td>${n0(x.s)}</td><td class="cv"><b>${fx(x.avg)}</b></td></tr>`),`<tr><td><b>Alle Beteiligten</b></td><td><b>${dmT.a}</b></td>${dmT.v.map(v=>`<td><b>${v?n0(v):''}</b></td>`).join('')}<td><b>${n0(dmT.s)}</b></td><td class="cv"><b>${fx(dmT.s/dmT.a)}</b></td></tr>`])
+   +T(['Name','Teilnahmen',...[1,2,3,4,5,6,7].map(i=>`${i} <span class="mu">(×${i})</span>`),'Summe','Ø pro Teilnahme'],[...DMr.map(x=>`<tr><td>${x.rang}. ${esc(x.n)}${typ(x.n)=='Gast'?' <span class="mu">(Gast)</span>':''}</td><td>${x.a}</td>${x.v.map(v=>`<td>${v?n0(v):''}</td>`).join('')}<td>${n0(x.s)}</td><td class="cv"><b>${fx(x.avg)}</b></td></tr>`),`<tr class="sum"><td><b>Alle Beteiligten</b></td><td><b>${dmT.a}</b></td>${dmT.v.map(v=>`<td><b>${v?n0(v):''}</b></td>`).join('')}<td><b>${n0(dmT.s)}</b></td><td class="cv"><b>${fx(dmT.s/dmT.a)}</b></td></tr>`])
   :`<p class="mu">${YR?`Für ${YR} gibt es keine Abende mit Dortmunder-Werten. Mit „Zeitraum: Alle“ siehst du alle Jahre.`:'Es gibt noch keine Abende mit Dortmunder-Werten. Sie werden in der Eingabe unter „Dortmunder“ erfasst und mit dem Abend gespeichert.'}</p>`);
  const Hs=H.slice().sort((a,b)=>a.date<b.date?-1:1),who=[...new Set(H.flatMap(h=>h.rows.map(r=>r.name)))].sort((a,b)=>a.localeCompare(b));
  if(ST.vw&&!who.includes(ST.vw))ST.vw='';
@@ -359,7 +359,8 @@ function aus(){
  const eSec=`<h2 id="a-ein">Einzelergebnisse <span class="mu">${MODE=='avg'?'Ø pro anwesendem Abend':'Summe über alle anwesenden Abende'}; Lotterie in €.</span></h2>${eCtl}${T(['Name','Abende',...'defghij'.split('').map(k=>COLS.find(c=>c[0]==k)[1])],E.map(x=>`<tr><td>${x.n}</td><td>${x.a}</td>${'defghij'.split('').map(k=>{const v=MODE=='avg'?x[k]/x.a:x[k];return`<td>${k=='j'?eu(v):MODE=='avg'?fx(v):iv(v)}</td>`}).join('')}</tr>`))}`;
  $('#aus').innerHTML=aTop+`${dmSec}${kSec}${eSec}${aSec}${vSec}${jSec}`;sortTables();sub()}
 $('#aus').addEventListener('change',e=>{const t=e.target;if(t.id=='yr')YR=t.value;if(t.id=='md')MODE=t.value;if(t.dataset.s)ST[t.dataset.s]=t.value;aus()});
-// Auswertung: Spalten per Klick auf die Überschrift absteigend sortieren (große Werte zuerst)
+// Auswertung: Spalten per Klick auf die Überschrift absteigend sortieren (große Werte zuerst).
+// Summenzeilen (tr.sum, z. B. „Alle Beteiligten“) werden nicht mitsortiert und bleiben am Tabellenende.
 const SRT={};
 const sortVal=(c,rank)=>{const t=(c?c.textContent:'').trim();if(!t)return{e:1};
  if(rank){const m=t.match(/^(\d+)\./);if(m)return{n:+m[1]}}
@@ -378,13 +379,13 @@ function sortTables(){
    const go=()=>{SRT[id]=j;sortTables()};
    th.onclick=go;th.onkeydown=e=>{if(e.key=='Enter'||e.key==' '){e.preventDefault();go()}}});
   const j=SRT[id];if(j==null||j>=ths.length)return;
-  const rank=/^Rang/.test(ths[j].textContent.trim()),body=[...tb.rows].slice(1);
+  const rank=/^Rang/.test(ths[j].textContent.trim()),all=[...tb.rows].slice(1),body=all.filter(r=>!r.classList.contains('sum')),sums=all.filter(r=>r.classList.contains('sum'));
   const key=body.map((r,i)=>({r,i,v:sortVal(r.cells[j],rank)}));
   key.sort((x,y)=>{if(x.v.e||y.v.e)return(x.v.e||0)-(y.v.e||0)||x.i-y.i;
    if(x.v.n!=null&&y.v.n!=null)return y.v.n-x.v.n||x.i-y.i;
    if(x.v.n!=null)return-1;if(y.v.n!=null)return 1;
    return y.v.s.localeCompare(x.v.s,'de')||x.i-y.i});
-  key.forEach(k=>tb.tBodies[0].appendChild(k.r))})}
+  key.forEach(k=>tb.tBodies[0].appendChild(k.r));sums.forEach(r=>tb.tBodies[0].appendChild(r))})}
 function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0]}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
