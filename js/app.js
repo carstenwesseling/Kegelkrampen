@@ -60,7 +60,7 @@ const stepNav=k=>{const i=STEPS.findIndex(s=>s[0]==k),p=STEPS[i-1],n=STEPS[i+1];
 const emptyCard=(t,b)=>`<div class="empty">${icon('users')}<p>${t}</p>${b||''}</div>`;
 const chips=()=>{const n=S.rows.filter(r=>r.c&&!r.gast).length,all=S.rows.filter(r=>!r.gast).length;
  return`<h2 id="s-anw">Anwesenheit <span class="badge">${n} von ${all}</span></h2><div class="chips">${S.rows.map((r,i)=>r.gast?'':`<button type="button" class="chip${r.c?' on':''}" data-chip="${i}" aria-pressed="${!!r.c}">${r.c?icon('check'):''}${esc(r.name)}</button>`).join('')}${S.rows.map((r,i)=>r.gast?`<button type="button" class="chip on gst" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${esc(r.name)} <span class="tag">Gast</span>${icon('x')}</button>`:'').join('')}</div>
-<div class="gadd"><label for="gn">Gast hinzufügen</label><div class="row"><input type="text" id="gn" placeholder="Name des Gastes" autocomplete="off" enterkeyhint="done"><button type="button" id="gadd">${icon('plus')}Hinzufügen</button></div><p class="mu" id="gm" aria-live="polite"></p></div>`};
+<div class="gadd"><label for="gn">Gast hinzufügen</label><div class="row"><input type="text" id="gn" placeholder="Name des Gastes" autocomplete="off" enterkeyhint="done"><button type="button" id="gadd">${icon('plus')}Hinzufügen</button></div><p class="mu" id="gm" aria-live="polite"></p></div><div class="top"><button type="button" id="an-rs">Anwesenheit zurücksetzen</button></div>`};
 function eingabe(){
  const P=S.preise,L=k=>k=='k'?'Beitrag':COLS.find(c=>c[0]==k)[1],pr='defghik'.split(''),rows=byOrd(S.rows).filter(([r])=>r.c);
  const ptx=pr.map(k=>`${L(k)} ${eu(P[k])}`).join(' · ');
@@ -98,6 +98,7 @@ const dstat=(s,t)=>{const e=$('#dstat');if(!e)return;e.dataset.s=s;e.innerHTML=(
 function draft(){clearTimeout(tm);if(!db)return dstat('err','Ohne Datenbank – nicht gesichert');dstat('wait','Wird gesichert …');tm=setTimeout(()=>db.doc('state/entwurf').set(clean(S)).then(()=>{st('Entwurf gespeichert');dstat('ok','Entwurf gesichert '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}))}).catch(e=>{st('Entwurf konnte nicht gespeichert werden: '+(e.message||e.code));dstat('err','Entwurf nicht gesichert');toast('Entwurf konnte nicht gespeichert werden: '+(e.message||e.code),'err')}),800)}
 $('#edit').addEventListener('click',e=>{
  const b=e.target.closest('[data-chip]');if(b){const r=S.rows[b.dataset.chip];r.c=r.c?0:1;if(r.c)r.ord=S.seq=(S.seq||0)+1;else delete r.ord;autoKoenige();render();draft();return}
+ if(e.target.closest('#an-rs')){confirmDlg('Anwesenheit zurücksetzen? Alle Mitglieder werden wieder auf nicht anwesend gesetzt.','Zurücksetzen').then(ok=>{if(!ok)return;S.rows.forEach(r=>{if(!r.gast){r.c=0;delete r.ord}});autoKoenige();render();draft();toast('Anwesenheit wurde zurückgesetzt.')});return}
  const x=e.target.closest('[data-rm]');if(x){const r=S.rows[x.dataset.rm];confirmDlg(`Gast „${r.name}“ entfernen? Seine Werte von heute gehen verloren.`,'Entfernen').then(ok=>{if(!ok||S.rows[x.dataset.rm]!==r)return;S.rows.splice(x.dataset.rm,1);autoKoenige();render();draft();toast(`Gast „${r.name}“ entfernt.`,'info')});return}
  if(e.target.id=='gadd'){const n=$('#gn').value.trim(),m=t=>$('#gm').textContent=t;
   if(!n)return m('Bitte einen Namen eingeben.');
