@@ -6,7 +6,7 @@ const dd=i=>i?i.split('-').reverse().join('.'):'';
 const iv=v=>v==null||v===''||isNaN(v)?'':Math.round(+v).toLocaleString('de-DE'),eu=v=>fx(v)?fx(v)+' €':'';
 const clean=x=>JSON.parse(JSON.stringify(x));
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
-let S={},CFG={rekorde:[]},RK=[],HSEL,HIST=[],MEM={liste:[],gaeste:[],weitere:[]},db=null,OWN=false,EDT=false,tm,YR='',HYR='',MODE='sum';
+let S={},CFG={rekorde:[]},RK=[],HSEL,HIST=[],MEM={liste:[],gaeste:[],weitere:[]},db=null,OWN=false,EDT=false,tm,YR='',HYR=String(new Date().getFullYear()),MODE='sum'; // Historie: Standardfilter ist das aktuelle Jahr
 //CALC-START
 const isG=r=>r.gast||r.name==='Gast';
 function calc(S){
@@ -121,7 +121,7 @@ async function save(){
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
  HIST=[doc,...HIST];S={};sync();draft();if(typeof UMF!=='undefined'&&Object.keys(UMF).length)db.doc('state/umfrage').set({votes:{}}).catch(()=>{});render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.')}
 const inHY=h=>!HYR||h.date.startsWith(HYR);
-const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set(HIST.map(h=>h.date.slice(0,4)))].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
+const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set([...HIST.map(h=>h.date.slice(0,4)),String(new Date().getFullYear())])].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
 function hist(sel){
  if(EDIT&&EDIT.date!=sel)EDIT=null;
  if(sel&&HYR&&sel.slice(0,4)!=HYR)HYR=sel.slice(0,4);
@@ -136,7 +136,7 @@ $('#hist').onclick=e=>{const t=e.target.closest('button');if(!t)return;
  if(t.dataset.d){hist(t.dataset.d);return}
  if(t.dataset.ec!=null&&EDIT){const r=EDIT.doc.rows[t.dataset.ec];r.c=r.c?0:1;hist(HSEL);return}
  if(t.id=='ebtn')startEdit();else if(t.id=='esv')saveEdit();else if(t.id=='ecx'){EDIT=null;hist(HSEL)}};
-$('#hist').addEventListener('change',e=>{if(e.target.id!='hyr')return;HYR=e.target.value;const cur=HIST.find(h=>h.date==HSEL),first=HIST.find(inHY);hist((cur&&inHY(cur)?cur:first||cur||{}).date);const s=$('#hyr');if(s)s.focus({preventScroll:true})});
+$('#hist').addEventListener('change',e=>{if(e.target.id!='hyr')return;HYR=e.target.value;const cur=HIST.find(h=>h.date==HSEL),first=HIST.find(inHY);hist((cur&&inHY(cur)?cur:first||{}).date);const s=$('#hyr');if(s)s.focus({preventScroll:true})});
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const rekView=id=>`<h2 id="${id||'h-rek'}">Rekorde</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th><th>Datum</th></tr>${(CFG.rekorde||[]).map(r=>`<tr><td>${esc(r.t)}</td><td data-l="Name">${esc(r.name)}</td><td data-l="Punkte">${r.pt??''}</td><td data-l="Datum">${dd(r.datum)}</td></tr>`).join('')}</table></div>`;
 function rekEdit(){

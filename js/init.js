@@ -43,7 +43,7 @@ $('#menu').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if
 document.addEventListener('click',e=>{if(!$('#menu').hidden&&!e.target.closest('#menu')&&!e.target.closest('#burger'))menuSet(false)});
 document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!$('#menu').hidden){menuSet(false);$('#burger').focus()}});
 navsShow();
-TABS.forEach(([b,v])=>$(b).onclick=()=>{CUR=b;TABS.forEach(([b2,v2])=>{$(v2).hidden=v2!=v;$(b2).classList.toggle('on',b2==b);$(b2).setAttribute('aria-current',b2==b?'page':'false')});if(b=='#b2')hist((HIST.find(inHY)||HIST[0]||{}).date);if(b=='#b3')aus();if(b=='#b4')members();if(b=='#b7')tour();if(b=='#b8')dortmunder();grp();sub();navsShow();window.scrollTo(0,0)});
+TABS.forEach(([b,v])=>$(b).onclick=()=>{CUR=b;TABS.forEach(([b2,v2])=>{$(v2).hidden=v2!=v;$(b2).classList.toggle('on',b2==b);$(b2).setAttribute('aria-current',b2==b?'page':'false')});if(b=='#b2')hist((HIST.find(inHY)||{}).date);if(b=='#b3')aus();if(b=='#b4')members();if(b=='#b7')tour();if(b=='#b8')dortmunder();grp();sub();navsShow();window.scrollTo(0,0)});
 (async()=>{
  const T=p=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),10000))]);
  try{const c=window.claude;db=c&&await T(c.use('db'));USR=c&&await T(c.use('user'));OWN=USR?await USR.isOwner():false;EDT=OWN||(USR&&USR.isEditor?await T(USR.isEditor())===true:false)}catch(e){db=null}

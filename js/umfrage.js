@@ -6,7 +6,7 @@ let UMF={};
 const umfCount=()=>{const c={dabei:0,rein:0,nein:0};MEM.liste.forEach(n=>{if(c[UMF[n]]!=null)c[UMF[n]]++});return c};
 function umfInner(){
  const c=umfCount();
- return `<div class="w"><table class="stack"><tr class="hd"><th>Name</th>${UMF_COLS.map(([k,l])=>`<th>${l}</th>`).join('')}</tr>`
+ return `<div class="w"><table class="umt"><tr><th>Name</th>${UMF_COLS.map(([k,l])=>`<th>${l}</th>`).join('')}</tr>`
  +MEM.liste.map((n,i)=>`<tr><td>${esc(n)}</td>${UMF_COLS.map(([k,l])=>`<td data-l="${l}" class="umc">${EDT?`<button type="button" class="umb${UMF[n]==k?' on':''}" data-um="${i}" data-v="${k}" aria-pressed="${UMF[n]==k}" aria-label="${esc(n)}: ${l}">${UMF[n]==k?'✓':''}</button>`:(UMF[n]==k?'<span class="umk">✓</span>':'')}</td>`).join('')}</tr>`).join('')
  +`<tr class="sum"><td>Anzahl</td>${UMF_COLS.map(([k])=>`<td>${c[k]}</td>`).join('')}</tr></table></div>`
  +(EDT?`<div class="top"><button type="button" class="pri" id="um-an">Alle „Dabei“ als anwesend markieren</button><button type="button" id="um-rs">Umfrage zurücksetzen</button><span class="mu" id="um-ms"></span></div>`:'<p class="mu">Die Umfrage kann nur von freigegebenen Mitgliedern geändert werden.</p>')}
