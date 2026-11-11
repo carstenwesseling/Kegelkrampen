@@ -1,5 +1,5 @@
 // Dortmunder-Ergebnisse 2000–2025 aus „Dortmunder_2000-2025.xlsx“ (Blatt „Kegeln 2000-2025“, Spalten B–N = Abend 1–13 des Jahres, „x“ = nicht dabei = null).
-// „André“ steht als „Trunsen“. Ab 2026 kommen die Werte aus den über die Eingabe gespeicherten Abenden (js/dortmunder.js).
+// „André“ steht als „Trunsen“, „Petzi“ als „Pätzi“. Ab 2026 kommen die Werte aus den über die Eingabe gespeicherten Abenden (js/dortmunder.js).
 const DT_XL={
  "2000":{
   "Buggy":[null,null,null,null,null,null,null,null,null,null,56,null,54],
@@ -9,7 +9,7 @@ const DT_XL={
   "Heiko":[null,null,null,null,null,null,null,null,null,null,67,74,68],
   "Manna":[null,null,null,null,null,null,null,null,null,null,44,72,70],
   "Mark":[null,null,null,null,null,null,null,null,null,null,null,null,53],
-  "Petzi":[null,null,null,null,null,null,null,null,null,null,60,null,null],
+  "Pätzi":[null,null,null,null,null,null,null,null,null,null,60,null,null],
   "Roesse":[null,null,null,null,null,null,null,null,null,null,null,68,null],
   "Sam":[null,null,null,null,null,null,null,null,null,null,null,41,39],
   "Trunsen":[null,null,null,null,null,null,null,null,null,null,65,37,49],

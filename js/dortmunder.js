@@ -2,7 +2,7 @@
 // Quellen: DT_XL (Excel 2000–2025, js/dortmunder-historie-data.js) und ab 2026 die über die Eingabe gespeicherten Abende (HIST[].blatt).
 // „x“ = nicht dabei gewesen. Einträge mit 0 Punkten (angekreuzt, aber nichts eingetragen) zählen nicht als Ergebnis.
 let DTY='',DTSEL=[]; // DTSEL: angehakte Jahre für die Gesamtübersicht, leer = alle Jahre
-const dtName=n=>/^andr[eé]$/i.test(String(n).trim())?'Trunsen':String(n).trim();
+const dtName=n=>/^andr[eé]$/i.test(String(n).trim())?'Trunsen':/^petzi$/i.test(String(n).trim())?'Pätzi':String(n).trim();
 const dtN1=v=>(+v).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
 const dtT=(hd,rows)=>`<div class="w"><table><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.join('')}</table></div>`;
 function dtData(){
