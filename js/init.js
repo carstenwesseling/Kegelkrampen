@@ -32,7 +32,10 @@ const GRP=['#b1','#b5','#b6'];
 function grp(){const g=GRP.includes(CUR);$('#eg').hidden=!g;if(g){$('#b1').classList.add('on');$('#b1').setAttribute('aria-current',CUR=='#b1'?'page':'true')}$('#b1a').classList.toggle('on',CUR=='#b1');$('#b1a').setAttribute('aria-current',CUR=='#b1'?'page':'false')}
 $('#b1a').onclick=()=>$('#b1').click();
 // Menüleiste (Hamburger) und Sprungmarken: Die Navigation erscheint erst, wenn ein Menüpunkt gewählt wurde.
-const navsShow=()=>{$('#navs').hidden=CUR=='#b0';navh()};
+const navsShow=()=>{$('#navs').hidden=CUR=='#b0';navh();fitStart()};
+// Startseite: Das Bild füllt die verbleibende Fensterhöhe und ist immer ganz und unverzerrt zu sehen (background-size: contain).
+function fitStart(){const s=$('#start');if(!s||s.hidden)return;s.style.height='';const top=s.getBoundingClientRect().top+window.scrollY;s.style.height=Math.max(240,window.innerHeight-top-60)+'px'}
+addEventListener('resize',fitStart);addEventListener('load',fitStart);
 const menuSet=o=>{$('#menu').hidden=!o;$('#burger').setAttribute('aria-expanded',o?'true':'false');$('#burger').setAttribute('aria-label',o?'Menü schließen':'Menü öffnen')};
 $('#burger').onclick=e=>{e.stopPropagation();menuSet($('#menu').hidden)};
 $('#menu').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;menuSet(false);$(b.dataset.go).click()});

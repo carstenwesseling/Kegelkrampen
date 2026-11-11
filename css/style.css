@@ -201,5 +201,5 @@ th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
 #loginbox{display:grid;gap:6px}
 .navs .in{padding-right:max(70px,env(safe-area-inset-right,0px))}
 .hero .brand{padding-right:60px}
-.start{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;margin:16px auto 0;width:min(100%,calc((100vh - 170px)*2/3));aspect-ratio:2/3;background:#fff}
+.start{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;margin:16px 0 0;width:100%;height:calc(100dvh - 230px);min-height:240px;background:#fff}
 .start::before{content:"";position:absolute;inset:0;z-index:-1;background:url(../img/willingen-2026.jpg) center/contain no-repeat;opacity:.5}
