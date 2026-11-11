@@ -67,7 +67,7 @@ function stat(W,C){
  return`<h2 id="s-stat">Statistik <span class="mu">Alle Mitglieder. Nicht Anwesende zahlen den Durchschnittsanteil. „Rest letztes Kegeln“ kommt automatisch vom letzten gespeicherten Abend.</span></h2><div class="w">${h}</div>`}
 function render(){
  const W=V(),C=calc(W),L=HIST[0];
- $('#edit').innerHTML=`<div class="top"><label>Datum <input type="date" id="dat" data-a="d" value="${S.date}"></label>${EDT?'<button class="pri" id="sv">Abend speichern</button>':''}<span class="mu" id="ms"></span></div><p class="mu">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}. ${EDT?'':'Speichern können nur freigegebene Mitglieder; Deine Eingaben bleiben als Entwurf erhalten.'}</p>`
+ $('#edit').innerHTML=`<div class="top"><label>Datum <input type="date" id="dat" data-a="d" value="${S.date}"></label>${EDT?'<button class="pri" id="sv">Abend speichern</button>':''}<button type="button" id="pdf-dl">PDF herunterladen</button><span class="mu" id="ms"></span></div><p class="mu">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}. ${EDT?'':'Speichern können nur freigegebene Mitglieder; Deine Eingaben bleiben als Entwurf erhalten.'}</p>`
  +(typeof umfHtml==='function'?umfHtml():'')+chips()+eingabe()+stat(W,C)+side(W,1,C)
  +rekEdit();
  if(EDT)$('#sv').onclick=save;if(OWN)$('#rsv').onclick=saveRk;blatt();BTC=false;bergTal();sub()}
