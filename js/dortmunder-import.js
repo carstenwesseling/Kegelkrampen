@@ -12,18 +12,23 @@ function dmKoenige(D,blatt){
  if(dmSet(k.name)!==dmSet(nm.join('/'))||+k.pt!==mx){k.name=nm.join(' / ');k.pt=mx}
  return ko}
 const dmPending=()=>HIST.filter(h=>DM_IMPORT[h.date]&&(!(h.blatt&&h.blatt.length)||JSON.stringify(dmKoenige(h,dmBlatt(h.date)))!==JSON.stringify(h.koenige||[])));
+const abPending=()=>typeof ABEND_IMPORT==='undefined'?[]:Object.keys(ABEND_IMPORT).filter(d=>!HIST.some(h=>h.date==d));
 function dmImportBox(){
  if(!OWN||typeof DM_IMPORT==='undefined')return'';
- const n=dmPending().length;
- return n?`<div class="note" id="dm-imp"><b>Dortmunder-Import 2013–2025:</b> Für ${n} Abende liegen Dortmunder-Werte aus der Excel-Datei vor. <button class="pri" id="dm-go">Jetzt importieren</button> <span class="mu" id="dm-msg"></span></div>`:''}
+ const n=dmPending().length,a=abPending();
+ return n||a.length?`<div class="note" id="dm-imp"><b>Import aus Excel:</b> ${a.length?'Abend '+a.map(dd).join(', ')+' fehlt und wird angelegt. ':''}${n?'Für '+n+' Abende liegen Dortmunder-Werte (2013–2025) vor. ':''} <button class="pri" id="dm-go">Jetzt importieren</button> <span class="mu" id="dm-msg"></span></div>`:''}
 async function dmImport(){
- const todo=dmPending(),m=$('#dm-msg'),b=$('#dm-go');
- if(!OWN||!db||!todo.length)return;
- b.disabled=true;let ok=0;
+ const m=$('#dm-msg'),b=$('#dm-go');
+ if(!OWN||!db)return;
+ b.disabled=true;
+ for(const d of abPending()){
+  try{const doc=clean(ABEND_IMPORT[d]);await db.doc('sessions/'+d).set(doc);HIST=[doc,...HIST].sort((x,y)=>x.date<y.date?1:-1);m.textContent='Abend '+dd(d)+' angelegt …'}
+  catch(e){m.textContent='Fehler beim Anlegen von '+dd(d)+': '+(e.message||e.code);b.disabled=false;return}}
+ const todo=dmPending();let ok=0;
  for(const D of todo){
   const blatt=D.blatt&&D.blatt.length?D.blatt:dmBlatt(D.date);
   const koenige=dmKoenige(D,blatt);
   try{await db.doc('sessions/'+D.date).update(clean({blatt,koenige}));D.blatt=blatt;D.koenige=koenige;ok++;m.textContent=ok+' von '+todo.length+' Abenden importiert …'}
   catch(e){m.textContent='Fehler bei '+dd(D.date)+': '+(e.message||e.code)+' ('+ok+' von '+todo.length+' importiert).';b.disabled=false;return}}
- hist(HSEL);const r=$('#hist');r.insertAdjacentHTML('afterbegin','<div class="note">Import fertig: '+ok+' Abende mit Dortmunder-Werten ergänzt.</div>')}
+ hist(HSEL);const r=$('#hist');r.insertAdjacentHTML('afterbegin','<div class="note">Import fertig'+(ok?': '+ok+' Abende mit Dortmunder-Werten ergänzt':'')+'.</div>')}
 document.addEventListener('click',e=>{if(e.target.id=='dm-go')dmImport()});
