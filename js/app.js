@@ -66,9 +66,9 @@ function eingabe(){
  const ptx=pr.map(k=>`${L(k)} ${eu(P[k])}`).join(' · ');
  const prices=OWN?`<details class="prices"><summary><span><b>Preise</b> <span class="mu">${esc(ptx)}</span></span>${icon('down','chev')}</summary><div class="pgrid">${pr.map(k=>`<div class="fld eur"><label for="p-${k}">${L(k)}</label>${eIn('p',0,k,P[k],'p-'+k)}</div>`).join('')}</div></details>`:`<p class="prices ro"><b>Preise</b> <span class="mu">${esc(ptx)}</span></p>`;
  const cards=rows.map(([r,i])=>{const gs=r.gast;
-  return`<article class="pc"><header class="pc-h"><h3>${esc(r.name)}</h3>${gs?`<span class="tag">Gast</span><button type="button" class="icb" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${icon('trash')}</button>`:''}</header><div class="pc-g">${(gs?'hi':'defghi').split('').map(k=>stepper(L(k),`data-a="r" data-i="${i}" data-k="${k}"`,r[k]||'',`r${i}${k}`)).join('')}<div class="fld eur"><label for="r${i}j">Lotterie</label>${eIn('r',i,'j',r.j,`r${i}j`)}</div></div></article>`}).join('');
+  return`<div class="pe"><div class="pe-n"><h3>${esc(r.name)}</h3>${gs?`<span class="tag">Gast</span><button type="button" class="icb" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${icon('trash')}</button>`:''}</div><div class="pe-f">${(gs?'hi':'defghi').split('').map(k=>stepper(L(k),`data-a="r" data-i="${i}" data-k="${k}"`,r[k]||'',`r${i}${k}`)).join('')}<div class="fld eur"><label for="r${i}j">Lotterie</label>${eIn('r',i,'j',r.j,`r${i}j`)}</div></div></div>`}).join('');
  return`<h2 id="s-ein">Spiel <span class="mu">Zählwerte mit + und − erfassen oder direkt eintippen; Enter springt zum nächsten Feld.</span></h2>${prices}`
-  +(rows.length?`<div class="pc-list">${cards}</div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))}
+  +(rows.length?`<div class="pe-list">${cards}</div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))}
 function stat(W,C){
  const cv=(o,i,k,r)=>`<b id="v${i}${k}"${o[k]<0?' class="neg"':''}>${k=='k'&&!r.c?'–':fx(o[k])}</b>`;
  const cards=byOrd(W.rows).filter(([r])=>!r.gast).map(([r,i])=>{const o=C.out[i];

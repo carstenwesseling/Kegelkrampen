@@ -20,7 +20,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 ## Eingabe
 
 - Die Eingabe ist in fünf Schritte gegliedert (Leiste oben, „Weiter“/„Zurück“ am Ende jedes Schritts): 1 Vorbereitung (Umfrage, Anwesenheit, Gäste), 2 Spiel (Zählwerte), 3 Dortmunder, 4 Berg & Tal, 5 Abschluss (Zahlungen, Kasse, Könige, Rekorde). Unten steht eine feste Leiste mit Spieltag-Datum, PDF und „Abend speichern“; der Stand des Entwurfs steht in der Kopfzeile.
-- Spiel: je anwesender Person eine Karte; die Zählwerte (verl. Spiele, Pumpen, Klingel, Kugel Tisch, Alle Neune, Kranz Hand) haben Knöpfe − und + (nicht unter 0) und lassen sich auch eintippen; Enter springt zum nächsten Feld. Die Preise stehen zugeklappt darüber (ändern nur der Besitzer).
+- Spiel: alle anwesenden Personen untereinander in einer Liste, je Person eine Zeile (Name links, Zählwerte rechts, keine einzelnen Karten); die Zählwerte (verl. Spiele, Pumpen, Klingel, Kugel Tisch, Alle Neune, Kranz Hand) haben Knöpfe − und + (nicht unter 0) und lassen sich auch eintippen; Enter springt zum nächsten Feld. Die Preise stehen zugeklappt darüber (ändern nur der Besitzer).
 - Zahlungen: je Mitglied eine Karte mit „Noch zu zahlen“ groß, Eingabe von „Runde bezahlt“ und „Hat gezahlt“ und den übrigen Werten; darunter die Summe.
 - Anwesenheit wird pro Abend ausgewählt; in die Eingabetabelle kommen nur die Anwesenden.
 - Die Eingabe ist eine reine Eingabemaske (inkl. Spalte Lotterie). Die übrigen Spalten aller Mitglieder stehen unter „Statistik“.
