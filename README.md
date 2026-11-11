@@ -11,6 +11,7 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 │   └── style.css       Layout, Farben, Tabellen, Diagramme, Bildansicht
 ├── js/
 │   ├── app.js          Eingabe, Berechnung, Historie, Auswertung, Mitglieder
+│   ├── pdf.js          PDF-Download der Eingabe (jsPDF, Dateien in js/vendor)
 │   ├── umfrage.js      Umfrage vor dem Abend, Freigabeliste für Mitglieder
 │   ├── tour.js         Kegeltouren: Upload, Jahre, Diashow
 │   ├── dortmunder-import-data.js  Dortmunder-Werte 2013–2025 aus der Excel-Datei
