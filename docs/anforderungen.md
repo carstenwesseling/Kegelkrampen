@@ -64,6 +64,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 - Eigene Hauptseite „Dortmunder“ im Hamburger-Menü. Datenbasis: Excel „Dortmunder_2000-2025.xlsx“ (Blatt „Kegeln 2000-2025“; `js/dortmunder-historie-data.js`) für 2000–2025, ab 2026 die über die Eingabe gespeicherten Abende. „x“ = nicht dabei; Einträge mit 0 Punkten zählen nicht. „André“ = „Trunsen“.
 - Tabelle je Jahr mit den Abenden 1–13, Summe und Schnitt je Kegler und der Zeile „Schnitt Club“; Jahr wählbar.
+- Alle Tabellen der Seite lassen sich per Klick auf die Spaltenüberschrift sortieren (bester/größter Wert oben, Rang: 1 oben; Summenzeilen bleiben unten). Die Gesamtübersicht „Schnitt gesamt pro Kegler“ wertet wahlweise alle Jahre („Alle“) oder einzeln angehakte Jahre (mehrere möglich).
 - Auswertungen: Schnitt pro Jahr pro Kegler, Schnitt gesamt pro Kegler, Maximum und Minimum pro Kegler, Schnitt des Clubs pro Jahr (Durchschnitt aller Einzelergebnisse), Rekorde (Top 10 Einzelwerte, Gleichstände zählen mit), Minusrekorde (niedrigste 10 Einzelwerte).
 
 ## Mitglieder

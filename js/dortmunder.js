@@ -1,7 +1,7 @@
 // Hauptseite „Dortmunder“: Auswertung aller Dortmunder-Ergebnisse.
 // Quellen: DT_XL (Excel 2000–2025, js/dortmunder-historie-data.js) und ab 2026 die über die Eingabe gespeicherten Abende (HIST[].blatt).
 // „x“ = nicht dabei gewesen. Einträge mit 0 Punkten (angekreuzt, aber nichts eingetragen) zählen nicht als Ergebnis.
-let DTY='';
+let DTY='',DTSEL=[]; // DTSEL: angehakte Jahre für die Gesamtübersicht, leer = alle Jahre
 const dtName=n=>/^andr[eé]$/i.test(String(n).trim())?'Trunsen':String(n).trim();
 const dtN1=v=>(+v).toLocaleString('de-DE',{minimumFractionDigits:1,maximumFractionDigits:1});
 const dtT=(hd,rows)=>`<div class="w"><table><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.join('')}</table></div>`;
@@ -23,7 +23,7 @@ function dtRank(list,desc){
 function dortmunder(){
  const el=$('#dort'),R=dtData();
  if(!R.length){el.innerHTML='<h2 id="dt-tab">Dortmunder</h2><p class="mu">Keine Dortmunder-Daten vorhanden.</p>';sub();return}
- const years=[...new Set(R.map(r=>r.y))].sort((a,b)=>a-b),names=[...new Set(R.map(r=>r.n))].sort((a,b)=>a.localeCompare(b,'de'));
+ const years=[...new Set(R.map(r=>r.y))].sort((a,b)=>a-b);DTSEL=DTSEL.filter(y=>years.includes(y));const names=[...new Set(R.map(r=>r.n))].sort((a,b)=>a.localeCompare(b,'de'));
  if(!years.includes(+DTY))DTY=String(years[years.length-1]);
  const Y=+DTY,RY=R.filter(r=>r.y==Y),nE=Y<=2025?13:Math.max(...RY.map(r=>r.e));
  // 1. Tabelle eines Jahres: Abende 1–13, Summe, Schnitt
@@ -35,10 +35,7 @@ function dortmunder(){
  // 2. Schnitt pro Jahr pro Kegler
  const t2=dtT(['Name',...years],[...names.map(n=>`<tr><td>${esc(n)}</td>${years.map(y=>{const a=R.filter(r=>r.n==n&&r.y==y);return`<td>${a.length?dtN1(dtAvg(a)):''}</td>`}).join('')}</tr>`),
   `<tr class="sum"><td><b>Schnitt Club</b></td>${years.map(y=>`<td><b>${dtN1(dtAvg(R.filter(r=>r.y==y)))}</b></td>`).join('')}</tr>`]);
- // 3. Schnitt gesamt pro Kegler
- const g=names.map(n=>{const a=R.filter(r=>r.n==n);return{n,a:a.length,s:dtSum(a),avg:dtAvg(a),y0:Math.min(...a.map(r=>r.y)),y1:Math.max(...a.map(r=>r.y))}}).sort((a,b)=>b.avg-a.avg||b.a-a.a);
- const t3=dtT(['Rang','Name','Teilnahmen','Summe','Schnitt gesamt','Jahre'],[...g.map((x,i)=>`<tr><td>${i+1}.</td><td>${esc(x.n)}</td><td>${x.a}</td><td>${x.s}</td><td class="cv"><b>${dtN1(x.avg)}</b></td><td>${x.y0==x.y1?x.y0:x.y0+'–'+x.y1}</td></tr>`),
-  `<tr class="sum"><td></td><td><b>Club</b></td><td><b>${R.length}</b></td><td><b>${dtSum(R)}</b></td><td class="cv"><b>${dtN1(dtAvg(R))}</b></td><td></td></tr>`]);
+ // 3. Schnitt gesamt pro Kegler (Jahre wählbar, siehe dtGes)
  // 4. Maximum / Minimum pro Kegler
  const mm=names.map(n=>{const a=R.filter(r=>r.n==n),mx=a.reduce((p,r)=>r.v>p.v?r:p),mi=a.reduce((p,r)=>r.v<p.v?r:p);return{n,mx,mi}}).sort((a,b)=>b.mx.v-a.mx.v||a.n.localeCompare(b.n,'de'));
  const t4=dtT(['Name','Maximum','erreicht','Minimum','erreicht'],mm.map(x=>`<tr><td>${esc(x.n)}</td><td class="cv"><b>${x.mx.v}</b></td><td>${dtWhen(x.mx)}</td><td class="cv"><b>${x.mi.v}</b></td><td>${dtWhen(x.mi)}</td></tr>`));
@@ -50,10 +47,26 @@ function dortmunder(){
  el.innerHTML=`<h2 id="dt-tab">Dortmunder <span class="mu">Alle Ergebnisse ${years[0]}–${years[years.length-1]}: ${R.length} Einzelergebnisse an ${new Set(R.map(r=>r.y+'-'+r.e)).size} Abenden. „x“ = nicht dabei. Bis 2025 aus der Excel-Datei, ab 2026 aus den gespeicherten Abenden.</span></h2>`
  +`<div class="top"><label>Jahr <select id="dty">${[...years].reverse().map(y=>`<option${y==Y?' selected':''}>${y}</option>`).join('')}</select></label></div>${t1}`
  +`<h2 id="dt-jahr">Schnitt pro Jahr pro Kegler <span class="mu">Summe ÷ Teilnahmen des Jahres.</span></h2>${t2}`
- +`<h2 id="dt-ges">Schnitt gesamt pro Kegler <span class="mu">Über alle Jahre. Bei wenigen Teilnahmen ist der Schnitt wenig aussagekräftig.</span></h2>${t3}`
+ +`<div id="dt-gesbox">${dtGes(R,years)}</div>`
  +`<h2 id="dt-mm">Maximum und Minimum pro Kegler</h2>${t4}`
  +`<h2 id="dt-club">Schnitt des Clubs pro Jahr <span class="mu">Durchschnitt aller Einzelergebnisse des Jahres.</span></h2>${t5}`
  +`<h2 id="dt-rek">Rekorde <span class="mu">Die höchsten Einzelergebnisse aller Zeiten.</span></h2>${rk(dtRank(R,true))}`
  +`<h2 id="dt-min">Minusrekorde <span class="mu">Die niedrigsten Einzelergebnisse aller Zeiten.</span></h2>${rk(dtRank(R,false))}`;
- sub()}
+ if(typeof sortTables==='function')sortTables();sub()}
+// Gesamtübersicht: Schnitt pro Kegler über alle oder über einzeln angehakte Jahre.
+function dtGes(R,years){
+ const sel=DTSEL.length?DTSEL:years,RS=R.filter(r=>sel.includes(r.y)),names=[...new Set(RS.map(r=>r.n))].sort((a,b)=>a.localeCompare(b,'de'));
+ const g=names.map(n=>{const a=RS.filter(r=>r.n==n);return{n,a:a.length,s:dtSum(a),avg:dtAvg(a),y0:Math.min(...a.map(r=>r.y)),y1:Math.max(...a.map(r=>r.y))}}).sort((a,b)=>b.avg-a.avg||b.a-a.a);
+ const when=DTSEL.length?DTSEL.join(', '):`alle Jahre ${years[0]}–${years[years.length-1]}`;
+ const boxes=`<div class="top dtj"><label><input type="checkbox" id="dtj-all"${DTSEL.length?'':' checked'}> <b>Alle</b></label>${years.map(y=>`<label><input type="checkbox" data-dtj="${y}"${DTSEL.includes(y)?' checked':''}> ${y}</label>`).join('')}</div>`;
+ const rows=g.length?[...g.map((x,i)=>`<tr><td>${i+1}.</td><td>${esc(x.n)}</td><td>${x.a}</td><td>${x.s}</td><td class="cv"><b>${dtN1(x.avg)}</b></td><td>${x.y0==x.y1?x.y0:x.y0+'–'+x.y1}</td></tr>`),
+  `<tr class="sum"><td></td><td><b>Club</b></td><td><b>${RS.length}</b></td><td><b>${dtSum(RS)}</b></td><td class="cv"><b>${dtN1(dtAvg(RS))}</b></td><td></td></tr>`]:['<tr><td colspan="6" class="mu">Keine Ergebnisse.</td></tr>'];
+ return`<h2 id="dt-ges">Schnitt gesamt pro Kegler <span class="mu">Zeitraum: ${when}. Jahre anhaken, um nur diese zu werten (mehrere möglich); „Alle“ wertet jedes Jahr. Bei wenigen Teilnahmen ist der Schnitt wenig aussagekräftig.</span></h2>${boxes}${dtT(['Rang','Name','Teilnahmen','Summe','Schnitt gesamt','Jahre'],rows)}`}
+document.addEventListener('change',e=>{
+ const t=e.target;if(!t.closest||!t.closest('#dort'))return;
+ if(t.id=='dtj-all'||t.dataset.dtj){
+  if(t.id=='dtj-all')DTSEL=[];else{const y=+t.dataset.dtj;DTSEL=t.checked?[...DTSEL,y].sort((a,b)=>a-b):DTSEL.filter(x=>x!=y)}
+  const R=dtData(),years=[...new Set(R.map(r=>r.y))].sort((a,b)=>a-b);
+  $('#dt-gesbox').innerHTML=dtGes(R,years);if(typeof sortTables==='function')sortTables();
+  const f=DTSEL.length&&t.dataset.dtj?$('#dort [data-dtj="'+t.dataset.dtj+'"]'):$('#dtj-all');if(f)f.focus({preventScroll:true})}});
 document.addEventListener('change',e=>{if(e.target.id=='dty'){DTY=e.target.value;dortmunder();const s=$('#dty');if(s)s.focus({preventScroll:true})}});
