@@ -82,10 +82,40 @@ window.claude = {
   const box = document.getElementById("loginbox");
   btn.className = "mi";
   if (box) box.appendChild(btn);
+  // Fehlermeldungen sichtbar machen (vorher blieb der Knopf bei Fehlern stumm).
+  const AUTH_HINT = {
+    "auth/unauthorized-domain": "Diese Seite ist in Firebase nicht als autorisierte Domain eingetragen (Authentication → Settings → Autorisierte Domains).",
+    "auth/operation-not-allowed": "Die Google-Anmeldung ist in Firebase nicht aktiviert (Authentication → Anmeldemethode → Google).",
+    "auth/popup-blocked": "Der Browser blockiert das Anmeldefenster.",
+    "auth/network-request-failed": "Keine Verbindung zu Google.",
+    "auth/web-storage-unsupported": "Der Browser erlaubt die Anmeldung nicht (Speicher blockiert). Bitte Drittanbieter-Cookies erlauben."
+  };
+  const authFail = (e, alertUser = true) => {
+    const code = (e && e.code) || "";
+    const text = "Anmeldung fehlgeschlagen. " + (AUTH_HINT[code] ? AUTH_HINT[code] + " " : "") + "(" + (code || (e && e.message) || "unbekannt") + ")";
+    note(text);
+    if (alertUser) alert(text);
+  };
+  // Popup geht nicht (blockiert, Handy, eingeschränkter Browser): Anmeldung per Weiterleitung.
+  const REDIRECT_CODES = ["auth/popup-blocked", "auth/operation-not-supported-in-this-environment", "auth/web-storage-unsupported"];
   btn.onclick = async () => {
-    if (fbAuth.currentUser) { await fbAuth.signOut(); }
-    else { await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-    location.reload();
+    if (fbAuth.currentUser) {
+      try { await fbAuth.signOut(); location.reload(); } catch (e) { authFail(e); }
+      return;
+    }
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    try {
+      await fbAuth.signInWithPopup(provider);
+      location.reload();
+    } catch (e) {
+      const code = (e && e.code) || "";
+      if (REDIRECT_CODES.includes(code)) {
+        try { await fbAuth.signInWithRedirect(provider); } catch (e2) { authFail(e2); }
+      } else if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        authFail(e);
+      }
+    }
   };
   // Anmeldung ohne Google-Konto (z. B. @aol.com): Die App schickt einen Anmelde-Link per E-Mail.
   // Nach dem Klick auf den Link ist die Adresse bestätigt (email_verified), damit greifen die Freigaberegeln.
@@ -97,6 +127,8 @@ window.claude = {
   btn.insertAdjacentElement("afterend", mail);
   const KEY = "kkEmailForSignIn";
   const note = t => { const s = document.getElementById("st"); if (s) s.textContent = t; };
+  // Ergebnis einer Anmeldung per Weiterleitung abfangen (Fehler sichtbar machen, Anmeldung übernimmt Firebase).
+  fbAuth.getRedirectResult().catch(e => authFail(e, false));
   mail.onclick = async () => {
     const email = (prompt("E-Mail-Adresse, an die der Anmelde-Link geschickt wird:") || "").trim().toLowerCase();
     if (!email) return;
