@@ -12,6 +12,8 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 ├── js/
 │   ├── app.js          Eingabe, Berechnung, Historie, Auswertung, Mitglieder
 │   ├── tour.js         Kegeltouren: Upload, Jahre, Diashow
+│   ├── dortmunder-import-data.js  Dortmunder-Werte 2013–2025 aus der Excel-Datei
+│   ├── dortmunder-import.js       Import-Knopf in der Historie (nur Besitzer)
 │   └── init.js         Start: Tabs, Anmeldung, Laden der Daten
 ├── docs/
 │   └── anforderungen.md  Fachliche Anforderungen aus den Absprachen
@@ -19,7 +21,7 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 └── README.md
 ```
 
-Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `tour.js`, `init.js`.
+Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `tour.js`, `init.js`.
 
 ## Status
 

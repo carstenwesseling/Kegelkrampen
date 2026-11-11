@@ -125,7 +125,7 @@ const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value=""
 function hist(sel){
  if(EDIT&&EDIT.date!=sel)EDIT=null;
  if(sel&&HYR&&sel.slice(0,4)!=HYR)HYR=sel.slice(0,4);
- HSEL=sel;$('#hist').innerHTML=rekView('h-rek')+'<h2 id="h-tage">Gespeicherte Spieltage <span class="mu">'+(OWN?'Zum Ändern einen Abend wählen und „Bearbeiten“ antippen.':'Schreibgeschützt.')+'</span></h2>'+hyrSel()+'<div class="top days">'+HIST.filter(inHY).map(h=>`<button data-d="${h.date}"${h.date==sel?' class="on"':''}>${dd(h.date)}</button>`).join('')+'</div><div id="hd"></div>';
+ HSEL=sel;$('#hist').innerHTML=(typeof dmImportBox==='function'?dmImportBox():'')+rekView('h-rek')+'<h2 id="h-tage">Gespeicherte Spieltage <span class="mu">'+(OWN?'Zum Ändern einen Abend wählen und „Bearbeiten“ antippen.':'Schreibgeschützt.')+'</span></h2>'+hyrSel()+'<div class="top days">'+HIST.filter(inHY).map(h=>`<button data-d="${h.date}"${h.date==sel?' class="on"':''}>${dd(h.date)}</button>`).join('')+'</div><div id="hd"></div>';
  const D=HIST.find(h=>h.date==sel);if(!D){sub();return}
  if(EDIT){$('#hd').innerHTML=editHtml();sub();return}
  const C=calc(D);D.rows.forEach((r,i)=>{if(r.m!=null)C.out[i]={k:r.k,m:r.m,o:r.o,q:r.q}});
