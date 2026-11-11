@@ -366,7 +366,7 @@ function aus(){
  const eSec=`<h2 id="a-ein">Einzelergebnisse <span class="mu">${MODE=='avg'?'Ø pro anwesendem Abend':'Summe über alle anwesenden Abende'}; Lotterie in €.</span></h2>${eCtl}${T(['Name','Abende',...'defghij'.split('').map(k=>COLS.find(c=>c[0]==k)[1])],E.map(x=>`<tr><td>${x.n}</td><td>${x.a}</td>${'defghij'.split('').map(k=>{const v=MODE=='avg'?x[k]/x.a:x[k];return`<td>${k=='j'?eu(v):MODE=='avg'?fx(v):iv(v)}</td>`}).join('')}</tr>`))}`;
  $('#aus').innerHTML=aTop+`${dmSec}${kSec}${eSec}${aSec}${vSec}${jSec}`;sortTables();sub()}
 $('#aus').addEventListener('change',e=>{const t=e.target;if(t.id=='yr')YR=t.value;if(t.id=='md')MODE=t.value;if(t.dataset.s)ST[t.dataset.s]=t.value;aus()});
-// Auswertung: Spalten per Klick auf die Überschrift absteigend sortieren (große Werte zuerst).
+// Auswertung und Dortmunder: Spalten per Klick auf die Überschrift sortieren (beste/größte Werte zuerst, Rang: 1 zuerst).
 // Summenzeilen (tr.sum, z. B. „Alle Beteiligten“) werden nicht mitsortiert und bleiben am Tabellenende.
 const SRT={};
 const sortVal=(c,rank)=>{const t=(c?c.textContent:'').trim();if(!t)return{e:1};
@@ -376,7 +376,7 @@ const sortVal=(c,rank)=>{const t=(c?c.textContent:'').trim();if(!t)return{e:1};
  if(/^-?\d[\d.]*(,\d+)?$/.test(u)||/^-?\d+(\.\d+)?$/.test(u)&&!/\./.test(u))return{n:parseFloat(u.replace(/\./g,'').replace(',','.'))};
  return{s:t.replace(/^\d+\.\s*/,'').toLowerCase()}};
 function sortTables(){
- document.querySelectorAll('#aus table').forEach(tb=>{
+ document.querySelectorAll('#aus table,#dort table').forEach(tb=>{
   let el=tb.closest('.w'),id='';while(el&&!id){el=el.previousElementSibling;if(el&&el.tagName=='H2')id=el.id}
   const ths=[...tb.rows[0].cells];
   ths.forEach((th,j)=>{
@@ -389,7 +389,7 @@ function sortTables(){
   const rank=/^Rang/.test(ths[j].textContent.trim()),all=[...tb.rows].slice(1),body=all.filter(r=>!r.classList.contains('sum')),sums=all.filter(r=>r.classList.contains('sum'));
   const key=body.map((r,i)=>({r,i,v:sortVal(r.cells[j],rank)}));
   key.sort((x,y)=>{if(x.v.e||y.v.e)return(x.v.e||0)-(y.v.e||0)||x.i-y.i;
-   if(x.v.n!=null&&y.v.n!=null)return y.v.n-x.v.n||x.i-y.i;
+   if(x.v.n!=null&&y.v.n!=null)return(rank?x.v.n-y.v.n:y.v.n-x.v.n)||x.i-y.i;  // Rang: 1 zuerst, sonst größter Wert zuerst
    if(x.v.n!=null)return-1;if(y.v.n!=null)return 1;
    return y.v.s.localeCompare(x.v.s,'de')||x.i-y.i});
   key.forEach(k=>tb.tBodies[0].appendChild(k.r));sums.forEach(r=>tb.tBodies[0].appendChild(r))})}
