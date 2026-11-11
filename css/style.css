@@ -203,3 +203,15 @@ th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
 .hero .brand{padding-right:60px}
 .start{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;margin:16px 0 0;width:100%;height:calc(100dvh - 230px);min-height:240px;background:#fff}
 .start::before{content:"";position:absolute;inset:0;z-index:-1;background:url(../img/willingen-2026.jpg) center/contain no-repeat;opacity:.5}
+
+/* Umfrage: schmale Tabelle, auch am Handy alle drei Spalten nebeneinander (kein Stapeln) */
+table.umt{width:auto;max-width:100%}
+.umt th,.umt td{padding:6px 8px;white-space:normal;text-align:center;vertical-align:middle}
+.umt th{font-size:12px;line-height:1.2;min-width:68px}
+.umt th:first-child,.umt td:first-child{text-align:left;white-space:nowrap;min-width:0;background:var(--card)}
+.umt tr.sum td:first-child{background:var(--sum)}
+@media (max-width:640px){
+ .umt th{min-width:0;font-size:11px;padding:6px 4px}
+ .umt td{padding:5px 4px}
+ .umb{min-width:38px;min-height:38px;padding:0}
+}
