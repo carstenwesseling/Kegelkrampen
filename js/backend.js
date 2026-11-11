@@ -36,7 +36,7 @@ const kkUser = {
   async me() {
     await kkAuthReady;
     const u = fbAuth.currentUser;
-    return u ? { id: u.uid, name: u.displayName || u.email, avatarUrl: u.photoURL || "" } : null;
+    return u ? { id: u.uid, name: u.displayName || u.email, avatarUrl: u.photoURL || "", email: u.emailVerified && u.email ? u.email.toLowerCase() : "" } : null;
   }
 };
 

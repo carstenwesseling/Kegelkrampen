@@ -42,6 +42,16 @@ service cloud.firestore {
         && request.resource.data.get('weitere', []) == resource.data.get('weitere', []);
     }
 
+    // Angemeldete Adressen: Jeder verifizierte Benutzer trägt nur seine eigene Adresse ein; lesen und löschen nur der Besitzer.
+    match /logins/{mail} {
+      allow read, delete: if isOwner();
+      allow create, update: if request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == mail
+        && request.resource.data.email == mail
+        && request.resource.data.keys().hasOnly(['email', 'name', 'last']);
+    }
+
     // Kegeltouren (Fotos-Metadaten): lesen alle, schreiben nur der Besitzer.
     match /touren/{id} {
       allow read: if true;
