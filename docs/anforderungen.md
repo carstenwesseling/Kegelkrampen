@@ -60,6 +60,12 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Kein CSV-Export mehr (die Schaltflächen „CSV Teilnahmen“ und „CSV Könige“ wurden entfernt).
 - Auswertung: Alle Tabellenspalten lassen sich per Klick auf die Überschrift absteigend (groß nach klein, Text Z–A) sortieren; die Sortierung bleibt beim Neuaufbau der Seite erhalten. Summenzeilen (z. B. „Alle Beteiligten“ in der Dortmunder-Auswertung) werden nie mitsortiert und bleiben fest am Tabellenende; neue Summenzeilen bekommen die Klasse `sum`.
 
+## Dortmunder (Hauptseite)
+
+- Eigene Hauptseite „Dortmunder“ im Hamburger-Menü. Datenbasis: Excel „Dortmunder_2000-2025.xlsx“ (Blatt „Kegeln 2000-2025“; `js/dortmunder-historie-data.js`) für 2000–2025, ab 2026 die über die Eingabe gespeicherten Abende. „x“ = nicht dabei; Einträge mit 0 Punkten zählen nicht. „André“ = „Trunsen“.
+- Tabelle je Jahr mit den Abenden 1–13, Summe und Schnitt je Kegler und der Zeile „Schnitt Club“; Jahr wählbar.
+- Auswertungen: Schnitt pro Jahr pro Kegler, Schnitt gesamt pro Kegler, Maximum und Minimum pro Kegler, Schnitt des Clubs pro Jahr (Durchschnitt aller Einzelergebnisse), Rekorde (Top 10 Einzelwerte, Gleichstände zählen mit), Minusrekorde (niedrigste 10 Einzelwerte).
+
 ## Mitglieder
 
 - Mitgliederliste entsteht aus allen jemals Anwesenden.
