@@ -31,10 +31,10 @@ document.addEventListener('click',async e=>{
 function umfWatch(){
  try{db.doc('state/umfrage').onSnapshot(s=>{UMF=s.exists?clean((s.data()||{}).votes||{}):{};umfDraw()},()=>{})}catch(e){}}
 
-// Freigabe: Besitzer trägt die Google-Adressen der Mitglieder ein, die Abende speichern dürfen.
-const frgHtml=l=>`<h2 id="m-frg">Freigabe zum Speichern <span class="mu">Diese Google-Adressen dürfen Abende, Umfrage und Entwurf speichern. Rekorde, Mitglieder, Bearbeiten und Fotos bleiben beim Besitzer.</span></h2>`
- +`<div class="w"><table class="stack"><tr class="hd"><th>Google-Adresse</th><th></th></tr>${l.length?l.map(m=>`<tr><td>${esc(m)}</td><td><button type="button" data-fr="${esc(m)}">Entfernen</button></td></tr>`).join(''):'<tr><td colspan="2" class="mu">Noch niemand freigegeben.</td></tr>'}</table></div>`
- +`<div class="top"><input type="email" id="fr-in" placeholder="name@gmail.com"><button class="pri" id="fr-add">Freigeben</button><span class="mu" id="fr-ms"></span></div>`;
+// Freigabe: Besitzer trägt die E-Mail-Adressen der Mitglieder (Google oder andere, z. B. aol.com) ein, die Abende speichern dürfen.
+const frgHtml=l=>`<h2 id="m-frg">Freigabe zum Speichern <span class="mu">Diese E-Mail-Adressen (auch ohne Google-Konto, z. B. @aol.com) dürfen Abende, Umfrage und Entwurf speichern. Rekorde, Mitglieder, Bearbeiten und Fotos bleiben beim Besitzer.</span></h2>`
+ +`<div class="w"><table class="stack"><tr class="hd"><th>E-Mail-Adresse</th><th></th></tr>${l.length?l.map(m=>`<tr><td>${esc(m)}</td><td><button type="button" data-fr="${esc(m)}">Entfernen</button></td></tr>`).join(''):'<tr><td colspan="2" class="mu">Noch niemand freigegeben.</td></tr>'}</table></div>`
+ +`<div class="top"><input type="email" id="fr-in" placeholder="name@aol.com"><button class="pri" id="fr-add">Freigeben</button><span class="mu" id="fr-ms"></span></div>`;
 async function frgLoad(){
  const e=$('#frg');if(!e||!OWN||!db)return;
  try{const s=await db.collection('editors').get();e.innerHTML=frgHtml(s.docs.map(d=>d.id).sort())}
@@ -44,7 +44,7 @@ document.addEventListener('click',async e=>{
  const m=t=>{const x=$('#fr-ms');if(x)x.textContent=t};
  if(e.target.id=='fr-add'){
   const v=$('#fr-in').value.trim().toLowerCase();
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))return m('Bitte eine gültige Google-Adresse eingeben.');
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))return m('Bitte eine gültige E-Mail-Adresse eingeben.');
   try{await db.doc('editors/'+v).set({added:new Date().toISOString()});await frgLoad()}catch(x){m('Fehler: '+(x.message||x.code))}return}
  const r=e.target.closest('[data-fr]');
  if(r){try{await db.doc('editors/'+r.dataset.fr).delete();await frgLoad()}catch(x){m('Fehler: '+(x.message||x.code))}}});

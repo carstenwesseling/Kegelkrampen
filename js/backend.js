@@ -86,5 +86,34 @@ window.claude = {
     else { await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
     location.reload();
   };
-  fbAuth.onAuthStateChanged(u => { btn.textContent = u ? "Abmelden" : "Mit Google anmelden"; });
+  // Anmeldung ohne Google-Konto (z. B. @aol.com): Die App schickt einen Anmelde-Link per E-Mail.
+  // Nach dem Klick auf den Link ist die Adresse bestätigt (email_verified), damit greifen die Freigaberegeln.
+  const mail = document.createElement("button");
+  mail.type = "button";
+  mail.id = "kk-mail";
+  mail.style.marginLeft = "8px";
+  mail.textContent = "Mit E-Mail-Link anmelden";
+  btn.insertAdjacentElement("afterend", mail);
+  const KEY = "kkEmailForSignIn";
+  const note = t => { const s = document.getElementById("st"); if (s) s.textContent = t; };
+  mail.onclick = async () => {
+    const email = (prompt("E-Mail-Adresse, an die der Anmelde-Link geschickt wird:") || "").trim().toLowerCase();
+    if (!email) return;
+    try {
+      await fbAuth.sendSignInLinkToEmail(email, { url: location.origin + location.pathname, handleCodeInApp: true });
+      try { localStorage.setItem(KEY, email); } catch (e) {}
+      alert("Der Anmelde-Link wurde an " + email + " geschickt. Bitte den Link in der E-Mail öffnen (am besten im selben Browser).");
+    } catch (e) { alert("Link konnte nicht gesendet werden: " + (e.message || e.code)); }
+  };
+  if (fbAuth.isSignInWithEmailLink(location.href)) {
+    let email = "";
+    try { email = localStorage.getItem(KEY) || ""; } catch (e) {}
+    if (!email) email = (prompt("Bitte die E-Mail-Adresse zur Bestätigung eingeben:") || "").trim().toLowerCase();
+    if (email) {
+      fbAuth.signInWithEmailLink(email, location.href)
+        .then(() => { try { localStorage.removeItem(KEY); } catch (e) {} location.replace(location.origin + location.pathname); })
+        .catch(e => note("E-Mail-Anmeldung fehlgeschlagen: " + (e.message || e.code)));
+    }
+  }
+  fbAuth.onAuthStateChanged(u => { btn.textContent = u ? "Abmelden" : "Mit Google anmelden"; mail.hidden = !!u; });
 })();
