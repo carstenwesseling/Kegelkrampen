@@ -51,7 +51,7 @@ function grid(D,C){
 function side(D,ed,C,px='',altEd=0){
  const pf=ed&&!px?'ek':'hk',K=D.kasse||{},row=(l,v)=>`<tr><td>${l}</td><td class="cv" data-l="Betrag"${v[0]?` id="${px}${v[0]}"`:''}>${fx(v[1])}</td><td></td></tr>`,ki=(l,k,t)=>`<tr><td>${l}</td><td data-l="Betrag">${A('k',0,k,K[k]??'',ed)}</td><td style="text-align:left" data-l="Text / Grund">${t?(ed?`<input type="text" class="wide" data-a="k" data-i="0" data-k="${t}" value="${esc(K[t])}" placeholder="Text / Grund">`:esc(K[t])):''}</td></tr>`;
  return`<h2 id="${pf}-kasse">Kasse</h2><div class="w"><table class="stack"><tr class="hd"><th>Position</th><th>Betrag</th><th>Text / Grund</th></tr>${row('Gezahlt',['kg',C.gz])}${ki('Abzug Bahn','bahn')}${ki('Sonderausgabe','sonder','sonderText')}${row('Aufs Konto',['ka',C.aufs])}${ki('Abgang Konto','abgang','abgangText')}${altEd?`<tr><td>Alter Konto</td><td data-l="Betrag">${A('k',0,'alt',K.alt??'',1)}</td><td></td></tr>`:row('Alter Konto',['',K.alt])}${row('Neuer Konto',['kn',C.neu])}</table></div>${D.notiz?`<p class="mu">${D.notiz}</p>`:''}
- <h2 id="${pf}-koenige">Könige${ed&&!px?' <span class="mu">Pumpen-, Dortmunder- und TBTBBTB-König werden automatisch eingetragen.</span>':''}</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th></tr>${(D.koenige||[]).map((k,i)=>`<tr><td>${k.t}</td><td data-l="Name">${A('kn',i,'',k.name,ed,'text')}</td><td data-l="Punkte">${A('kp',i,'',k.pt,ed)}</td></tr>`).join('')}</table></div>`}
+ <h2 id="${pf}-koenige">Könige</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th></tr>${(D.koenige||[]).map((k,i)=>`<tr><td>${k.t}</td><td data-l="Name">${A('kn',i,'',k.name,ed,'text')}</td><td data-l="Punkte">${A('kp',i,'',k.pt,ed)}</td></tr>`).join('')}</table></div>`}
 // Euro-Feld mit Einheit im Feld (Eingabe-Karten, Zahlungen).
 const eIn=(a,i,k,v,id)=>`<span class="eu"><input${id?` id="${id}"`:''} type="text" inputmode="decimal" enterkeyhint="next" data-e="1" data-a="${a}" data-i="${i}" data-k="${k}" placeholder="0,00" value="${v?fx(v):''}"><span class="u">€</span></span>`;
 // Knöpfe „Zurück“ / „Weiter“ am Ende jedes Eingabe-Schritts (STEPS steht in init.js).
@@ -59,7 +59,7 @@ const stepNav=k=>{const i=STEPS.findIndex(s=>s[0]==k),p=STEPS[i-1],n=STEPS[i+1];
  return`<div class="stepnav">${p?`<button type="button" data-step="${p[0]}">${icon('left')}${p[1]}</button>`:'<span></span>'}${n?`<button type="button" class="pri" data-step="${n[0]}">Weiter: ${n[1]}${icon('right')}</button>`:''}</div>`};
 const emptyCard=(t,b)=>`<div class="empty">${icon('users')}<p>${t}</p>${b||''}</div>`;
 const chips=()=>{const n=S.rows.filter(r=>r.c&&!r.gast).length,all=S.rows.filter(r=>!r.gast).length;
- return`<h2 id="s-anw">Anwesenheit <span class="badge">${n} von ${all}</span><span class="mu">Namen antippen zum Auswählen. Nur die Anwesenden kommen in die Eingabe.</span></h2><div class="chips">${S.rows.map((r,i)=>r.gast?'':`<button type="button" class="chip${r.c?' on':''}" data-chip="${i}" aria-pressed="${!!r.c}">${r.c?icon('check'):''}${esc(r.name)}</button>`).join('')}${S.rows.map((r,i)=>r.gast?`<button type="button" class="chip on gst" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${esc(r.name)} <span class="tag">Gast</span>${icon('x')}</button>`:'').join('')}</div>
+ return`<h2 id="s-anw">Anwesenheit <span class="badge">${n} von ${all}</span></h2><div class="chips">${S.rows.map((r,i)=>r.gast?'':`<button type="button" class="chip${r.c?' on':''}" data-chip="${i}" aria-pressed="${!!r.c}">${r.c?icon('check'):''}${esc(r.name)}</button>`).join('')}${S.rows.map((r,i)=>r.gast?`<button type="button" class="chip on gst" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${esc(r.name)} <span class="tag">Gast</span>${icon('x')}</button>`:'').join('')}</div>
 <div class="gadd"><label for="gn">Gast hinzufügen</label><div class="row"><input type="text" id="gn" placeholder="Name des Gastes" autocomplete="off" enterkeyhint="done"><button type="button" id="gadd">${icon('plus')}Hinzufügen</button></div><p class="mu" id="gm" aria-live="polite"></p></div>`};
 function eingabe(){
  const P=S.preise,L=k=>k=='k'?'Beitrag':COLS.find(c=>c[0]==k)[1],pr='defghik'.split(''),rows=byOrd(S.rows).filter(([r])=>r.c);
@@ -67,7 +67,7 @@ function eingabe(){
  const prices=OWN?`<details class="prices"><summary><span><b>Preise</b> <span class="mu">${esc(ptx)}</span></span>${icon('down','chev')}</summary><div class="pgrid">${pr.map(k=>`<div class="fld eur"><label for="p-${k}">${L(k)}</label>${eIn('p',0,k,P[k],'p-'+k)}</div>`).join('')}</div></details>`:`<p class="prices ro"><b>Preise</b> <span class="mu">${esc(ptx)}</span></p>`;
  const cards=rows.map(([r,i])=>{const gs=r.gast;
   return`<div class="pe"><div class="pe-n"><h3>${esc(r.name)}</h3>${gs?`<span class="tag">Gast</span><button type="button" class="icb" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${icon('trash')}</button>`:''}</div><div class="pe-f">${(gs?'hi':'defghi').split('').map(k=>stepper(L(k),`data-a="r" data-i="${i}" data-k="${k}"`,r[k]||'',`r${i}${k}`)).join('')}<div class="fld eur"><label for="r${i}j">Lotterie</label>${eIn('r',i,'j',r.j,`r${i}j`)}</div></div></div>`}).join('');
- return`<h2 id="s-ein">Spiel <span class="mu">Zählwerte mit + und − erfassen oder direkt eintippen; Enter springt zum nächsten Feld.</span></h2>${prices}`
+ return`<h2 id="s-ein">Spiel</h2>${prices}`
   +(rows.length?`<div class="pe-list">${cards}</div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))}
 function stat(W,C){
  const cv=(o,i,k,r)=>`<b id="v${i}${k}"${o[k]<0?' class="neg"':''}>${k=='k'&&!r.c?'–':fx(o[k])}</b>`;
@@ -77,10 +77,10 @@ function stat(W,C){
   +`<dl class="kv"><div><dt>Beitrag</dt><dd>${cv(o,i,'k',r)}</dd></div><div><dt>Summe</dt><dd>${cv(o,i,'m',r)}</dd></div><div><dt>Rest letztes Kegeln</dt><dd>${fx(r.n)}</dd></div><div><dt>soll zahlen</dt><dd>${cv(o,i,'o',r)}</dd></div></dl></article>`}).join('');
  const T=k=>`<b id="t${k}">${fx(C.t[k])}</b>`;
  const sum=`<article class="pc pay tot"><header class="pc-h"><h3>Summe</h3><span class="tag"><b id="tc">${C.t.c}</b> anwesend</span><div class="due"><span>Noch zu zahlen</span><span class="amt">${T('q')} €</span></div></header><dl class="kv"><div><dt>Beitrag</dt><dd>${T('k')}</dd></div><div><dt>Runde bezahlt</dt><dd>${T('l')}</dd></div><div><dt>Summe</dt><dd>${T('m')}</dd></div><div><dt>Rest letztes Kegeln</dt><dd>${T('n')}</dd></div><div><dt>soll zahlen</dt><dd>${T('o')}</dd></div><div><dt>Hat gezahlt</dt><dd>${T('p')}</dd></div></dl></article>`;
- return`<h2 id="s-stat">Zahlungen <span class="mu">Alle Mitglieder. Nicht Anwesende zahlen den Durchschnittsanteil. „Rest letztes Kegeln“ kommt automatisch vom letzten gespeicherten Abend.</span></h2><div class="pc-list pay-list">${cards}${sum}</div>`}
+ return`<h2 id="s-stat">Zahlungen</h2><div class="pc-list pay-list">${cards}${sum}</div>`}
 function render(){
  const W=V(),C=calc(W),L=HIST[0],hd=k=>STEP!=k?' hidden':'';
- $('#edit').innerHTML=`<section data-st="vor"${hd('vor')}><p class="mu lead">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}. ${EDT?'Alle Eingaben werden automatisch als Entwurf gesichert.':'Speichern können nur freigegebene Mitglieder; deine Eingaben bleiben als Entwurf erhalten.'}</p>`
+ $('#edit').innerHTML=`<section data-st="vor"${hd('vor')}><p class="mu lead">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}.</p>`
  +(typeof umfHtml==='function'?umfHtml():'')+chips()+stepNav('vor')+'</section>'
  +`<section data-st="spiel"${hd('spiel')}>${eingabe()}${stepNav('spiel')}</section>`
  +`<section data-st="ab"${hd('ab')}>${stat(W,C)}${side(W,1,C)}${rekEdit()}${stepNav('ab')}</section>`
@@ -150,7 +150,7 @@ const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value=""
 function hist(sel){
  if(EDIT&&EDIT.date!=sel)EDIT=null;
  if(sel&&HYR&&sel.slice(0,4)!=HYR)HYR=sel.slice(0,4);
- HSEL=sel;$('#hist').innerHTML=(typeof dmImportBox==='function'?dmImportBox():'')+rekView('h-rek')+'<h2 id="h-tage">Gespeicherte Spieltage <span class="mu">'+(OWN?'Zum Ändern einen Abend wählen und „Bearbeiten“ antippen.':'Schreibgeschützt.')+'</span></h2>'+hyrSel()+daysRow(sel)+'<div id="hd"></div>';
+ HSEL=sel;$('#hist').innerHTML=(typeof dmImportBox==='function'?dmImportBox():'')+rekView('h-rek')+'<h2 id="h-tage">Gespeicherte Spieltage</h2>'+hyrSel()+daysRow(sel)+'<div id="hd"></div>';
  const dw=$('#hist .days .on');if(dw){const p=dw.parentElement;p.scrollLeft=dw.offsetLeft-p.clientWidth/2+dw.offsetWidth/2}
  if(CUR=='#b2'&&sel&&location.hash!='#/historie/'+sel)history.replaceState(null,'','#/historie/'+sel);
  const D=HIST.find(h=>h.date==sel);if(!D){if(!HIST.filter(inHY).length)$('#hd').innerHTML=emptyCard(HIST.length?'Keine Spieltage in diesem Jahr.':'Noch keine Spieltage gespeichert.');sub();return}
@@ -172,8 +172,8 @@ $('#hist').addEventListener('change',e=>{if(e.target.id!='hyr')return;HYR=e.targ
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
 const rekView=id=>`<h2 id="${id||'h-rek'}">Rekorde</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th><th>Datum</th></tr>${(CFG.rekorde||[]).map(r=>`<tr><td>${esc(r.t)}</td><td data-l="Name">${esc(r.name)}</td><td data-l="Punkte">${r.pt??''}</td><td data-l="Datum">${dd(r.datum)}</td></tr>`).join('')}</table></div>`;
 function rekEdit(){
- if(!OWN)return rekView('s-rek')+'<p class="mu">Rekorde kann nur der Besitzer ändern.</p>';
- return`<h2 id="s-rek">Rekorde <span class="mu">Hier ändern und speichern. Die Rekorde gelten dann auch in der Historie.</span></h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th><th>Datum</th></tr>${RK.map((r,i)=>`<tr><td>${esc(r.t)}</td><td data-l="Name"><input type="text" data-a="rk" data-i="${i}" data-k="name" value="${esc(r.name)}"></td><td data-l="Punkte"><input type="number" step="any" inputmode="decimal" data-a="rk" data-i="${i}" data-k="pt" value="${r.pt??''}"></td><td data-l="Datum"><input type="date" data-a="rk" data-i="${i}" data-k="datum" value="${esc(r.datum)}"></td></tr>`).join('')}</table></div><div class="top"><button class="pri" id="rsv">Rekorde speichern</button><span class="mu" id="rm"></span></div>`}
+ if(!OWN)return rekView('s-rek');
+ return`<h2 id="s-rek">Rekorde</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th><th>Datum</th></tr>${RK.map((r,i)=>`<tr><td>${esc(r.t)}</td><td data-l="Name"><input type="text" data-a="rk" data-i="${i}" data-k="name" value="${esc(r.name)}"></td><td data-l="Punkte"><input type="number" step="any" inputmode="decimal" data-a="rk" data-i="${i}" data-k="pt" value="${r.pt??''}"></td><td data-l="Datum"><input type="date" data-a="rk" data-i="${i}" data-k="datum" value="${esc(r.datum)}"></td></tr>`).join('')}</table></div><div class="top"><button class="pri" id="rsv">Rekorde speichern</button><span class="mu" id="rm"></span></div>`}
 async function saveRk(){
  const m=t=>{const e=$('#rm');if(e)e.textContent=t};
  if(!OWN||!db)return m('Speichern ist nur dem Besitzer möglich.');
@@ -183,11 +183,11 @@ const bsum=a=>(a||[]).reduce((s,v,i)=>s+(+v||0)*(i+1),0),n0=v=>(+v).toLocaleStri
 const bhead=()=>'<tr class="hd"><th>Name</th>'+[1,2,3,4,5,6,7].map(i=>`<th>${i} <span class="mu">(×${i})</span></th>`).join('')+'<th>Summe</th></tr>';
 function blatt(){
  const rows=byOrd(S.rows).filter(([r])=>r.c);
- $('#blatt').innerHTML='<h2 id="d-tab">Dortmunder <span class="mu">Werte von links nach rechts eingeben. Jeder Wert wird mit seinem Multiplikator ×1 bis ×7 multipliziert und zur Summe addiert.</span></h2>'
+ $('#blatt').innerHTML='<h2 id="d-tab">Dortmunder</h2>'
  +(rows.length?`<div class="w"><table class="stack">${bhead()}${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<tr><td>${esc(r.name)}${r.gast?' <span class="mu">(Gast)</span>':''}</td>${[0,1,2,3,4,5,6].map(k=>`<td data-l="${k+1} (×${k+1})"><input type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}"></td>`).join('')}<td class="cv" data-l="Summe"><b id="bs${i}">${n0(bsum(a))}</b></td></tr>`}).join('')}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
- +'<p class="note king" id="d-kon">'+icon('crown')+'<span id="dkm">'+dkText()+'</span></p><p class="mu">Die Werte werden mit „Abend speichern“ (Leiste unten) zusammen mit dem Abend abgelegt und erscheinen dann in der Historie.</p>'+stepNav('dm')}
+ +'<p class="note king" id="d-kon"'+(dkText()?'':' hidden')+'>'+icon('crown')+'<span id="dkm">'+dkText()+'</span></p>'+stepNav('dm')}
 const DK=KL.indexOf('Dortmunder'),PK=KL.indexOf('Pumpen - König'),TK=KL.indexOf('TBTBBTB');
-const dkText=()=>S.auto&&S.auto[DK]?`Dortmunder-König (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[DK])} – ${n0(S.koenige[DK].pt)} Punkte`:'Der Teilnehmer mit der höchsten Summe wird automatisch als Dortmunder-König in der Eingabe unter Könige eingetragen (bei Gleichstand alle, mit „ / “ getrennt).';
+const dkText=()=>S.auto&&S.auto[DK]?`Dortmunder-König (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[DK])} – ${n0(S.koenige[DK].pt)} Punkte`:'';
 function autoK(i,sc){
  let mx=0,best=[];
  S.rows.forEach(r=>{if(!r.c)return;const s=sc(r);if(s>mx+1e-9){mx=s;best=[r.name]}else if(s>0&&Math.abs(s-mx)<1e-9)best.push(r.name)});
@@ -198,9 +198,9 @@ function autoK(i,sc){
  if(en)en.value=k.name||'';if(ep)ep.value=k.pt??''}
 function autoKoenige(){
  autoK(DK,r=>bsum(S.blatt[r.name]));autoK(PK,r=>+r.e||0);autoK(TK,r=>btPS(r.name));
- const m=$('#dkm');if(m)m.textContent=dkText();const t=$('#btk');if(t)t.textContent=btkText()}
+ const m=$('#dkm');if(m){m.textContent=dkText();m.parentElement.hidden=!dkText()}const t=$('#btk');if(t){t.textContent=btkText();t.parentElement.hidden=!btkText()}}
 const btPS=n=>{const x=btShow().find(x=>x.p.some(y=>y.name==n));return x?btsum(btV(x.q)):0};
-const btkText=()=>S.auto&&S.auto[TK]?`König „TBTBBTB“ (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[TK])} – ${n0(S.koenige[TK].pt)} Punkte`:'Das Paar mit der höchsten Summe wird automatisch als König „TBTBBTB“ in der Eingabe unter Könige eingetragen (bei Gleichstand alle, mit „ / “ getrennt; beide Spieler eines Paares).';
+const btkText=()=>S.auto&&S.auto[TK]?`König „TBTBBTB“ (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[TK])} – ${n0(S.koenige[TK].pt)} Punkte`:'';
 // Dortmunder aus dem Excel-Import (js/dortmunder-import-data.js, js/abend-import-data.js) erscheinen nur in der Auswertung,
 // nicht unter Historie. Wird ein Dortmunder über die Eingabe gespeichert (oder der importierte Wert geändert), erscheint der Bereich.
 const dmFromExcel=D=>{
@@ -227,14 +227,14 @@ function bergTal(){
  const sh=btShow(),pres=S.rows.filter(r=>r.c),inP=new Set(sh.flatMap(x=>x.p.map(y=>y.name))),open=pres.filter(r=>!inP.has(r.name));
  const two=sh.filter(x=>x.p.length==2).length,one=sh.length-two;
  let msg='';if(!sh.length)BTC=false;
- if(!pres.length)msg='Noch niemand ausgewählt – bitte im Schritt „Vorbereitung“ die Anwesenden antippen.';
+ if(!pres.length)msg='Noch niemand ausgewählt.';
  else if(BTC)msg='Es sind schon Werte eingetragen. Nochmal auf „Neu auslosen“ tippen, um die Paare zu ändern – die Werte werden dann gelöscht.';
  else if(!sh.length)msg=`${pres.length} Anwesende. Noch keine Paare – bitte „Paare auslosen“ tippen.`;
  else msg=`${pres.length} Anwesende: ${two} ${two==1?'Paar':'Paare'}${one?` und ${one} Einzelspieler`:''}.`+(open.length?` Noch nicht eingeteilt: ${open.map(r=>esc(r.name)).join(', ')} – bitte neu auslosen.`:'');
- $('#bt').innerHTML='<h2 id="bt-tab">Berg und Tal <span class="mu">Die Anwesenden aus der Eingabe werden zufällig zu Paaren gelost (bei ungerader Zahl spielt einer allein). In die Spalten Tal und Berg kommen die Werte; die Summe ist die Summe aller sieben Werte.</span></h2>'
+ $('#bt').innerHTML='<h2 id="bt-tab">Berg und Tal</h2>'
  +`<div class="top" id="bt-paare"><button type="button" class="${sh.length?'':'pri'}" id="btd"${pres.length?'':' disabled'}>${sh.length?'Neu auslosen':'Paare auslosen'}</button><span class="mu" id="btm">${msg}</span></div>`
  +(sh.length?`<div class="w" id="bt-werte"><table class="stack">${btHead()}${sh.map(({i,q,p})=>{const a=btV(q);return`<tr><td>${btName(p)}</td>${a.map((v,k)=>`<td data-l="${k+1}. ${BTH[k]}"><input type="number" step="any" inputmode="decimal" enterkeyhint="next" data-bt="1" data-i="${i}" data-k="${k}" value="${v||''}" aria-label="${BTH[k]} ${k+1}"></td>`).join('')}<td class="cv" data-l="Summe"><b id="bts${i}">${n0(btsum(a))}</b></td></tr>`}).join('')}</table></div>`:'')
- +'<p class="note king" id="bt-kon">'+icon('crown')+'<span id="btk">'+btkText()+'</span></p><p class="mu">Paare und Werte werden mit „Abend speichern“ (Leiste unten) zusammen mit dem Abend abgelegt und erscheinen dann in der Historie.</p>'+stepNav('bt');
+ +'<p class="note king" id="bt-kon"'+(btkText()?'':' hidden')+'>'+icon('crown')+'<span id="btk">'+btkText()+'</span></p>'+stepNav('bt');
 }
 $('#bt').addEventListener('click',e=>{
  if(e.target.id!='btd')return;
@@ -282,10 +282,9 @@ function editHtml(){
  const pr=W.rows.map((r,i)=>[r,i]).filter(([r])=>r.c);
  const bt=pr.length?`<h2 id="h-dm">Dortmunder</h2><div class="w"><table class="stack">${bhead()}${pr.map(([r,i])=>{const a=X.bl[r.name]||[];return`<tr><td>${esc(r.name)}${r.gast?' <span class="mu">(Gast)</span>':''}</td>${[0,1,2,3,4,5,6].map(k=>`<td data-l="${k+1} (×${k+1})"><input type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}"></td>`).join('')}<td class="cv" data-l="Summe"><b id="ebs${i}">${n0(bsum(a))}</b></td></tr>`}).join('')}</table></div>`:'';
  const pn=new Set(pr.map(([r])=>r.name)),tq=(X.bt||[]).map((q,i)=>({q,i,p:q.p.filter(x=>pn.has(x.name))})).filter(x=>x.p.length);
- const tb=tq.length?`<h2 id="h-bt">Berg und Tal <span class="mu">Die Paare bleiben wie gespeichert; hier lassen sich nur die Werte ändern.</span></h2><div class="w"><table class="stack">${btHead()}${tq.map(({q,i,p})=>{const a=btV(q);return`<tr><td>${btName(p)}</td>${a.map((v,k)=>`<td data-l="${k+1}. ${BTH[k]}"><input type="number" step="any" inputmode="decimal" enterkeyhint="next" data-bt="1" data-i="${i}" data-k="${k}" value="${v||''}" aria-label="${BTH[k]} ${k+1}"></td>`).join('')}<td class="cv" data-l="Summe"><b id="ebts${i}">${n0(btsum(a))}</b></td></tr>`}).join('')}</table></div>`:'';
- const info=b?'Dieser Abend steht am Anfang einer Kette: „Rest letztes Kegeln“ und „Alter Konto“ sind hier direkt änderbar.':'„Rest letztes Kegeln“ und „Alter Konto“ kommen automatisch vom Vorabend ('+dd(X.prev.date)+').';
+ const tb=tq.length?`<h2 id="h-bt">Berg und Tal</h2><div class="w"><table class="stack">${btHead()}${tq.map(({q,i,p})=>{const a=btV(q);return`<tr><td>${btName(p)}</td>${a.map((v,k)=>`<td data-l="${k+1}. ${BTH[k]}"><input type="number" step="any" inputmode="decimal" enterkeyhint="next" data-bt="1" data-i="${i}" data-k="${k}" value="${v||''}" aria-label="${BTH[k]} ${k+1}"></td>`).join('')}<td class="cv" data-l="Summe"><b id="ebts${i}">${n0(btsum(a))}</b></td></tr>`}).join('')}</table></div>`:'';
  return`<h2 id="h-tab">Spieltag ${dd(X.date)} bearbeiten</h2><div class="top"><button class="pri" id="esv">Änderungen speichern</button><button id="ecx">Abbrechen</button><span class="mu" id="em"></span></div>
- <p class="note">Das Datum bleibt fest. ${info} Beim Speichern werden die Folgeabende neu berechnet, solange ihre Reste und ihr Kontostand vom Vorabend stammen.</p>
+
  <div class="w">${h}</div>${bt}${tb}${side(W,1,C,'e',b)}`}
 function eupd(){
  const X=EDIT;if(!X)return;const{W,C}=mk(X.doc,X.prev,X.base);
@@ -378,10 +377,10 @@ function aus(){
  const dm={};let dmN=0;
  H.forEach(h=>{if(!h.blatt||!h.blatt.length)return;dmN++;h.blatt.forEach(b=>{const n=canon(b.name),o=dm[n]=dm[n]||{n,a:0,v:[0,0,0,0,0,0,0],s:0};o.a++;(b.v||[]).forEach((x,i)=>{if(i<7)o.v[i]+=+x||0});o.s+=typeof b.s=='number'?b.s:bsum(b.v)})});
  const DMr=rk(Object.values(dm).map(o=>({...o,avg:o.s/o.a})).sort((a,b)=>b.avg-a.avg||b.s-a.s||a.n.localeCompare(b.n)),'avg'),dmT=DMr.reduce((t,o)=>{t.a+=o.a;t.s+=o.s;o.v.forEach((x,i)=>t.v[i]+=x);return t},{a:0,s:0,v:[0,0,0,0,0,0,0]});
- const dmSec=`<h2 id="a-dm">Dortmunder <span class="mu">${YR?'Zeitraum '+YR:'Alle Jahre'}. Summen aus allen Dortmunder-Blättern; Ø pro Teilnahme = Summe ÷ Teilnahmen. Als Teilnahme zählt jeder Eintrag in einem Dortmunder-Blatt, auch ohne Punkte.</span></h2>`
+ const dmSec=`<h2 id="a-dm">Dortmunder <span class="mu">${YR?'Zeitraum '+YR:'Alle Jahre'}</span></h2>`
   +(DMr.length?`<p class="note">Ø aller Teilnahmen: <b>${fx(dmT.s/dmT.a)}</b> Punkte (${dmT.a} Teilnahmen von ${DMr.length} Beteiligten an ${dmN} ${dmN==1?'Abend':'Abenden'}${YR?' in '+YR:''})</p><div class="top"><label>Diagramm ${sel('dt',TYPES,ST.dt)}</label></div>`+(ST.dt!='none'?chart(ST.dt,DMr.map(x=>({n:x.n,v:x.avg})),fx,'Dortmunder – Ø pro Teilnahme'+(YR?' '+YR:'')):'')
    +T(['Name','Teilnahmen',...[1,2,3,4,5,6,7].map(i=>`${i} <span class="mu">(×${i})</span>`),'Summe','Ø pro Teilnahme'],[...DMr.map(x=>`<tr><td>${x.rang}. ${esc(x.n)}${typ(x.n)=='Gast'?' <span class="mu">(Gast)</span>':''}</td><td>${x.a}</td>${x.v.map(v=>`<td>${v?n0(v):''}</td>`).join('')}<td>${n0(x.s)}</td><td class="cv"><b>${fx(x.avg)}</b></td></tr>`),`<tr class="sum"><td><b>Alle Beteiligten</b></td><td><b>${dmT.a}</b></td>${dmT.v.map(v=>`<td><b>${v?n0(v):''}</b></td>`).join('')}<td><b>${n0(dmT.s)}</b></td><td class="cv"><b>${fx(dmT.s/dmT.a)}</b></td></tr>`])
-  :`<p class="mu">${YR?`Für ${YR} gibt es keine Abende mit Dortmunder-Werten. Mit „Zeitraum: Alle“ siehst du alle Jahre.`:'Es gibt noch keine Abende mit Dortmunder-Werten. Sie werden in der Eingabe unter „Dortmunder“ erfasst und mit dem Abend gespeichert.'}</p>`);
+  :`<p class="mu">${YR?`Für ${YR} gibt es keine Abende mit Dortmunder-Werten.`:'Es gibt noch keine Abende mit Dortmunder-Werten.'}</p>`);
  const Hs=H.slice().sort((a,b)=>a.date<b.date?-1:1),who=[...new Set(H.flatMap(h=>h.rows.map(r=>r.name)))].sort((a,b)=>a.localeCompare(b));
  if(ST.vw&&!who.includes(ST.vw))ST.vw='';
  const vlab=ST.vc=='@neu'?'Kontostand (Neuer Konto)':ST.vc=='@anw'?'Anwesende (Anzahl)':COLN(ST.vc);
@@ -389,13 +388,13 @@ function aus(){
   if(ST.vc=='@neu')return{x:h.date,y:typeof h.kasse.neu=='number'?h.kasse.neu:null};
   if(ST.vc=='@anw')return{x:h.date,y:h.rows.filter(r=>present(r)&&(!ST.vw||r.name==ST.vw)).length};
   let s=0,c=0;h.rows.forEach(r=>{if(ST.vw&&r.name!=ST.vw)return;const v=r[ST.vc];if(typeof v!='number'||('defghij'.includes(ST.vc)&&!present(r)))return;s+=v;c++});return{x:h.date,y:c?s:null}}),vfmt=v=>ST.vc=='@neu'?eu(v):ST.vc=='@anw'?iv(v):fmtC(ST.vc,v,false),vt=vlab+(ST.vc=='@neu'?'':' – '+(ST.vw||'alle zusammen'));
- const vSec=`<h2 id="a-ver">Verlauf <span class="mu">Alle Spieltage im gewählten Zeitraum, gleichmäßig verteilt.</span></h2><div class="top"><label>Spalte ${sel('vc',[...COLS.filter(c=>c[0]!='c').map(c=>[c[0],c[1]]),['@anw','Anwesende (Anzahl)'],['@neu','Kontostand (Neuer Konto)']],ST.vc)}</label>${ST.vc=='@neu'?'':`<label>Auswahl ${sel('vw',[['','Alle zusammen (Summe)'],...who.map(n=>[n,n])],ST.vw)}</label>`}</div>`+(pts.some(p=>p.y!=null)?`<div class="cap">${esc(vt)}</div><div class="w cw">${lineSvg(pts,vfmt,vt+': '+pts.filter(p=>p.y!=null).length+' Werte von '+dd(pts[0].x)+' bis '+dd(pts[pts.length-1].x))}</div><details><summary class="mu">Werte als Tabelle</summary>${T(['Spieltag',vlab],pts.map(p=>`<tr><td>${dd(p.x)}</td><td>${p.y==null?'':vfmt(p.y)}</td></tr>`))}</details>`:'<p class="mu">Für diese Auswahl liegen keine Werte vor.</p>');
+ const vSec=`<h2 id="a-ver">Verlauf</h2><div class="top"><label>Spalte ${sel('vc',[...COLS.filter(c=>c[0]!='c').map(c=>[c[0],c[1]]),['@anw','Anwesende (Anzahl)'],['@neu','Kontostand (Neuer Konto)']],ST.vc)}</label>${ST.vc=='@neu'?'':`<label>Auswahl ${sel('vw',[['','Alle zusammen (Summe)'],...who.map(n=>[n,n])],ST.vw)}</label>`}</div>`+(pts.some(p=>p.y!=null)?`<div class="cap">${esc(vt)}</div><div class="w cw">${lineSvg(pts,vfmt,vt+': '+pts.filter(p=>p.y!=null).length+' Werte von '+dd(pts[0].x)+' bis '+dd(pts[pts.length-1].x))}</div><details><summary class="mu">Werte als Tabelle</summary>${T(['Spieltag',vlab],pts.map(p=>`<tr><td>${dd(p.x)}</td><td>${p.y==null?'':vfmt(p.y)}</td></tr>`))}</details>`:'<p class="mu">Für diese Auswahl liegen keine Werte vor.</p>');
  const JY={};HIST.forEach(h=>{const y=h.date.slice(0,4),o=JY[y]=JY[y]||{y,n:0,m:0,g:0,z:0,last:'',neu:null},pr=h.rows.filter(present);o.n++;o.m+=pr.filter(r=>!isG(r)).length;o.g+=pr.filter(isG).length;o.z+=+h.kasse.gezahlt||0;if(h.date>o.last){o.last=h.date;o.neu=h.kasse.neu}});
- const jSec=`<h2 id="a-jahr">Jahresübersicht <span class="mu">Alle Jahre, unabhängig vom gewählten Zeitraum.</span></h2>${T(['Jahr','Abende','Ø Mitglieder pro Abend','Gäste (Teilnahmen)','Eingezahlt','Kontostand Jahresende'],Object.values(JY).sort((a,b)=>b.y.localeCompare(a.y)).map(o=>`<tr><td>${o.y}</td><td>${o.n}</td><td>${(o.m/o.n).toLocaleString('de-DE',{maximumFractionDigits:1})}</td><td>${o.g||''}</td><td>${eu(o.z)}</td><td>${typeof o.neu=='number'?eu(o.neu):''}</td></tr>`))}`;
+ const jSec=`<h2 id="a-jahr">Jahresübersicht</h2>${T(['Jahr','Abende','Ø Mitglieder pro Abend','Gäste (Teilnahmen)','Eingezahlt','Kontostand Jahresende'],Object.values(JY).sort((a,b)=>b.y.localeCompare(a.y)).map(o=>`<tr><td>${o.y}</td><td>${o.n}</td><td>${(o.m/o.n).toLocaleString('de-DE',{maximumFractionDigits:1})}</td><td>${o.g||''}</td><td>${eu(o.z)}</td><td>${typeof o.neu=='number'?eu(o.neu):''}</td></tr>`))}`;
  const aTop=`<div class="top"><label>Zeitraum <select id="yr"><option value="">Alle (${HIST.length} Abende)</option>${yrs.map(y=>`<option${y==YR?' selected':''}>${y}</option>`).join('')}</select></label><label>Einzelergebnisse <select id="md"><option value="sum">Summe</option><option value="avg"${MODE=='avg'?' selected':''}>Ø pro anwesendem Abend</option></select></label></div>`;
- const kSec=`<h2 id="a-kon">Könige-Rangliste <span class="mu">Sortiert nach Gesamtzahl der Titel. Geteilte Titel zählen für jeden.</span></h2>${kCtl}${T(['Rang',...KL.map(k=>k.replace(' - König',''))],K.map(x=>`<tr><td>${x.rang}. ${x.n}</td>${x.v.map(v=>`<td>${v||''}</td>`).join('')}</tr>`))}`;
+ const kSec=`<h2 id="a-kon">Könige-Rangliste</h2>${kCtl}${T(['Rang',...KL.map(k=>k.replace(' - König',''))],K.map(x=>`<tr><td>${x.rang}. ${x.n}</td>${x.v.map(v=>`<td>${v||''}</td>`).join('')}</tr>`))}`;
  const aSec=`<h2 id="a-anw">Anwesenheit</h2>${T(['Name','Typ','Abende','Quote','','zuletzt dabei'],A2.map(x=>{const q=H.length?x.a/H.length:0;return`<tr><td>${x.rang}. ${x.n}</td><td>${typ(x.n)}</td><td>${x.a}</td><td>${Math.round(q*100)} %</td><td style="text-align:left"><span class="bar" style="width:${Math.round(q*100)}px"></span></td><td>${dd(x.l)}</td></tr>`}))}`;
- const eSec=`<h2 id="a-ein">Einzelergebnisse <span class="mu">${MODE=='avg'?'Ø pro anwesendem Abend':'Summe über alle anwesenden Abende'}; Lotterie in €.</span></h2>${eCtl}${T(['Name','Abende',...'defghij'.split('').map(k=>COLS.find(c=>c[0]==k)[1])],E.map(x=>`<tr><td>${x.n}</td><td>${x.a}</td>${'defghij'.split('').map(k=>{const v=MODE=='avg'?x[k]/x.a:x[k];return`<td>${k=='j'?eu(v):MODE=='avg'?fx(v):iv(v)}</td>`}).join('')}</tr>`))}`;
+ const eSec=`<h2 id="a-ein">Einzelergebnisse</h2>${eCtl}${T(['Name','Abende',...'defghij'.split('').map(k=>COLS.find(c=>c[0]==k)[1])],E.map(x=>`<tr><td>${x.n}</td><td>${x.a}</td>${'defghij'.split('').map(k=>{const v=MODE=='avg'?x[k]/x.a:x[k];return`<td>${k=='j'?eu(v):MODE=='avg'?fx(v):iv(v)}</td>`}).join('')}</tr>`))}`;
  $('#aus').innerHTML=aTop+`${dmSec}${kSec}${eSec}${aSec}${vSec}${jSec}`;sortTables();compact('a-dm',[2,3,4,5,6,7,8]);compact('a-anw',[1,4]);compact('a-jahr',[3,4]);sub()}
 $('#aus').addEventListener('change',e=>{const t=e.target;if(t.id=='yr')YR=t.value;if(t.id=='md')MODE=t.value;if(t.dataset.s)ST[t.dataset.s]=t.value;aus()});
 // Auswertung und Dortmunder: Spalten per Klick auf die Überschrift sortieren (beste/größte Werte zuerst, Rang: 1 zuerst).
@@ -429,9 +428,9 @@ function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0]}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
  $('#mem').innerHTML=`<h2 id="m-liste">Mitgliederliste (${MEM.liste.length+(MEM.weitere||[]).length} Mitglieder, ${MEM.gaeste.length} Gäste)</h2><div class="w"><table class="stack mt"><tr class="hd"><th>Name</th><th>Typ</th><th>Abende anwesend</th><th>davon ${JY}</th><th>zuletzt dabei</th></tr>${rows.map(r=>`<tr><td>${esc(r.n)}${r.t=='Gast'?' <span class="tag">Gast</span>':''}</td><td data-l="Typ">${r.t}</td><td data-l="Abende">${r.a}</td><td data-l="davon ${JY}">${r.y}</td><td data-l="zuletzt dabei">${dd(r.l)||'–'}</td></tr>`).join('')}</table></div>`
- +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'<p class="mu">Neue Mitglieder und die Reihenfolge der Liste kann nur der Besitzer ändern. Gäste werden bei der Eingabe angelegt.</p>')+(OWN?reihe()+'<div id="frg"></div>':'');
+ +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'')+(OWN?reihe()+'<div id="frg"></div>':'');
  if(OWN){$('#add').onclick=()=>busy($('#add'),addMember());$('#nm').onkeydown=e=>{if(e.key=='Enter'&&!e.isComposing){e.preventDefault();$('#add').click()}};if(typeof frgLoad==='function')frgLoad().then(sub)}sub()}
-const reihe=()=>`<h2 id="m-reihe">Reihenfolge der Liste <span class="mu">Bestimmt die Reihenfolge der Anwesenheits-Knöpfe in der Eingabe. Das kann nur der Besitzer ändern.</span></h2><div class="w"><table><tr><th>Name</th><th>Verschieben</th></tr>${MEM.liste.map((n,i)=>`<tr><td>${i+1}. ${esc(n)}</td><td class="mvc"><button type="button" class="mv" data-mv="${i}" data-dir="-1" aria-label="${esc(n)} nach oben"${i?'':' disabled'}>${icon('up')}</button><button type="button" class="mv" data-mv="${i}" data-dir="1" aria-label="${esc(n)} nach unten"${i<MEM.liste.length-1?'':' disabled'}>${icon('down')}</button></td></tr>`).join('')}</table></div><p class="mu" id="m-rm" aria-live="polite"></p>`;
+const reihe=()=>`<h2 id="m-reihe">Reihenfolge der Liste</h2><div class="w"><table><tr><th>Name</th><th>Verschieben</th></tr>${MEM.liste.map((n,i)=>`<tr><td>${i+1}. ${esc(n)}</td><td class="mvc"><button type="button" class="mv" data-mv="${i}" data-dir="-1" aria-label="${esc(n)} nach oben"${i?'':' disabled'}>${icon('up')}</button><button type="button" class="mv" data-mv="${i}" data-dir="1" aria-label="${esc(n)} nach unten"${i<MEM.liste.length-1?'':' disabled'}>${icon('down')}</button></td></tr>`).join('')}</table></div><p class="mu" id="m-rm" aria-live="polite"></p>`;
 let MVB=false;
 $('#mem').addEventListener('click',async e=>{
  const b=e.target.closest('[data-mv]');if(!b||!OWN||!db||MVB)return;
