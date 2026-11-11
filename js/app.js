@@ -169,7 +169,14 @@ function autoKoenige(){
  const m=$('#dkm');if(m)m.textContent=dkText();const t=$('#btk');if(t)t.textContent=btkText()}
 const btPS=n=>{const x=btShow().find(x=>x.p.some(y=>y.name==n));return x?btsum(btV(x.q)):0};
 const btkText=()=>S.auto&&S.auto[TK]?`König „TBTBBTB“ (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[TK])} – ${n0(S.koenige[TK].pt)} Punkte`:'Das Paar mit der höchsten Summe wird automatisch als König „TBTBBTB“ in der Eingabe unter Könige eingetragen (bei Gleichstand alle, mit „ / “ getrennt; beide Spieler eines Paares).';
-const blattView=D=>D.blatt&&D.blatt.length?`<h2 id="h-dm">Dortmunder</h2><div class="w"><table>${bhead()}${D.blatt.map(b=>`<tr><td>${esc(b.name)}${b.gast?' <span class="mu">(Gast)</span>':''}</td>${b.v.map(v=>`<td>${v?n0(v):''}</td>`).join('')}<td class="cv"><b>${n0(b.s)}</b></td></tr>`).join('')}</table></div>`:'';
+// Dortmunder aus dem Excel-Import (js/dortmunder-import-data.js, js/abend-import-data.js) erscheinen nur in der Auswertung,
+// nicht unter Historie. Wird ein Dortmunder über die Eingabe gespeichert (oder der importierte Wert geändert), erscheint der Bereich.
+const dmFromExcel=D=>{
+ const key=a=>JSON.stringify((a||[]).map(x=>[x.name,+x.s]).sort((p,q)=>p[0]<q[0]?-1:1));
+ if(typeof DM_IMPORT!=='undefined'&&DM_IMPORT[D.date])return key(D.blatt)==key(DM_IMPORT[D.date].map(([name,s])=>({name,s})));
+ if(typeof ABEND_IMPORT!=='undefined'&&ABEND_IMPORT[D.date])return key(D.blatt)==key(ABEND_IMPORT[D.date].blatt);
+ return false};
+const blattView=D=>D.blatt&&D.blatt.length&&!dmFromExcel(D)?`<h2 id="h-dm">Dortmunder</h2><div class="w"><table>${bhead()}${D.blatt.map(b=>`<tr><td>${esc(b.name)}${b.gast?' <span class="mu">(Gast)</span>':''}</td>${b.v.map(v=>`<td>${v?n0(v):''}</td>`).join('')}<td class="cv"><b>${n0(b.s)}</b></td></tr>`).join('')}</table></div>`:'';
 const BTH=['Tal','Berg','Tal','Berg','Berg','Tal','Berg'],btsum=a=>(a||[]).reduce((s,v)=>s+(+v||0),0);
 const btHead=()=>'<tr class="hd"><th>Paar</th>'+BTH.map(x=>`<th>${x}</th>`).join('')+'<th>Summe</th></tr>';
 const btName=p=>p.map(x=>esc(x.name)+(x.gast?' <span class="mu">(Gast)</span>':'')).join(' &amp; ');

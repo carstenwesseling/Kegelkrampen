@@ -36,6 +36,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Jeder Wert wird mit Multiplikator 1 bis 7 (links nach rechts) multipliziert und zur Summe addiert.
 - Werte und Summe werden mit dem Abend gespeichert und in der Historie angezeigt.
 - Der Teilnehmer mit der höchsten Summe wird automatisch als Dortmunder-König eingetragen.
+- Historie → Spieltage zeigt den Bereich „Dortmunder“ nur für Abende, deren Dortmunder über die Eingabe gespeichert wurde. Dortmunder aus dem Excel-Import (2013–2025, Abend 12.12.2025) stehen nur in der Auswertung; ändert man sie über „Bearbeiten“, erscheint der Bereich ebenfalls.
 - Abend 12.12.2025 (fehlte in der Datenbank) steht in `js/abend-import-data.js` (aus „Kegeln_zahlen_2025.xls.xlsx“, Blatt „12.12.2026“ = 12.12.2025) und wird mit demselben Knopf angelegt. Die Reste passen zum 09.01.2026.
 - Historische Dortmunder 2013–2025: Werte aus „Dortmunder_2000-2025.xlsx“ (Spalte Q = Jahr, Spalten B–N = Abende des Jahres) stehen in `js/dortmunder-import-data.js` und kommen je Abend als Wert in Spalte 1 (×1) ins Dortmunder-Blatt (Summe = Wert). Die Zuordnung Spalte → Datum erfolgt über die Anwesenheit der Abende in der Datenbank. Nur Abende, die es in der Datenbank gibt; nur Personen, die an dem Abend anwesend waren; „x“ = kein Wert. Import per Knopf in der Historie (nur Besitzer, wiederholbar, überschreibt nichts). Der Dortmunder-König richtet sich nach den Excel-Werten: leer oder abweichend (13.09.2013, 25.03.2016, 14.06.2024) wird angepasst.
 
