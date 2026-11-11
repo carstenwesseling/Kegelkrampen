@@ -9,6 +9,12 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Weitere Tabellenblätter sind historische Spieltage. Der Tabellenname ist das Datum des Abends.
 - Ältere Blätter (2013) werden in die neue Logik übernommen; fehlende Daten bleiben leer.
 
+## Navigation und Startseite
+
+- Die Seite startet auf einer Startseite (Hintergrund: Bild „Willingen 2026“ mit 50 % Durchlässigkeit, `img/willingen-2026.jpg`) mit einem Text über den Club: seit 2000, aktuell 13 „Männer“, Kegeltouren, jeden 2. Freitag im Monat um 19 Uhr im HSV Casino, regelmäßige Clubkämpfe gegen die „Männer von Flake“.
+- Hamburger-Menü oben rechts mit Startseite, Eingabe, Historie, Auswertung, Mitglieder, Kegeltouren und der Rubrik „Einloggen“ (Mit Google anmelden, Per Link anmelden, Abmelden).
+- Die Navigationsleiste (Bereiche der Eingabe, Sprungmarken) erscheint erst, wenn ein Menüpunkt außer der Startseite gewählt wurde.
+
 ## Eingabe
 
 - Anwesenheit wird pro Abend ausgewählt; in die Eingabetabelle kommen nur die Anwesenden.

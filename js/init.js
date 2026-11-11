@@ -1,5 +1,5 @@
-const TABS=[['#b1','#edit'],['#b5','#blatt'],['#b6','#bt'],['#b2','#hist'],['#b3','#aus'],['#b4','#mem'],['#b7','#tour']];
-let CUR='#b1',USR=null,ME=null;
+const TABS=[['#b0','#start'],['#b1','#edit'],['#b5','#blatt'],['#b6','#bt'],['#b2','#hist'],['#b3','#aus'],['#b4','#mem'],['#b7','#tour']];
+let CUR='#b0',USR=null,ME=null;
 const SUB={'#b1':[['s-umf','Umfrage'],['s-anw','Anwesenheit'],['s-ein','Eingabe'],['s-stat','Statistik'],['ek-kasse','Kasse'],['ek-koenige','Könige'],['s-rek','Rekorde']],
  '#b5':[['d-tab','Dortmunder'],['d-kon','König']],
  '#b6':[['bt-tab','Berg und Tal'],['bt-paare','Auslosen'],['bt-werte','Tabelle'],['bt-kon','König']],
@@ -31,7 +31,15 @@ async function who(){
 const GRP=['#b1','#b5','#b6'];
 function grp(){const g=GRP.includes(CUR);$('#eg').hidden=!g;if(g){$('#b1').classList.add('on');$('#b1').setAttribute('aria-current',CUR=='#b1'?'page':'true')}$('#b1a').classList.toggle('on',CUR=='#b1');$('#b1a').setAttribute('aria-current',CUR=='#b1'?'page':'false')}
 $('#b1a').onclick=()=>$('#b1').click();
-TABS.forEach(([b,v])=>$(b).onclick=()=>{CUR=b;TABS.forEach(([b2,v2])=>{$(v2).hidden=v2!=v;$(b2).classList.toggle('on',b2==b);$(b2).setAttribute('aria-current',b2==b?'page':'false')});if(b=='#b2')hist((HIST.find(inHY)||HIST[0]||{}).date);if(b=='#b3')aus();if(b=='#b4')members();if(b=='#b7')tour();grp();sub();window.scrollTo(0,0)});
+// Menüleiste (Hamburger) und Sprungmarken: Die Navigation erscheint erst, wenn ein Menüpunkt gewählt wurde.
+const navsShow=()=>{$('#navs').hidden=CUR=='#b0';navh()};
+const menuSet=o=>{$('#menu').hidden=!o;$('#burger').setAttribute('aria-expanded',o?'true':'false');$('#burger').setAttribute('aria-label',o?'Menü schließen':'Menü öffnen')};
+$('#burger').onclick=e=>{e.stopPropagation();menuSet($('#menu').hidden)};
+$('#menu').addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(!b)return;menuSet(false);$(b.dataset.go).click()});
+document.addEventListener('click',e=>{if(!$('#menu').hidden&&!e.target.closest('#menu')&&!e.target.closest('#burger'))menuSet(false)});
+document.addEventListener('keydown',e=>{if(e.key=='Escape'&&!$('#menu').hidden){menuSet(false);$('#burger').focus()}});
+navsShow();
+TABS.forEach(([b,v])=>$(b).onclick=()=>{CUR=b;TABS.forEach(([b2,v2])=>{$(v2).hidden=v2!=v;$(b2).classList.toggle('on',b2==b);$(b2).setAttribute('aria-current',b2==b?'page':'false')});if(b=='#b2')hist((HIST.find(inHY)||HIST[0]||{}).date);if(b=='#b3')aus();if(b=='#b4')members();if(b=='#b7')tour();grp();sub();navsShow();window.scrollTo(0,0)});
 (async()=>{
  const T=p=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),10000))]);
  try{const c=window.claude;db=c&&await T(c.use('db'));USR=c&&await T(c.use('user'));OWN=USR?await USR.isOwner():false;EDT=OWN||(USR&&USR.isEditor?await T(USR.isEditor())===true:false)}catch(e){db=null}

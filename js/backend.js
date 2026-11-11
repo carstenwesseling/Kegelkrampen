@@ -78,9 +78,10 @@ window.claude = {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.id = "kk-login";
-  btn.style.marginLeft = "8px";
-  const who = document.getElementById("who");
-  if (who) who.insertAdjacentElement("afterend", btn);
+  // Die Anmelde-Knöpfe stehen im Hamburger-Menü unter „Einloggen“.
+  const box = document.getElementById("loginbox");
+  btn.className = "mi";
+  if (box) box.appendChild(btn);
   btn.onclick = async () => {
     if (fbAuth.currentUser) { await fbAuth.signOut(); }
     else { await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
@@ -91,8 +92,8 @@ window.claude = {
   const mail = document.createElement("button");
   mail.type = "button";
   mail.id = "kk-mail";
-  mail.style.marginLeft = "8px";
-  mail.textContent = "Mit E-Mail-Link anmelden";
+  mail.className = "mi";
+  mail.textContent = "Per Link anmelden";
   btn.insertAdjacentElement("afterend", mail);
   const KEY = "kkEmailForSignIn";
   const note = t => { const s = document.getElementById("st"); if (s) s.textContent = t; };

@@ -18,6 +18,8 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 │   ├── dortmunder-import.js       Import-Knopf in der Historie (nur Besitzer)
 │   ├── abend-import-data.js       Abend 12.12.2025 aus Excel
 │   └── init.js         Start: Tabs, Anmeldung, Laden der Daten
+├── img/
+│   └── willingen-2026.jpg  Hintergrundbild der Startseite
 ├── docs/
 │   └── anforderungen.md  Fachliche Anforderungen aus den Absprachen
 ├── .gitignore
