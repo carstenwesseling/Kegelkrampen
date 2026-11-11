@@ -127,7 +127,9 @@ $('#blatt').addEventListener('input',e=>{const t=e.target;if(!t.dataset.bl)retur
  $('#bs'+t.dataset.i).textContent=n0(bsum(a));autoKoenige();draft()});
 const colNav=e=>{
  const t=e.target;if(!t.dataset||!(t.dataset.bl||t.dataset.bt)||(e.key!=='Tab'&&e.key!=='Enter')||e.ctrlKey||e.altKey||e.metaKey)return;
- const all=[...t.closest('table').querySelectorAll('input[data-bl],input[data-bt]')].sort((a,b)=>(+a.dataset.k)-(+b.dataset.k)||(+a.dataset.i)-(+b.dataset.i));
+ const box=t.closest('.pe-list,table'),sel='input[data-bl],input[data-bt]';
+ // Liste: DOM-Reihenfolge (Zeile für Zeile); Tabelle: spaltenweise
+ const all=box.classList.contains('pe-list')?[...box.querySelectorAll(sel)]:[...box.querySelectorAll(sel)].sort((a,b)=>(+a.dataset.k)-(+b.dataset.k)||(+a.dataset.i)-(+b.dataset.i));
  const n=all[all.indexOf(t)+(e.shiftKey?-1:1)];
  if(!n)return;e.preventDefault();n.focus();if(n.select)n.select()};
 $('#blatt').addEventListener('keydown',colNav);$('#bt').addEventListener('keydown',colNav);$('#hist').addEventListener('keydown',colNav);
@@ -184,7 +186,7 @@ const bhead=()=>'<tr class="hd"><th>Name</th>'+[1,2,3,4,5,6,7].map(i=>`<th>${i} 
 function blatt(){
  const rows=byOrd(S.rows).filter(([r])=>r.c);
  $('#blatt').innerHTML='<h2 id="d-tab">Dortmunder</h2>'
- +(rows.length?`<div class="w"><table class="stack">${bhead()}${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<tr><td>${esc(r.name)}${r.gast?' <span class="mu">(Gast)</span>':''}</td>${[0,1,2,3,4,5,6].map(k=>`<td data-l="${k+1} (×${k+1})"><input type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}"></td>`).join('')}<td class="cv" data-l="Summe"><b id="bs${i}">${n0(bsum(a))}</b></td></tr>`}).join('')}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
+ +(rows.length?`<div class="pe-list">${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<div class="pe"><div class="pe-n"><h3>${esc(r.name)}</h3>${r.gast?'<span class="tag">Gast</span>':''}</div><div class="pe-f">${[0,1,2,3,4,5,6].map(k=>`<div class="fld"><label for="bl${i}_${k}">${k+1} (×${k+1})</label><input id="bl${i}_${k}" type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}"></div>`).join('')}<div class="fld"><span class="fl">Summe</span><b class="dsum" id="bs${i}">${n0(bsum(a))}</b></div></div></div>`}).join('')}</div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
  +'<p class="note king" id="d-kon"'+(dkText()?'':' hidden')+'>'+icon('crown')+'<span id="dkm">'+dkText()+'</span></p>'+stepNav('dm')}
 const DK=KL.indexOf('Dortmunder'),PK=KL.indexOf('Pumpen - König'),TK=KL.indexOf('TBTBBTB');
 const dkText=()=>S.auto&&S.auto[DK]?`Dortmunder-König (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[DK])} – ${n0(S.koenige[DK].pt)} Punkte`:'';
@@ -450,6 +452,7 @@ document.addEventListener('mousemove',e=>{const t=e.target.closest?e.target.clos
 document.addEventListener('mouseleave',()=>{TIP.style.display='none'});
 window.addEventListener('error',e=>st('Fehler: '+e.message));
 // Startseite: Kopfbild „Willingen 2026“ und Übersicht (nächster Abend, Kasse, offene Beträge, Könige, Schnellzugriff).
+let OPOPEN=false; // Startseite „Offene Beträge“ aufgeklappt (bleibt beim Neuzeichnen erhalten)
 function startView(){
  const el=$('#start'),L=HIST[0];
  const hero=`<figure class="hero-img"><img src="img/willingen-2026.jpg" alt="Willingen 2026 – Tour der Kegelkrampen" width="1024" height="1536" decoding="async"></figure>`;
@@ -461,11 +464,11 @@ function startView(){
  if(!L){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${next}${emptyCard('Noch keine gespeicherten Abende. Nach dem ersten „Abend speichern“ erscheinen hier Kontostand, offene Beträge und Könige.')}</div></div>`;return}
  const kasse=card('wallet','Kontostand',`<p class="big">${typeof L.kasse.neu=='number'?eu(L.kasse.neu):'–'}</p><p class="mu">Stand nach dem ${dd(L.date)}${typeof L.kasse.gezahlt=='number'?` · eingezahlt ${eu(L.kasse.gezahlt)}`:''}</p>`);
  const op=L.rows.filter(r=>!isG(r)&&+r.q>.005).sort((a,b)=>b.q-a.q),os=op.reduce((a,r)=>a+(+r.q),0);
- const offen=card('alert','Offene Beträge',op.length?`<p class="big">${eu(os)}</p><ul class="lst" id="op-top">${op.slice(0,5).map(r=>`<li><span>${esc(r.name)}</span><b>${eu(r.q)}</b></li>`).join('')}</ul>${op.length>5?`<ul class="lst" id="op-all" hidden>${op.map(r=>`<li><span>${esc(r.name)}</span><b>${eu(r.q)}</b></li>`).join('')}</ul><button type="button" class="lnk" id="op-more" data-n="${op.length-5}" aria-expanded="false" aria-controls="op-all">und ${op.length-5} weitere</button>`:''}`:`<p class="big ok">Alles bezahlt</p><p class="mu">Nach dem ${dd(L.date)} ist niemand im Rückstand.</p>`);
+ const offen=card('alert','Offene Beträge',op.length?`<p class="big">${eu(os)}</p><ul class="lst" id="op-top"${OPOPEN?' hidden':''}>${op.slice(0,5).map(r=>`<li><span>${esc(r.name)}</span><b>${eu(r.q)}</b></li>`).join('')}</ul>${op.length>5?`<ul class="lst" id="op-all"${OPOPEN?'':' hidden'}>${op.map(r=>`<li><span>${esc(r.name)}</span><b>${eu(r.q)}</b></li>`).join('')}</ul><button type="button" class="lnk" id="op-more" data-n="${op.length-5}" aria-expanded="${OPOPEN}" aria-controls="op-all">${OPOPEN?'weniger anzeigen':`und ${op.length-5} weitere`}</button>`:''}`:`<p class="big ok">Alles bezahlt</p><p class="mu">Nach dem ${dd(L.date)} ist niemand im Rückstand.</p>`);
  const kg=(L.koenige||[]).filter(k=>k.name);
  const kon=card('crown',`Könige vom ${dd(L.date)}`,kg.length?`<ul class="lst">${kg.map(k=>`<li><span>${esc(k.t.replace(' - König',''))}</span><b>${esc(k.name)}${k.pt!=null&&k.pt!==''?` <span class="mu">${n0(k.pt)}</span>`:''}</b></li>`).join('')}</ul>`:'<p class="mu">Keine Könige eingetragen.</p>');
  const quick=card('right','Schnellzugriff',`<div class="acts q"><button type="button" data-tab="#b2">${icon('history')}Historie</button><button type="button" data-tab="#b3">${icon('chart')}Auswertung</button><button type="button" data-tab="#b8">${icon('pin')}Dortmunder</button><button type="button" data-tab="#b7">${icon('image')}Kegeltouren</button></div>`);
  el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${next}${kasse}${offen}${kon}${quick}</div></div>`}
 // Startseite „Offene Beträge“: der Knopf „und N weitere“ zeigt die ganze Liste, nochmal tippen zeigt wieder die ersten fünf.
-document.addEventListener('click',e=>{const b=e.target.closest('#op-more');if(!b)return;const open=b.getAttribute('aria-expanded')!=='true';
- b.setAttribute('aria-expanded',String(open));$('#op-all').hidden=!open;$('#op-top').hidden=open;b.textContent=open?'weniger anzeigen':`und ${b.dataset.n} weitere`});
+document.addEventListener('click',e=>{const b=e.target.closest('#op-more');if(!b)return;OPOPEN=!OPOPEN;
+ b.setAttribute('aria-expanded',String(OPOPEN));$('#op-all').hidden=!OPOPEN;$('#op-top').hidden=OPOPEN;b.textContent=OPOPEN?'weniger anzeigen':`und ${b.dataset.n} weitere`});
