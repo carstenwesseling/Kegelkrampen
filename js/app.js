@@ -6,7 +6,7 @@ const dd=i=>i?i.split('-').reverse().join('.'):'';
 const iv=v=>v==null||v===''||isNaN(v)?'':Math.round(+v).toLocaleString('de-DE'),eu=v=>fx(v)?fx(v)+' €':'';
 const clean=x=>JSON.parse(JSON.stringify(x));
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
-let S={},CFG={rekorde:[]},RK=[],HSEL,HIST=[],MEM={liste:[],gaeste:[],weitere:[]},db=null,OWN=false,tm,YR='',HYR='',MODE='sum';
+let S={},CFG={rekorde:[]},RK=[],HSEL,HIST=[],MEM={liste:[],gaeste:[],weitere:[]},db=null,OWN=false,EDT=false,tm,YR='',HYR='',MODE='sum';
 //CALC-START
 const isG=r=>r.gast||r.name==='Gast';
 function calc(S){
@@ -67,10 +67,10 @@ function stat(W,C){
  return`<h2 id="s-stat">Statistik <span class="mu">Alle Mitglieder. Nicht Anwesende zahlen den Durchschnittsanteil. „Rest letztes Kegeln“ kommt automatisch vom letzten gespeicherten Abend.</span></h2><div class="w">${h}</div>`}
 function render(){
  const W=V(),C=calc(W),L=HIST[0];
- $('#edit').innerHTML=`<div class="top"><label>Datum <input type="date" id="dat" data-a="d" value="${S.date}"></label>${OWN?'<button class="pri" id="sv">Abend speichern</button>':''}<span class="mu" id="ms"></span></div><p class="mu">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}. ${OWN?'':'Speichern kann nur der Besitzer; Deine Eingaben bleiben als Entwurf erhalten.'}</p>`
- +chips()+eingabe()+stat(W,C)+side(W,1,C)
+ $('#edit').innerHTML=`<div class="top"><label>Datum <input type="date" id="dat" data-a="d" value="${S.date}"></label>${EDT?'<button class="pri" id="sv">Abend speichern</button>':''}<span class="mu" id="ms"></span></div><p class="mu">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}. ${EDT?'':'Speichern können nur freigegebene Mitglieder; Deine Eingaben bleiben als Entwurf erhalten.'}</p>`
+ +(typeof umfHtml==='function'?umfHtml():'')+chips()+eingabe()+stat(W,C)+side(W,1,C)
  +rekEdit();
- if(OWN){$('#sv').onclick=save;$('#rsv').onclick=saveRk}blatt();BTC=false;bergTal();sub()}
+ if(EDT)$('#sv').onclick=save;if(OWN)$('#rsv').onclick=saveRk;blatt();BTC=false;bergTal();sub()}
 function upd(){
  const W=V(),C=calc(W);
  W.rows.forEach((r,i)=>{if(r.gast)return;for(const k of 'kmoq'){const e=$('#v'+i+k),v=C.out[i][k];if(!e)continue;e.textContent=k=='k'&&!r.c?'x':fx(v);e.classList.toggle('neg',v<0)}});
@@ -108,7 +108,7 @@ const colNav=e=>{
 $('#blatt').addEventListener('keydown',colNav);$('#bt').addEventListener('keydown',colNav);$('#hist').addEventListener('keydown',colNav);
 async function save(){
  const L=HIST[0],W=V(),C=calc(W);
- if(!OWN||!db)return ms('Speichern ist nur dem Besitzer möglich.');
+ if(!EDT||!db)return ms('Speichern ist nur freigegebenen Mitgliedern möglich.');
  if(!S.date)return ms('Bitte zuerst ein Datum wählen.');
  if(L&&S.date<=L.date)return ms('Das Datum muss nach dem letzten gespeicherten Spieltag ('+dd(L.date)+') liegen.');
  if(!C.t.c)return ms('Bitte mindestens ein anwesendes Mitglied auswählen.');
@@ -119,7 +119,7 @@ async function save(){
  const neu=S.rows.filter(r=>r.gast&&!MEM.gaeste.some(x=>norm(x)==norm(r.name))).map(r=>r.name);
  try{await db.doc('sessions/'+S.date).set(doc);if(neu.length){MEM.gaeste=[...MEM.gaeste,...neu];await db.doc('state/mitglieder').set(clean(MEM))}}
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
- HIST=[doc,...HIST];S={};sync();draft();render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.')}
+ HIST=[doc,...HIST];S={};sync();draft();if(typeof UMF!=='undefined'&&Object.keys(UMF).length)db.doc('state/umfrage').set({votes:{}}).catch(()=>{});render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.')}
 const inHY=h=>!HYR||h.date.startsWith(HYR);
 const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set(HIST.map(h=>h.date.slice(0,4)))].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
 function hist(sel){
@@ -390,8 +390,8 @@ function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0]}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
  $('#mem').innerHTML=`<h2 id="m-liste">Mitgliederliste (${MEM.liste.length+(MEM.weitere||[]).length} Mitglieder, ${MEM.gaeste.length} Gäste)</h2><div class="w"><table><tr><th>Name</th><th>Typ</th><th>Abende anwesend</th><th>davon ${JY}</th><th>zuletzt dabei</th></tr>${rows.map(r=>`<tr><td>${r.n}</td><td>${r.t}</td><td>${r.a}</td><td>${r.y}</td><td>${dd(r.l)}</td></tr>`).join('')}</table></div>`
- +(OWN?`<div class="top" id="m-neu"><input type="text" id="nm" placeholder="Neues Mitglied"><button class="pri" id="add">Hinzufügen</button><span class="mu" id="mm"></span></div>`:'<p class="mu">Neue Mitglieder und die Reihenfolge der Liste kann nur der Besitzer ändern. Gäste werden bei der Eingabe angelegt.</p>')+(OWN?reihe():'');
- if(OWN)$('#add').onclick=addMember;sub()}
+ +(OWN?`<div class="top" id="m-neu"><input type="text" id="nm" placeholder="Neues Mitglied"><button class="pri" id="add">Hinzufügen</button><span class="mu" id="mm"></span></div>`:'<p class="mu">Neue Mitglieder und die Reihenfolge der Liste kann nur der Besitzer ändern. Gäste werden bei der Eingabe angelegt.</p>')+(OWN?reihe()+'<div id="frg"></div>':'');
+ if(OWN){$('#add').onclick=addMember;if(typeof frgLoad==='function')frgLoad().then(sub)}sub()}
 const reihe=()=>`<h2 id="m-reihe">Reihenfolge der Liste <span class="mu">Bestimmt die Reihenfolge der Anwesenheits-Knöpfe in der Eingabe. Das kann nur der Besitzer ändern.</span></h2><div class="w"><table><tr><th>Name</th><th>Verschieben</th></tr>${MEM.liste.map((n,i)=>`<tr><td>${i+1}. ${esc(n)}</td><td class="mvc"><button type="button" class="mv" data-mv="${i}" data-dir="-1" aria-label="${esc(n)} nach oben"${i?'':' disabled'}>↑</button><button type="button" class="mv" data-mv="${i}" data-dir="1" aria-label="${esc(n)} nach unten"${i<MEM.liste.length-1?'':' disabled'}>↓</button></td></tr>`).join('')}</table></div><p class="mu" id="m-rm" aria-live="polite"></p>`;
 let MVB=false;
 $('#mem').addEventListener('click',async e=>{
