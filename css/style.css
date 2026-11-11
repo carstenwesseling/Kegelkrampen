@@ -227,12 +227,12 @@ body[data-page=eingabe] .dstat:not(:empty){display:inline-flex}
 .pe-n .icb{min-height:40px;width:40px;min-width:40px;border-color:var(--line)}
 .pe-f{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,140px),1fr));gap:10px 12px;min-width:0}
 @media (max-width:640px){.pe{grid-template-columns:minmax(0,1fr);gap:8px}}
-.stp{display:grid;grid-template-columns:48px minmax(0,1fr) 48px;border:1px solid var(--line-2);border-radius:var(--r-m);overflow:hidden;background:var(--card);transition:box-shadow var(--t-fast),border-color var(--t-fast)}
+.stp{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;border:1px solid var(--line-2);border-radius:var(--r-m);overflow:hidden;background:var(--card);transition:box-shadow var(--t-fast),border-color var(--t-fast)}
 .stp:focus-within{border-color:var(--ink);box-shadow:0 0 0 3px var(--lime)}
-.stp .sb{min-height:48px;height:48px;width:48px;padding:0;border:0;border-radius:0;background:var(--fill);color:var(--fg)}
+.stp .sb{min-height:40px;height:40px;width:40px;padding:0;border:0;border-radius:0;background:var(--fill);color:var(--fg)}
 .stp .sb:hover{background:var(--soft-lime)}
 .stp .sb:active{background:var(--lime);transform:none}
-.stp input{border:0;border-radius:0;box-shadow:none;min-width:0;min-height:48px;text-align:center;font-size:20px;font-weight:700;padding:0 4px}
+.stp input{border:0;border-radius:0;box-shadow:none;min-width:0;min-height:40px;text-align:center;font-size:17px;font-weight:700;padding:0 4px}
 .stp input:focus{box-shadow:none}
 @media (prefers-reduced-motion:no-preference){.fld.pop .stp input{animation:pop 300ms ease-out}}
 @keyframes pop{from{background:var(--lime)}}
