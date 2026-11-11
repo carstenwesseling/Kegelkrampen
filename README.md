@@ -27,13 +27,14 @@ Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `dortmunder-i
 
 ## Status
 
-Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Google-Anmeldung. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
+Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Anmeldung per Google oder E-Mail-Link. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
 
 - Lesen: für alle. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>`, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules`.
 - Der Datenimport aus dem Artifact ist noch offen. Solange er fehlt, ist die Datenbank leer.
 
 ### Einrichtung (einmalig)
 
+0. Authentication → Anmeldemethode: „E-Mail/Passwort“ aktivieren und dort „E-Mail-Link (Anmeldung ohne Passwort)“ einschalten (für Mitglieder ohne Google-Konto).
 1. In der Firebase-Konsole unter Authentication → Settings → „Autorisierte Domains“ die Domain eintragen, auf der die Seite läuft (z. B. `localhost` und später `<nutzer>.github.io`).
 2. Regeln veröffentlichen: `firebase deploy --only firestore:rules,storage` (Firebase CLI nötig, Login mit `firebase login`).
 3. Die Seite über GitHub Pages veröffentlichen (Settings → Pages → Branch `main`, Ordner `/ (root)`).

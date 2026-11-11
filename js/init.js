@@ -26,7 +26,7 @@ async function who(){
  e.append(t);
  const g=$('#gate');
  if(!db){g.hidden=false;g.textContent='Keine Datenbank verbunden. Die Seite kann nicht geladen werden; bitte später noch einmal versuchen.'}
- else if(!EDT&&w===false){g.hidden=false;g.textContent='Du bist mit Google angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner Google-Adresse. Mit dem Knopf oben kannst du dich wieder abmelden.'}
+ else if(!EDT&&w===false){g.hidden=false;g.textContent='Du bist angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner E-Mail-Adresse. Mit dem Knopf oben kannst du dich wieder abmelden.'}
  else g.hidden=true}
 const GRP=['#b1','#b5','#b6'];
 function grp(){const g=GRP.includes(CUR);$('#eg').hidden=!g;if(g){$('#b1').classList.add('on');$('#b1').setAttribute('aria-current',CUR=='#b1'?'page':'true')}$('#b1a').classList.toggle('on',CUR=='#b1');$('#b1a').setAttribute('aria-current',CUR=='#b1'?'page':'false')}
