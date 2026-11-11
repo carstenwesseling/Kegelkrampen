@@ -189,3 +189,21 @@ th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
 .umb.on{background:#e7f6ec;border-color:var(--ok)}
 .umk{font-size:20px;font-weight:700}
 .umc{text-align:center}
+
+/* Hamburger-Menü (oben rechts) und Startseite */
+.burger{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));z-index:60;width:46px;height:46px;padding:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;background:var(--lime);border:1px solid #000;border-radius:12px}
+.burger span{display:block;width:22px;height:3px;background:#000;border-radius:2px}
+.menu{position:fixed;top:calc(66px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));z-index:60;width:min(280px,calc(100vw - 24px));max-height:calc(100vh - 80px);overflow:auto;background:#000;color:#fff;border-radius:16px;padding:10px;box-shadow:0 8px 28px #0006}
+.menu nav{display:grid;gap:6px;overflow:visible}
+.menu .mi{display:block;width:100%;min-height:44px;text-align:left;padding:0 16px;font-size:16px;font-weight:600;background:transparent;color:#fff;border:1px solid #ffffff66;border-radius:10px}
+.menu .mi:hover{background:#ffffff22}
+.menu .mh{margin:14px 6px 6px;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--grey)}
+#loginbox{display:grid;gap:6px}
+.navs .in{padding-right:max(70px,env(safe-area-inset-right,0px))}
+.hero .brand{padding-right:60px}
+.start{position:relative;isolation:isolate;overflow:hidden;border-radius:20px;margin-top:16px;min-height:min(78vh,820px);display:flex;align-items:flex-start;justify-content:center;background:#fff}
+.start::before{content:"";position:absolute;inset:0;z-index:-1;background:url(../img/willingen-2026.jpg) center top/cover no-repeat;opacity:.5}
+.st-in{max-width:62ch;padding:30% clamp(16px,5vw,40px) clamp(20px,5vw,40px);text-align:center}
+.start h2{margin-top:0;text-shadow:0 1px 8px #fff}
+.start p{font-size:clamp(16px,2.4vw,20px);line-height:1.5;font-weight:600;color:#000;text-shadow:0 0 8px #fff,0 0 3px #fff;margin-inline:auto}
+.start .gh{font:700 clamp(22px,4vw,32px)/1.2 var(--f-d)}
