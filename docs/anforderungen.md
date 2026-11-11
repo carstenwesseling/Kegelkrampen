@@ -73,6 +73,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Reihenfolge der Liste bestimmt die Reihenfolge der Anwesenheits-Knöpfe in der Eingabe.
 - Buggy: Burkhard und Buggy sind dieselbe Person; überall „Buggy“. Buggy hat als einzige Ausnahme keinen Anwesenheits-Knopf.
 - Trunsen: „André“/„Andre“ wird überall durch „Trunsen“ ersetzt.
+- Pätzi: „Petzi“ und „Pätzi“ sind dieselbe Person; überall „Pätzi“.
 
 ## Kegeltouren
 
