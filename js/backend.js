@@ -78,7 +78,7 @@ window.claude = {
   const btn = document.createElement("button");
   btn.type = "button";
   btn.id = "kk-login";
-  // Die Anmelde-Knöpfe stehen im Hamburger-Menü unter „Einloggen“.
+  // Die Anmelde-Knöpfe stehen unter „Mehr“ → Konto.
   const box = document.getElementById("loginbox");
   btn.className = "mi";
   if (box) box.appendChild(btn);

@@ -11,19 +11,24 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 ## Navigation und Startseite
 
-- Die Seite startet auf einer Startseite: nur das Bild „Willingen 2026“ (`img/willingen-2026.jpg`), an der Fensterhöhe ausgerichtet, auf Desktop und Handy immer ganz und unverzerrt zu sehen (bei schmalen Bildschirmen begrenzt die Breite), mit 50 % Durchlässigkeit, ohne Text.
-- Hamburger-Menü oben rechts mit Startseite, Eingabe, Historie, Auswertung, Mitglieder, Kegeltouren und der Rubrik „Einloggen“ (Mit Google anmelden, Per Link anmelden, Abmelden).
-- Die Navigationsleiste (Bereiche der Eingabe, Sprungmarken) erscheint erst, wenn ein Menüpunkt außer der Startseite gewählt wurde.
+- Navigation: Am Handy und Tablet (bis 1023 px) eine feste Tab-Leiste unten mit Icon und Text: Eingabe, Historie, Auswertung, Dortmunder, Mehr. „Mehr“ öffnet ein Bottom-Sheet mit Startseite, Mitglieder, Kegeltouren und dem Bereich „Konto“ (Anmeldestatus, Mit Google anmelden, Per Link anmelden, Abmelden). Am Desktop stehen alle Seiten in der Leiste oben; der Konto-Knopf oben rechts öffnet dasselbe Menü.
+- Oben eine schmale App-Leiste mit „KK“ (führt zur Startseite), Seitentitel und Konto-Knopf. Darunter die Sprungmarken der Seite; der gerade sichtbare Abschnitt ist markiert.
+- Jede Ansicht hat eine eigene Adresse (`#/start`, `#/eingabe/<schritt>`, `#/historie/<datum>`, `#/auswertung`, `#/dortmunder`, `#/mitglieder`, `#/touren`). Zurück-Knopf, Neu laden und Links führen zur selben Ansicht.
+- Startseite: Bild „Willingen 2026“ (`img/willingen-2026.jpg`, immer ganz und unverzerrt) und darunter (am Desktop daneben) eine Übersicht: nächster Abend mit Umfrage-Stand und Knopf „Abend erfassen“, Kontostand, offene Beträge des letzten Abends, Könige des letzten Abends, Schnellzugriff.
+- Rückmeldungen (gespeichert, Fehler) erscheinen als kurze Meldung unten (Toast). Aktionen, die Daten löschen oder zurücksetzen (Gast entfernen, Umfrage zurücksetzen, Paare neu auslosen), fragen vorher nach.
 
 ## Eingabe
 
+- Die Eingabe ist in fünf Schritte gegliedert (Leiste oben, „Weiter“/„Zurück“ am Ende jedes Schritts): 1 Vorbereitung (Umfrage, Anwesenheit, Gäste), 2 Spiel (Zählwerte), 3 Dortmunder, 4 Berg & Tal, 5 Abschluss (Zahlungen, Kasse, Könige, Rekorde). Unten steht eine feste Leiste mit Spieltag-Datum, PDF und „Abend speichern“; der Stand des Entwurfs steht in der Kopfzeile.
+- Spiel: je anwesender Person eine Karte; die Zählwerte (verl. Spiele, Pumpen, Klingel, Kugel Tisch, Alle Neune, Kranz Hand) haben Knöpfe − und + (nicht unter 0) und lassen sich auch eintippen; Enter springt zum nächsten Feld. Die Preise stehen zugeklappt darüber (ändern nur der Besitzer).
+- Zahlungen: je Mitglied eine Karte mit „Noch zu zahlen“ groß, Eingabe von „Runde bezahlt“ und „Hat gezahlt“ und den übrigen Werten; darunter die Summe.
 - Anwesenheit wird pro Abend ausgewählt; in die Eingabetabelle kommen nur die Anwesenden.
 - Die Eingabe ist eine reine Eingabemaske (inkl. Spalte Lotterie). Die übrigen Spalten aller Mitglieder stehen unter „Statistik“.
 - Lotterie, „Runde bezahlt“ und „Hat gezahlt“ werden in Euro eingegeben.
 - Spieltag-Datum ist frei wählbar, muss aber nach dem letzten gespeicherten Termin liegen.
 - Speichern (neuer Abend, inkl. Dortmunder, Berg und Tal, Kasse) dürfen der Besitzer und freigegebene Mitglieder. Freigabe: Der Besitzer trägt E-Mail-Adressen (Google oder andere, z. B. aol.com) im Tab „Mitglieder“ unter „Freigabe“ ein (Firestore `editors/<mail>`). Anmeldung ohne Google-Konto per E-Mail-Link (Knopf „Mit E-Mail-Link anmelden“); in der Firebase-Konsole muss dafür Authentication → Anmeldemethode → „E-Mail/Passwort“ mit aktivierter „E-Mail-Link-Anmeldung“ eingeschaltet sein. Im Tab „Mitglieder“ zeigt „Angemeldete Adressen“ alle, die sich angemeldet haben (Firestore `logins/<mail>`, wird beim Anmelden automatisch geschrieben); „Übernehmen“ gibt eine Adresse zum Speichern frei. Freigegebene dürfen nur neue Abende speichern; Bearbeiten gespeicherter Abende, Rekorde, Mitgliederliste, Preise und Fotos bleiben beim Besitzer. Die Eingabe bleibt als Entwurf erhalten, bis gespeichert wird.
 - PDF-Download (Eingabe, Knopf „PDF herunterladen“, für alle sichtbar): Eingabe und Statistik zusammen in einer einfachen schwarz-weißen Tabelle, DIN A4 quer, eine Seite, Aufbau nach „Vorlage Notizen“ (Spalten da, Pumpen, verl. Spiele, Alle Neune, Kranz Hand, Kugel Tisch, Klingel, Lotterie Extra-Spiel, Runde, Restzahlung, gezahlt; Summe der Restzahlung; darunter die Könige). Werte aus dem aktuellen Entwurf.
-- Umfrage (Eingabe, über „Anwesenheit“): Tabelle aller Mitglieder mit den Spalten „Dabei“, „Schmeisse einen rein“, „Kann leider nicht“; je Mitglied ein grüner Haken (nochmal tippen entfernt ihn). Der Knopf „Alle ‚Dabei‘ als anwesend markieren“ setzt diese Mitglieder in der Anwesenheit. Gespeichert in `state/umfrage` (Änderungen live bei allen sichtbar); nach „Abend speichern“ wird sie zurückgesetzt. Ändern dürfen Besitzer und Freigegebene.
+- Umfrage (Eingabe, über „Anwesenheit“): Liste aller Mitglieder; je Mitglied ein Umschalter „Dabei“ / „Schmeisse einen rein“ / „Kann leider nicht“ (am Handy kurz: Dabei / Rein / Nein; nochmal tippen entfernt die Antwort), darüber die Anzahl je Antwort. Der Knopf „Alle ‚Dabei‘ als anwesend markieren“ setzt diese Mitglieder in der Anwesenheit. Gespeichert in `state/umfrage` (Änderungen live bei allen sichtbar); nach „Abend speichern“ wird sie zurückgesetzt. Ändern dürfen Besitzer und Freigegebene.
 - Werte vom gespeicherten Vorabend werden immer übernommen („Rest letztes Kegeln“, „Alter Konto“).
 - „Noch zu zahlen“ des letzten Spieltags wird immer in „Rest letztes Kegeln“ übernommen.
 - Gäste werden namentlich in Tabelle, Mitgliederliste und Statistik geführt, nicht in der Auswahl für neue Abende. Neue Gäste werden manuell angelegt und nach dem Speichern in die Mitgliederliste übernommen.
@@ -62,7 +67,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 ## Dortmunder (Hauptseite)
 
-- Eigene Hauptseite „Dortmunder“ im Hamburger-Menü. Datenbasis: Excel „Dortmunder_2000-2025.xlsx“ (Blatt „Kegeln 2000-2025“; `js/dortmunder-historie-data.js`) für 2000–2025, ab 2026 die über die Eingabe gespeicherten Abende. „x“ = nicht dabei; Einträge mit 0 Punkten zählen nicht. „André“ = „Trunsen“.
+- Eigene Hauptseite „Dortmunder“ in der Navigation. Datenbasis: Excel „Dortmunder_2000-2025.xlsx“ (Blatt „Kegeln 2000-2025“; `js/dortmunder-historie-data.js`) für 2000–2025, ab 2026 die über die Eingabe gespeicherten Abende. „x“ = nicht dabei; Einträge mit 0 Punkten zählen nicht. „André“ = „Trunsen“.
 - Tabelle je Jahr mit den Abenden 1–13, Summe und Schnitt je Kegler und der Zeile „Schnitt Club“; Jahr wählbar.
 - Alle Tabellen der Seite lassen sich per Klick auf die Spaltenüberschrift sortieren (bester/größter Wert oben, Rang: 1 oben; Summenzeilen bleiben unten). Die Gesamtübersicht „Schnitt gesamt pro Kegler“ wertet wahlweise alle Jahre („Alle“) oder einzeln angehakte Jahre (mehrere möglich).
 - Auswertungen: Schnitt pro Jahr pro Kegler, Schnitt gesamt pro Kegler, Maximum und Minimum pro Kegler, Schnitt des Clubs pro Jahr (Durchschnitt aller Einzelergebnisse), Rekorde (Top 10 Einzelwerte, Gleichstände zählen mit), Minusrekorde (niedrigste 10 Einzelwerte).
