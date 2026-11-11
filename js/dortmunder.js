@@ -22,7 +22,7 @@ function dtRank(list,desc){
  return top.map(r=>({...r,rang:1+s.findIndex(x=>x.v==r.v)}))}
 function dortmunder(){
  const el=$('#dort'),R=dtData();
- if(!R.length){el.innerHTML='<h2 id="dt-tab">Dortmunder</h2><p class="mu">Keine Dortmunder-Daten vorhanden.</p>';sub();return}
+ if(!R.length){el.innerHTML='<h2 id="dt-tab">Dortmunder</h2>'+emptyCard('Keine Dortmunder-Daten vorhanden.');sub();return}
  const years=[...new Set(R.map(r=>r.y))].sort((a,b)=>a-b);DTSEL=DTSEL.filter(y=>years.includes(y));const names=[...new Set(R.map(r=>r.n))].sort((a,b)=>a.localeCompare(b,'de'));
  if(!years.includes(+DTY))DTY=String(years[years.length-1]);
  const Y=+DTY,RY=R.filter(r=>r.y==Y),nE=Y<=2025?13:Math.max(...RY.map(r=>r.e));
@@ -52,7 +52,8 @@ function dortmunder(){
  +`<h2 id="dt-club">Schnitt des Clubs pro Jahr <span class="mu">Durchschnitt aller Einzelergebnisse des Jahres.</span></h2>${t5}`
  +`<h2 id="dt-rek">Rekorde <span class="mu">Die höchsten Einzelergebnisse aller Zeiten.</span></h2>${rk(dtRank(R,true))}`
  +`<h2 id="dt-min">Minusrekorde <span class="mu">Die niedrigsten Einzelergebnisse aller Zeiten.</span></h2>${rk(dtRank(R,false))}`;
- if(typeof sortTables==='function')sortTables();sub()}
+ if(typeof sortTables==='function')sortTables();
+ compact('dt-tab',e.map(i=>i));compact('dt-ges',[3,5]);compact('dt-club',[2,3,4]);sub()}
 // Gesamtübersicht: Schnitt pro Kegler über alle oder über einzeln angehakte Jahre.
 function dtGes(R,years){
  const sel=DTSEL.length?DTSEL:years,RS=R.filter(r=>sel.includes(r.y)),names=[...new Set(RS.map(r=>r.n))].sort((a,b)=>a.localeCompare(b,'de'));
@@ -67,6 +68,6 @@ document.addEventListener('change',e=>{
  if(t.id=='dtj-all'||t.dataset.dtj){
   if(t.id=='dtj-all')DTSEL=[];else{const y=+t.dataset.dtj;DTSEL=t.checked?[...DTSEL,y].sort((a,b)=>a-b):DTSEL.filter(x=>x!=y)}
   const R=dtData(),years=[...new Set(R.map(r=>r.y))].sort((a,b)=>a-b);
-  $('#dt-gesbox').innerHTML=dtGes(R,years);if(typeof sortTables==='function')sortTables();
+  $('#dt-gesbox').innerHTML=dtGes(R,years);if(typeof sortTables==='function')sortTables();compact('dt-ges',[3,5]);
   const f=DTSEL.length&&t.dataset.dtj?$('#dort [data-dtj="'+t.dataset.dtj+'"]'):$('#dtj-all');if(f)f.focus({preventScroll:true})}});
 document.addEventListener('change',e=>{if(e.target.id=='dty'){DTY=e.target.value;dortmunder();const s=$('#dty');if(s)s.focus({preventScroll:true})}});

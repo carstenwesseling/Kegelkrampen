@@ -10,7 +10,8 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 ├── css/
 │   └── style.css       Layout, Farben, Tabellen, Diagramme, Bildansicht
 ├── js/
-│   ├── app.js          Eingabe, Berechnung, Historie, Auswertung, Mitglieder
+│   ├── ui.js           Bedienelemente: Icons, Toasts, Bestätigungsdialog, Plus/Minus-Felder, Kompaktansicht von Tabellen
+│   ├── app.js          Eingabe, Berechnung, Historie, Auswertung, Mitglieder, Startseite
 │   ├── dortmunder.js   Hauptseite „Dortmunder“ (Auswertung aller Ergebnisse)
 │   ├── dortmunder-historie-data.js  Dortmunder 2000–2025 aus Excel
 │   ├── pdf.js          PDF-Download der Eingabe (jsPDF, Dateien in js/vendor)
@@ -19,16 +20,16 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 │   ├── dortmunder-import-data.js  Dortmunder-Werte 2013–2025 aus der Excel-Datei
 │   ├── dortmunder-import.js       Import-Knopf in der Historie (nur Besitzer)
 │   ├── abend-import-data.js       Abend 12.12.2025 aus Excel
-│   └── init.js         Start: Tabs, Anmeldung, Laden der Daten
+│   └── init.js         Start: Navigation, Adressen je Ansicht, Schritte der Eingabe, Anmeldung, Laden der Daten
 ├── img/
-│   └── willingen-2026.jpg  Hintergrundbild der Startseite
+│   └── willingen-2026.jpg  Bild der Startseite
 ├── docs/
 │   └── anforderungen.md  Fachliche Anforderungen aus den Absprachen
 ├── .gitignore
 └── README.md
 ```
 
-Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `umfrage.js`, `tour.js`, `init.js`.
+Die Reihenfolge der Skripte in `index.html` ist wichtig: `ui.js`, `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `umfrage.js`, `tour.js`, `init.js`.
 
 ## Status
 
