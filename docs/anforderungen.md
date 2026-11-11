@@ -11,7 +11,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 ## Navigation und Startseite
 
-- Die Seite startet auf einer Startseite (Hintergrund: Bild „Willingen 2026“ mit 50 % Durchlässigkeit, `img/willingen-2026.jpg`) mit einem Text über den Club: seit 2000, aktuell 13 „Männer“, Kegeltouren, jeden 2. Freitag im Monat um 19 Uhr im HSV Casino, regelmäßige Clubkämpfe gegen die „Männer von Flake“.
+- Die Seite startet auf einer Startseite: nur das Bild „Willingen 2026“ (`img/willingen-2026.jpg`), vollständig sichtbar, mit 50 % Durchlässigkeit, ohne Text.
 - Hamburger-Menü oben rechts mit Startseite, Eingabe, Historie, Auswertung, Mitglieder, Kegeltouren und der Rubrik „Einloggen“ (Mit Google anmelden, Per Link anmelden, Abmelden).
 - Die Navigationsleiste (Bereiche der Eingabe, Sprungmarken) erscheint erst, wenn ein Menüpunkt außer der Startseite gewählt wurde.
 
