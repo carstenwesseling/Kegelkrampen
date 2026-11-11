@@ -5,7 +5,7 @@ const SUB={'#b1':[['s-umf','Umfrage'],['s-anw','Anwesenheit'],['s-ein','Eingabe'
  '#b6':[['bt-tab','Berg und Tal'],['bt-paare','Auslosen'],['bt-werte','Tabelle'],['bt-kon','König']],
  '#b2':[['h-rek','Rekorde'],['h-tage','Spieltage'],['h-tab','Tabelle'],['h-dm','Dortmunder'],['h-bt','Berg und Tal'],['hk-kasse','Kasse'],['hk-koenige','Könige']],
  '#b3':[['a-dm','Dortmunder'],['a-kon','Könige'],['a-ein','Einzelergebnisse'],['a-anw','Anwesenheit'],['a-ver','Verlauf'],['a-jahr','Jahre']],
- '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-frg','Freigabe']]};
+ '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-lg','Angemeldet'],['m-frg','Freigabe']]};
 const navh=()=>document.documentElement.style.setProperty('--navh',($('#navs').offsetHeight||96)+'px');
 function sub(){
  const n=$('#sub');if(!n)return;
@@ -47,6 +47,8 @@ TABS.forEach(([b,v])=>$(b).onclick=()=>{CUR=b;TABS.forEach(([b2,v2])=>{$(v2).hid
  const T=p=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),10000))]);
  try{const c=window.claude;db=c&&await T(c.use('db'));USR=c&&await T(c.use('user'));OWN=USR?await USR.isOwner():false;EDT=OWN||(USR&&USR.isEditor?await T(USR.isEditor())===true:false)}catch(e){db=null}
  try{ME=USR&&USR.me?await T(USR.me()):null}catch(e){ME=null}
+ // Angemeldete Adresse merken (logins/<mail>), damit der Besitzer sie im Tab „Mitglieder“ freigeben kann.
+ if(db&&ME&&ME.email&&!OWN)db.doc('logins/'+ME.email).set({email:ME.email,name:ME.name||ME.email,last:new Date().toISOString()},{merge:true}).catch(()=>{});
  if(db){try{
   const [s,d,c,m]=await Promise.all([db.collection('sessions').get(),db.doc('state/entwurf').get(),db.doc('state/config').get(),db.doc('state/mitglieder').get()]);
   HIST=s.docs.map(x=>clean(x.data())).sort((a,b)=>a.date<b.date?1:-1);

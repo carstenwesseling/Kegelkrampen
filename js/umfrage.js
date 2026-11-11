@@ -35,9 +35,16 @@ function umfWatch(){
 const frgHtml=l=>`<h2 id="m-frg">Freigabe zum Speichern <span class="mu">Diese E-Mail-Adressen (auch ohne Google-Konto, z. B. @aol.com) dürfen Abende, Umfrage und Entwurf speichern. Rekorde, Mitglieder, Bearbeiten und Fotos bleiben beim Besitzer.</span></h2>`
  +`<div class="w"><table class="stack"><tr class="hd"><th>E-Mail-Adresse</th><th></th></tr>${l.length?l.map(m=>`<tr><td>${esc(m)}</td><td><button type="button" data-fr="${esc(m)}">Entfernen</button></td></tr>`).join(''):'<tr><td colspan="2" class="mu">Noch niemand freigegeben.</td></tr>'}</table></div>`
  +`<div class="top"><input type="email" id="fr-in" placeholder="name@aol.com"><button class="pri" id="fr-add">Freigeben</button><span class="mu" id="fr-ms"></span></div>`;
+const frgTime=s=>{const d=new Date(s);return isNaN(d)?'':d.toLocaleString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})};
+// Adressen, die sich angemeldet haben (noch ohne Freigabe zuerst); „Übernehmen“ gibt sie zum Speichern frei.
+const lgHtml=(L,E)=>`<h2 id="m-lg">Angemeldete Adressen <span class="mu">Alle, die sich auf dieser Seite angemeldet haben (ohne dich). Mit „Übernehmen“ darf die Adresse Abende speichern.</span></h2>`
+ +`<div class="w"><table class="stack"><tr class="hd"><th>E-Mail-Adresse</th><th>Name</th><th>Zuletzt angemeldet</th><th></th></tr>${L.length?L.map(l=>`<tr><td>${esc(l.email)}</td><td data-l="Name">${esc(l.name)}</td><td data-l="Zuletzt angemeldet">${frgTime(l.last)}</td><td>${E.includes(l.email)?'<span class="mu">freigegeben</span>':`<button type="button" class="pri" data-lg="${esc(l.email)}">Übernehmen</button>`} <button type="button" data-lgx="${esc(l.email)}" aria-label="${esc(l.email)} aus der Liste entfernen">Aus Liste entfernen</button></td></tr>`).join(''):'<tr><td colspan="4" class="mu">Noch niemand angemeldet. Adressen erscheinen hier, sobald sich jemand anmeldet.</td></tr>'}</table></div>`;
 async function frgLoad(){
  const e=$('#frg');if(!e||!OWN||!db)return;
- try{const s=await db.collection('editors').get();e.innerHTML=frgHtml(s.docs.map(d=>d.id).sort())}
+ try{
+  const [s,g]=await Promise.all([db.collection('editors').get(),db.collection('logins').get().catch(()=>null)]);
+  const E=s.docs.map(d=>d.id).sort(),L=g?g.docs.map(d=>({email:d.id,...d.data()})).sort((a,b)=>(E.includes(a.email)-E.includes(b.email))||String(b.last||'').localeCompare(String(a.last||''))):[];
+  e.innerHTML=lgHtml(L,E)+frgHtml(E)}
  catch(x){e.innerHTML='<p class="mu">Freigabeliste konnte nicht geladen werden: '+esc(x.message||x.code)+'</p>'}}
 document.addEventListener('click',async e=>{
  if(!OWN||!db)return;
@@ -46,5 +53,9 @@ document.addEventListener('click',async e=>{
   const v=$('#fr-in').value.trim().toLowerCase();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))return m('Bitte eine gültige E-Mail-Adresse eingeben.');
   try{await db.doc('editors/'+v).set({added:new Date().toISOString()});await frgLoad()}catch(x){m('Fehler: '+(x.message||x.code))}return}
+ const lg=e.target.closest('[data-lg]');
+ if(lg){try{await db.doc('editors/'+lg.dataset.lg).set({added:new Date().toISOString()});await frgLoad();sub()}catch(x){m('Fehler: '+(x.message||x.code))}return}
+ const lx=e.target.closest('[data-lgx]');
+ if(lx){try{await db.doc('logins/'+lx.dataset.lgx).delete();await frgLoad();sub()}catch(x){m('Fehler: '+(x.message||x.code))}return}
  const r=e.target.closest('[data-fr]');
  if(r){try{await db.doc('editors/'+r.dataset.fr).delete();await frgLoad()}catch(x){m('Fehler: '+(x.message||x.code))}}});
