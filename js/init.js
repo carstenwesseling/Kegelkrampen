@@ -94,7 +94,7 @@ $('#acct').onclick=moreOpen;$('#tb-more').onclick=moreOpen;
 more.addEventListener('click',e=>{if(e.target==more||e.target.closest('[data-close]'))more.close()});
 document.addEventListener('click',e=>{
  const t=e.target.closest('[data-tab]');if(t){if(more.open)more.close();go(t.dataset.tab);return}
- const s=e.target.closest('[data-step]');if(s){go('#b1',s.dataset.step);return}
+ const s=e.target.closest('button[data-step]');if(s){go('#b1',s.dataset.step);return} // nicht am body (trägt data-step im Eingabe-Schritt)
  const n=e.target.closest('[data-nav]');if(n){const[a,b]=n.dataset.nav.split('/');go(a,b)}});
 $('#home').onclick=()=>go('#b0');
 route();
