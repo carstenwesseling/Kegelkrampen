@@ -25,6 +25,14 @@ const kkIsOwner = () => {
 const kkUser = {
   async can(perm) { await kkAuthReady; return perm === "data.write" ? kkIsOwner() : false; },
   async isOwner() { await kkAuthReady; return kkIsOwner(); },
+  // Freigegebene Mitglieder: Dokument editors/<google-mail> (siehe firestore.rules). Der Besitzer zählt immer.
+  async isEditor() {
+    await kkAuthReady;
+    if (kkIsOwner()) return true;
+    const u = fbAuth.currentUser;
+    if (!u || !u.emailVerified || !u.email) return false;
+    try { return (await fbDb.doc("editors/" + u.email.toLowerCase()).get()).exists; } catch (e) { return false; }
+  },
   async me() {
     await kkAuthReady;
     const u = fbAuth.currentUser;

@@ -15,7 +15,8 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Die Eingabe ist eine reine Eingabemaske (inkl. Spalte Lotterie). Die übrigen Spalten aller Mitglieder stehen unter „Statistik“.
 - Lotterie, „Runde bezahlt“ und „Hat gezahlt“ werden in Euro eingegeben.
 - Spieltag-Datum ist frei wählbar, muss aber nach dem letzten gespeicherten Termin liegen.
-- Speichern nur durch den Besitzer. Die Eingabe bleibt als Entwurf erhalten, bis gespeichert wird.
+- Speichern (neuer Abend, inkl. Dortmunder, Berg und Tal, Kasse) dürfen der Besitzer und freigegebene Mitglieder. Freigabe: Der Besitzer trägt Google-Adressen im Tab „Mitglieder“ unter „Freigabe“ ein (Firestore `editors/<mail>`). Freigegebene dürfen nur neue Abende speichern; Bearbeiten gespeicherter Abende, Rekorde, Mitgliederliste, Preise und Fotos bleiben beim Besitzer. Die Eingabe bleibt als Entwurf erhalten, bis gespeichert wird.
+- Umfrage (Eingabe, über „Anwesenheit“): Tabelle aller Mitglieder mit den Spalten „Dabei“, „Schmeisse einen rein“, „Kann leider nicht“; je Mitglied ein grüner Haken (nochmal tippen entfernt ihn). Der Knopf „Alle ‚Dabei‘ als anwesend markieren“ setzt diese Mitglieder in der Anwesenheit. Gespeichert in `state/umfrage` (Änderungen live bei allen sichtbar); nach „Abend speichern“ wird sie zurückgesetzt. Ändern dürfen Besitzer und Freigegebene.
 - Werte vom gespeicherten Vorabend werden immer übernommen („Rest letztes Kegeln“, „Alter Konto“).
 - „Noch zu zahlen“ des letzten Spieltags wird immer in „Rest letztes Kegeln“ übernommen.
 - Gäste werden namentlich in Tabelle, Mitgliederliste und Statistik geführt, nicht in der Auswahl für neue Abende. Neue Gäste werden manuell angelegt und nach dem Speichern in die Mitgliederliste übernommen.

@@ -11,6 +11,7 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 │   └── style.css       Layout, Farben, Tabellen, Diagramme, Bildansicht
 ├── js/
 │   ├── app.js          Eingabe, Berechnung, Historie, Auswertung, Mitglieder
+│   ├── umfrage.js      Umfrage vor dem Abend, Freigabeliste für Mitglieder
 │   ├── tour.js         Kegeltouren: Upload, Jahre, Diashow
 │   ├── dortmunder-import-data.js  Dortmunder-Werte 2013–2025 aus der Excel-Datei
 │   ├── dortmunder-import.js       Import-Knopf in der Historie (nur Besitzer)
@@ -22,13 +23,13 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 └── README.md
 ```
 
-Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `tour.js`, `init.js`.
+Die Reihenfolge der Skripte in `index.html` ist wichtig: `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `umfrage.js`, `tour.js`, `init.js`.
 
 ## Status
 
 Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Google-Anmeldung. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
 
-- Lesen: für alle. Schreiben (Abende, Mitglieder, Rekorde, Fotos): nur für `carsten.wesseling@gmail.com` nach Google-Anmeldung.
+- Lesen: für alle. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>`, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules`.
 - Der Datenimport aus dem Artifact ist noch offen. Solange er fehlt, ist die Datenbank leer.
 
 ### Einrichtung (einmalig)

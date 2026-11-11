@@ -184,3 +184,8 @@ details{margin:8px 0}summary{cursor:pointer;min-height:32px}
 th.srt{cursor:pointer;user-select:none}
 th.srt:hover{background:var(--soft-lime)}
 th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
+.umb{min-width:46px;min-height:40px;padding:0 10px;font-size:20px;font-weight:700;line-height:1}
+.umb.on,.umk{color:var(--ok)}
+.umb.on{background:#e7f6ec;border-color:var(--ok)}
+.umk{font-size:20px;font-weight:700}
+.umc{text-align:center}

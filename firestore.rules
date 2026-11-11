@@ -3,15 +3,47 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Nur der Besitzer, mit verifizierter Google-Adresse, darf schreiben.
+    // Besitzer: verifizierte Google-Adresse des Vereinsverwalters.
     function isOwner() {
       return request.auth != null
         && request.auth.token.email == 'carsten.wesseling@gmail.com'
         && request.auth.token.email_verified == true;
     }
 
-    // Die Webseite ist für alle lesbar (Historie, Auswertungen, Kegeltouren).
-    match /{document=**} {
+    // Freigegebene Mitglieder: Dokument editors/<google-mail> (nur der Besitzer legt es an).
+    function isEditor() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/editors/$(request.auth.token.email));
+    }
+
+    // Freigabeliste: nicht öffentlich. Jeder sieht nur den eigenen Eintrag, der Besitzer alle.
+    match /editors/{mail} {
+      allow read: if isOwner() || (request.auth != null && request.auth.token.email == mail);
+      allow write: if isOwner();
+    }
+
+    // Spieltage: lesen alle; neue Abende speichern Besitzer und Freigegebene;
+    // vorhandene Abende ändern oder löschen nur der Besitzer.
+    match /sessions/{id} {
+      allow read: if true;
+      allow create: if isOwner() || isEditor();
+      allow update, delete: if isOwner();
+    }
+
+    // Zustand: Entwurf und Umfrage dürfen Freigegebene schreiben; die Mitgliederliste nur so,
+    // dass Reihenfolge (liste) und weitere Mitglieder unverändert bleiben (neue Gäste beim Speichern).
+    match /state/{id} {
+      allow read: if true;
+      allow write: if isOwner()
+        || (isEditor() && (id == 'entwurf' || id == 'umfrage'));
+      allow update: if isEditor() && id == 'mitglieder'
+        && request.resource.data.liste == resource.data.liste
+        && request.resource.data.get('weitere', []) == resource.data.get('weitere', []);
+    }
+
+    // Kegeltouren (Fotos-Metadaten): lesen alle, schreiben nur der Besitzer.
+    match /touren/{id} {
       allow read: if true;
       allow write: if isOwner();
     }
