@@ -11,7 +11,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 ## Navigation und Startseite
 
-- Die Seite startet auf einer Startseite: nur das Bild „Willingen 2026“ (`img/willingen-2026.jpg`), vollständig sichtbar, mit 50 % Durchlässigkeit, ohne Text.
+- Die Seite startet auf einer Startseite: nur das Bild „Willingen 2026“ (`img/willingen-2026.jpg`), an der Fensterhöhe ausgerichtet, auf Desktop und Handy immer ganz und unverzerrt zu sehen (bei schmalen Bildschirmen begrenzt die Breite), mit 50 % Durchlässigkeit, ohne Text.
 - Hamburger-Menü oben rechts mit Startseite, Eingabe, Historie, Auswertung, Mitglieder, Kegeltouren und der Rubrik „Einloggen“ (Mit Google anmelden, Per Link anmelden, Abmelden).
 - Die Navigationsleiste (Bereiche der Eingabe, Sprungmarken) erscheint erst, wenn ein Menüpunkt außer der Startseite gewählt wurde.
 
