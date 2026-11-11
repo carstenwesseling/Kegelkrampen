@@ -44,14 +44,14 @@ function dortmunder(){
   `<tr class="sum"><td><b>Gesamt</b></td><td><b>${new Set(R.map(r=>r.y+'-'+r.e)).size}</b></td><td><b>${R.length}</b></td><td></td><td><b>${dtSum(R)}</b></td><td class="cv"><b>${dtN1(dtAvg(R))}</b></td></tr>`]);
  // 6./7. Rekorde und Minusrekorde (Top/Flop 10 Einzelwerte, Gleichstände am Ende der Liste zählen mit)
  const rk=l=>dtT(['Rang','Name','Punkte','Jahr / Abend'],l.map(r=>`<tr><td>${r.rang}.</td><td>${esc(r.n)}</td><td class="cv"><b>${r.v}</b></td><td>${dtWhen(r)}</td></tr>`));
- el.innerHTML=`<h2 id="dt-tab">Dortmunder <span class="mu">Alle Ergebnisse ${years[0]}–${years[years.length-1]}: ${R.length} Einzelergebnisse an ${new Set(R.map(r=>r.y+'-'+r.e)).size} Abenden. „x“ = nicht dabei. Bis 2025 aus der Excel-Datei, ab 2026 aus den gespeicherten Abenden.</span></h2>`
+ el.innerHTML=`<h2 id="dt-tab">Dortmunder <span class="mu">${years[0]}–${years[years.length-1]}: ${R.length} Einzelergebnisse an ${new Set(R.map(r=>r.y+'-'+r.e)).size} Abenden</span></h2>`
  +`<div class="top"><label>Jahr <select id="dty">${[...years].reverse().map(y=>`<option${y==Y?' selected':''}>${y}</option>`).join('')}</select></label></div>${t1}`
- +`<h2 id="dt-jahr">Schnitt pro Jahr pro Kegler <span class="mu">Summe ÷ Teilnahmen des Jahres.</span></h2>${t2}`
+ +`<h2 id="dt-jahr">Schnitt pro Jahr pro Kegler</h2>${t2}`
  +`<div id="dt-gesbox">${dtGes(R,years)}</div>`
  +`<h2 id="dt-mm">Maximum und Minimum pro Kegler</h2>${t4}`
- +`<h2 id="dt-club">Schnitt des Clubs pro Jahr <span class="mu">Durchschnitt aller Einzelergebnisse des Jahres.</span></h2>${t5}`
- +`<h2 id="dt-rek">Rekorde <span class="mu">Die höchsten Einzelergebnisse aller Zeiten.</span></h2>${rk(dtRank(R,true))}`
- +`<h2 id="dt-min">Minusrekorde <span class="mu">Die niedrigsten Einzelergebnisse aller Zeiten.</span></h2>${rk(dtRank(R,false))}`;
+ +`<h2 id="dt-club">Schnitt des Clubs pro Jahr</h2>${t5}`
+ +`<h2 id="dt-rek">Rekorde</h2>${rk(dtRank(R,true))}`
+ +`<h2 id="dt-min">Minusrekorde</h2>${rk(dtRank(R,false))}`;
  if(typeof sortTables==='function')sortTables();
  compact('dt-tab',e.map(i=>i));compact('dt-ges',[3,5]);compact('dt-club',[2,3,4]);sub()}
 // Gesamtübersicht: Schnitt pro Kegler über alle oder über einzeln angehakte Jahre.
@@ -62,7 +62,7 @@ function dtGes(R,years){
  const boxes=`<div class="top dtj"><label><input type="checkbox" id="dtj-all"${DTSEL.length?'':' checked'}> <b>Alle</b></label>${years.map(y=>`<label><input type="checkbox" data-dtj="${y}"${DTSEL.includes(y)?' checked':''}> ${y}</label>`).join('')}</div>`;
  const rows=g.length?[...g.map((x,i)=>`<tr><td>${i+1}.</td><td>${esc(x.n)}</td><td>${x.a}</td><td>${x.s}</td><td class="cv"><b>${dtN1(x.avg)}</b></td><td>${x.y0==x.y1?x.y0:x.y0+'–'+x.y1}</td></tr>`),
   `<tr class="sum"><td></td><td><b>Club</b></td><td><b>${RS.length}</b></td><td><b>${dtSum(RS)}</b></td><td class="cv"><b>${dtN1(dtAvg(RS))}</b></td><td></td></tr>`]:['<tr><td colspan="6" class="mu">Keine Ergebnisse.</td></tr>'];
- return`<h2 id="dt-ges">Schnitt gesamt pro Kegler <span class="mu">Zeitraum: ${when}. Jahre anhaken, um nur diese zu werten (mehrere möglich); „Alle“ wertet jedes Jahr. Bei wenigen Teilnahmen ist der Schnitt wenig aussagekräftig.</span></h2>${boxes}${dtT(['Rang','Name','Teilnahmen','Summe','Schnitt gesamt','Jahre'],rows)}`}
+ return`<h2 id="dt-ges">Schnitt gesamt pro Kegler <span class="mu">Zeitraum: ${when}</span></h2>${boxes}${dtT(['Rang','Name','Teilnahmen','Summe','Schnitt gesamt','Jahre'],rows)}`}
 document.addEventListener('change',e=>{
  const t=e.target;if(!t.closest||!t.closest('#dort'))return;
  if(t.id=='dtj-all'||t.dataset.dtj){
