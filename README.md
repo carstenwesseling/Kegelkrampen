@@ -35,15 +35,22 @@ Die Reihenfolge der Skripte in `index.html` ist wichtig: `ui.js`, `app.js`, `dor
 
 Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Anmeldung per Google oder E-Mail-Link. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
 
-- Lesen: für alle. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>`, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules`.
+- Lesen: für alle. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>`, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Mitglieder mit Anmeldung per Handynummer setzen in der Umfrage nur die eigene Antwort. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules`. Regeln und App gehören zusammen: beides zusammen veröffentlichen (erst die Regeln, dann die App).
+- Regel-Tests: `firestore.rules` lässt sich mit dem Firestore-Emulator prüfen (siehe „Regeln prüfen“ unten).
 - Der Datenimport aus dem Artifact ist noch offen. Solange er fehlt, ist die Datenbank leer.
 
 ### Einrichtung (einmalig)
 
 0. Authentication → Anmeldemethode: „E-Mail/Passwort“ aktivieren und dort „E-Mail-Link (Anmeldung ohne Passwort)“ einschalten (für Mitglieder ohne Google-Konto).
-1. In der Firebase-Konsole unter Authentication → Settings → „Autorisierte Domains“ die Domain eintragen, auf der die Seite läuft (z. B. `localhost` und später `<nutzer>.github.io`).
+0a. Authentication → Anmeldemethode: „Telefon“ aktivieren (Anmeldung per SMS-Code für Mitglieder, die über die Handynummer abstimmen). Firebase verlangt dafür den Tarif Blaze (Abrechnungskonto); pro SMS fallen kleine Kosten an. Für Tests lässt sich in den Telefon-Einstellungen eine Testnummer mit festem Code hinterlegen, so kommt keine echte SMS.
+1. In der Firebase-Konsole unter Authentication → Settings → „Autorisierte Domains“ die Domain eintragen, auf der die Seite läuft (z. B. `localhost` und später `<nutzer>.github.io`). Dieselbe Liste gilt für die Anmeldung per Handynummer (reCAPTCHA).
 2. Regeln veröffentlichen: `firebase deploy --only firestore:rules,storage` (Firebase CLI nötig, Login mit `firebase login`).
 3. Die Seite über GitHub Pages veröffentlichen (Settings → Pages → Branch `main`, Ordner `/ (root)`).
+4. Optional, einmalig: das alte Dokument `state/umfrage` in der Konsole löschen. Die App liest es nicht mehr; die Umfrage liegt jetzt in `umfrage/<Name>`.
+
+### Regeln prüfen
+
+Die Zugriffsregeln lassen sich ohne echte Datenbank testen: Firebase CLI und Java nötig, Emulator starten (`firebase emulators:start --only firestore`) und die Regeln gegen Testfälle laufen lassen (z. B. mit `@firebase/rules-unit-testing`). Geprüft werden mindestens: Mitglied mit Handynummer ändert nur die eigene Antwort; Besitzer und Freigegebene dürfen alle; Unbekannte Nummer darf nicht abstimmen; ohne Anmeldung nur lesen.
 
 ### Dateien für Firebase
 
@@ -59,6 +66,8 @@ Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die D
 | `state/entwurf` | aktueller Entwurf der Eingabe |
 | `state/config` | Rekorde und Einstellungen |
 | `state/mitglieder` | Mitgliederliste (Reihenfolge), Gäste, weitere Mitglieder |
+| `umfrage/<Name>` | Antwort eines Mitglieds in der Umfrage (`antwort`: dabei / rein / nein, `zeit`) |
+| `telefon/<+49…>` | Handynummer eines Mitglieds (`name`); nur der Besitzer sieht alle, ein Mitglied nur die eigene |
 | `touren/<id>` | Metadaten eines Kegeltour-Fotos (Jahr, Bild-IDs, Name) |
 
 ## Lokal ansehen
