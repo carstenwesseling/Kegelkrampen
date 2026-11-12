@@ -4,8 +4,10 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Besitzer: verifizierte Google-Adresse des Vereinsverwalters.
+    // Anmeldungen per Handynummer haben keine E-Mail-Adresse im Token; deshalb wird das Feld zuerst geprüft.
     function isOwner() {
       return request.auth != null
+        && 'email' in request.auth.token
         && request.auth.token.email == 'carsten.wesseling@gmail.com'
         && request.auth.token.email_verified == true;
     }
@@ -13,13 +15,23 @@ service cloud.firestore {
     // Freigegebene Mitglieder: Dokument editors/<google-mail> (nur der Besitzer legt es an).
     function isEditor() {
       return request.auth != null
+        && 'email' in request.auth.token
         && request.auth.token.email_verified == true
         && exists(/databases/$(database)/documents/editors/$(request.auth.token.email));
     }
 
+    // Mitglied per Handynummer: Anmeldung mit SMS-Code (Firebase Phone Auth). Die Nummer steht
+    // unter telefon/<nummer> mit dem Namen des Mitglieds. Der Name muss zum Dokument passen (name).
+    function isPhoneMember(name) {
+      return request.auth != null
+        && 'phone_number' in request.auth.token
+        && exists(/databases/$(database)/documents/telefon/$(request.auth.token.phone_number))
+        && get(/databases/$(database)/documents/telefon/$(request.auth.token.phone_number)).data.name == name;
+    }
+
     // Freigabeliste: nicht öffentlich. Jeder sieht nur den eigenen Eintrag, der Besitzer alle.
     match /editors/{mail} {
-      allow read: if isOwner() || (request.auth != null && request.auth.token.email == mail);
+      allow read: if isOwner() || (request.auth != null && 'email' in request.auth.token && request.auth.token.email == mail);
       allow write: if isOwner();
     }
 
@@ -31,12 +43,13 @@ service cloud.firestore {
       allow update, delete: if isOwner();
     }
 
-    // Zustand: Entwurf und Umfrage dürfen Freigegebene schreiben; die Mitgliederliste nur so,
+    // Zustand: den Entwurf dürfen Freigegebene schreiben; die Mitgliederliste nur so,
     // dass Reihenfolge (liste) und weitere Mitglieder unverändert bleiben (neue Gäste beim Speichern).
+    // Die Umfrage liegt seit der Anmeldung per Handynummer unter umfrage/ (siehe unten).
     match /state/{id} {
       allow read: if true;
       allow write: if isOwner()
-        || (isEditor() && (id == 'entwurf' || id == 'umfrage'));
+        || (isEditor() && id == 'entwurf');
       allow update: if isEditor() && id == 'mitglieder'
         && request.resource.data.liste == resource.data.liste
         && request.resource.data.get('weitere', []) == resource.data.get('weitere', []);
@@ -46,10 +59,30 @@ service cloud.firestore {
     match /logins/{mail} {
       allow read, delete: if isOwner();
       allow create, update: if request.auth != null
+        && 'email' in request.auth.token
         && request.auth.token.email_verified == true
         && request.auth.token.email == mail
         && request.resource.data.email == mail
         && request.resource.data.keys().hasOnly(['email', 'name', 'last']);
+    }
+
+    // Handynummern der Mitglieder (telefon/<+49…> = {name}): nur der Besitzer pflegt sie und sieht alle.
+    // Ein angemeldetes Mitglied sieht nur den Eintrag zu seiner eigenen Nummer (so erkennt die App seinen Namen).
+    match /telefon/{nr} {
+      allow read: if isOwner()
+        || (request.auth != null && 'phone_number' in request.auth.token && request.auth.token.phone_number == nr);
+      allow write: if isOwner();
+    }
+
+    // Umfrage vor dem Abend: je Mitglied ein Dokument umfrage/<Name> = {antwort, zeit}.
+    // Lesen alle. Eintragen, ändern und löschen: Besitzer, Freigegebene und das Mitglied selbst,
+    // wenn es sich mit der Handynummer angemeldet hat, aber nur für den eigenen Namen.
+    match /umfrage/{name} {
+      allow read: if true;
+      allow create, update: if (isOwner() || isEditor() || isPhoneMember(name))
+        && request.resource.data.keys().hasOnly(['antwort', 'zeit'])
+        && request.resource.data.antwort in ['dabei', 'rein', 'nein'];
+      allow delete: if isOwner() || isEditor() || isPhoneMember(name);
     }
 
     // Kegeltouren (Fotos-Metadaten): lesen alle, schreiben nur der Besitzer.
