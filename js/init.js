@@ -11,7 +11,7 @@ const SUB={
  '#b2':[['h-rek','Rekorde'],['h-tage','Spieltage'],['h-tab','Tabelle'],['h-dm','Dortmunder'],['h-bt','Berg und Tal'],['hk-kasse','Kasse'],['hk-koenige','Könige']],
  '#b3':[['a-kon','Könige'],['a-ein','Einzelergebnisse'],['a-anw','Anwesenheit'],['a-ver','Verlauf'],['a-jahr','Jahre']],
  '#b8':[['dt-tab','Tabelle'],['dt-jahr','Schnitt pro Jahr'],['dt-ges','Schnitt gesamt'],['dt-mm','Max / Min'],['dt-club','Club'],['dt-rek','Rekorde'],['dt-min','Minusrekorde']],
- '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-lg','Angemeldet'],['m-frg','Freigabe'],['m-tel','Handynummern']]};
+ '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-lg','Angemeldet'],['m-frg','Freigabe']]};
 const SUBSTEP={vor:[['s-umf','Umfrage'],['s-anw','Anwesenheit']],ab:[['s-stat','Zahlungen'],['ek-kasse','Kasse'],['ek-koenige','Könige'],['s-rek','Rekorde']]};
 const navh=()=>document.documentElement.style.setProperty('--navh',($('#navs').offsetHeight||64)+'px');
 const stepDone=k=>{const R=S.rows||[];
@@ -57,14 +57,13 @@ async function who(){
  $('#acdot').classList.toggle('ok',ok);
  const d=document.createElement('span');d.className='dot';e.append(d);
  const t=document.createElement('span');
- if(ok){t.append('Angemeldet als ');const b=document.createElement('b');b.textContent=(ME&&ME.name)||'Mitglied';t.append(b,OWN?' · Besitzer':(EDT?' · Mitglied (darf speichern)':(VOTER?' · Mitglied (Umfrage)':' · nur Lesen')))}
+ if(ok){t.append('Angemeldet als ');const b=document.createElement('b');b.textContent=(ME&&ME.name)||'Mitglied';t.append(b,OWN?' · Besitzer':(EDT?' · Mitglied (darf speichern)':' · nur Lesen'))}
  else t.textContent='Nicht angemeldet';
  e.append(t);
  $('#acct').setAttribute('aria-label',(ok?'Angemeldet als '+((ME&&ME.name)||'Mitglied'):'Nicht angemeldet')+' – Konto und weitere Seiten');
  const g=$('#gate');
  if(!db){g.hidden=false;g.textContent='Keine Datenbank verbunden. Die Seite kann nicht geladen werden; bitte später noch einmal versuchen.'}
- else if(ok&&!OWN&&ME&&ME.phone&&!ME.member){g.hidden=false;g.textContent='Deine Handynummer ist noch keinem Mitglied zugeordnet, deshalb kannst du in der Umfrage nicht abstimmen. Bitte den Besitzer, die Nummer unter „Mitglieder“ → Handynummern einzutragen.'}
- else if(ok&&!EDT&&!VOTER&&w===false){g.hidden=false;g.innerHTML='';g.append('Du bist angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner E-Mail-Adresse. Abmelden kannst du unter „Mehr“ → Konto.')}
+ else if(ok&&!EDT&&w===false){g.hidden=false;g.innerHTML='';g.append('Du bist angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner E-Mail-Adresse. Abmelden kannst du unter „Mehr“ → Konto.')}
  else g.hidden=true}
 // Navigation
 const hashFor=(tab,arg)=>'#/'+RT[tab]+(arg?'/'+arg:'');
@@ -103,8 +102,6 @@ route();
  const T=p=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),10000))]);
  try{const c=window.claude;db=c&&await T(c.use('db'));USR=c&&await T(c.use('user'));OWN=USR?await USR.isOwner():false;EDT=OWN||(USR&&USR.isEditor?await T(USR.isEditor())===true:false)}catch(e){db=null}
  try{ME=USR&&USR.me?await T(USR.me()):null}catch(e){ME=null}
- // Mitglied per Handynummer: darf in der Umfrage die eigene Antwort setzen (siehe umfrage.js).
- VOTER=!!(ME&&ME.member);
  // Angemeldete Adresse merken (logins/<mail>), damit der Besitzer sie im Tab „Mitglieder“ freigeben kann.
  if(db&&ME&&ME.email&&!OWN)db.doc('logins/'+ME.email).set({email:ME.email,name:ME.name||ME.email,last:new Date().toISOString()},{merge:true}).catch(()=>{});
  if(db){try{
@@ -113,6 +110,6 @@ route();
   if(c.exists)CFG=clean(c.data());RK=clean(CFG.rekorde||[]);
   if(m.exists)MEM={liste:[],gaeste:[],weitere:[],...clean(m.data())};
   S=d.exists?clean(d.data()):{};sync();if(typeof umfWatch==='function')umfWatch();
-  st(HIST.length+' Spieltage in der Datenbank'+(OWN?' – angemeldet als Besitzer':EDT?' – angemeldet als Mitglied':VOTER?' – angemeldet als Mitglied (Umfrage)':''))}catch(e){st('Datenbank-Fehler: '+(e.message||e.code));toast('Datenbank-Fehler: '+(e.message||e.code),'err')}}
+  st(HIST.length+' Spieltage in der Datenbank'+(OWN?' – angemeldet als Besitzer':EDT?' – angemeldet als Mitglied':''))}catch(e){st('Datenbank-Fehler: '+(e.message||e.code));toast('Datenbank-Fehler: '+(e.message||e.code),'err')}}
  else st('Keine Datenbank verbunden – Eingaben werden nicht gespeichert.');
  LOADED=true;render();who();route();if(db)EDT?dstat('ok','Entwurf geladen'):dstat('off','Nur Ansicht – wird nicht gesichert')})();
