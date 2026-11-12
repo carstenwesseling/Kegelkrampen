@@ -6,7 +6,7 @@ const dd=i=>i?i.split('-').reverse().join('.'):'';
 const iv=v=>v==null||v===''||isNaN(v)?'':Math.round(+v).toLocaleString('de-DE'),eu=v=>fx(v)?fx(v)+' €':'';
 const clean=x=>JSON.parse(JSON.stringify(x));
 const norm=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
-let S={},CFG={rekorde:[]},RK=[],HSEL,HIST=[],MEM={liste:[],gaeste:[],weitere:[]},db=null,OWN=false,EDT=false,VOTER=false,tm,YR='',HYR=String(new Date().getFullYear()),MODE='sum'; // Historie: Standardfilter ist das aktuelle Jahr
+let S={},CFG={rekorde:[]},RK=[],HSEL,HIST=[],MEM={liste:[],gaeste:[],weitere:[]},db=null,OWN=false,EDT=false,tm,YR='',HYR=String(new Date().getFullYear()),MODE='sum'; // Historie: Standardfilter ist das aktuelle Jahr
 //CALC-START
 const isG=r=>r.gast||r.name==='Gast';
 function calc(S){
@@ -156,7 +156,7 @@ async function save(){
  const neu=S.rows.filter(r=>r.gast&&!MEM.gaeste.some(x=>norm(x)==norm(r.name))).map(r=>r.name);
  try{await db.doc('sessions/'+S.date).set(doc);if(neu.length){MEM.gaeste=[...MEM.gaeste,...neu];await db.doc('state/mitglieder').set(clean(MEM))}}
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
- HIST=[doc,...HIST];S={};sync();draft();if(typeof UMF!=='undefined'&&Object.keys(UMF).length&&typeof umfReset==='function')umfReset().catch(()=>{});render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.')}
+ HIST=[doc,...HIST];S={};sync();draft();if(typeof UMF!=='undefined'&&Object.keys(UMF).length)db.doc('state/umfrage').set({votes:{}}).catch(()=>{});render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.')}
 const inHY=h=>!HYR||h.date.startsWith(HYR);
 const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set([...HIST.map(h=>h.date.slice(0,4)),String(new Date().getFullYear())])].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
 function hist(sel){
@@ -437,8 +437,8 @@ function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0],s:dtSince(n)}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
  $('#mem').innerHTML=`<h2 id="m-liste">Mitgliederliste (${MEM.liste.length+(MEM.weitere||[]).length} Mitglieder, ${MEM.gaeste.length} Gäste)</h2><div class="w"><table class="stack mt"><tr class="hd"><th>Name</th><th>Typ</th><th>Mitglied seit</th><th>davon ${JY}</th><th>zuletzt dabei</th></tr>${rows.map(r=>`<tr><td>${esc(r.n)}${r.t=='Gast'?' <span class="tag">Gast</span>':''}</td><td data-l="Typ">${r.t}</td><td data-l="Mitglied seit">${r.s||'–'}</td><td data-l="davon ${JY}">${r.y}</td><td data-l="zuletzt dabei">${dd(r.l)||'–'}</td></tr>`).join('')}</table></div>`
- +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'')+(OWN?reihe()+'<div id="frg"></div><div id="tel"></div>':'');
- if(OWN){$('#add').onclick=()=>busy($('#add'),addMember());$('#nm').onkeydown=e=>{if(e.key=='Enter'&&!e.isComposing){e.preventDefault();$('#add').click()}};if(typeof frgLoad==='function')frgLoad().then(sub);if(typeof telLoad==='function')telLoad().then(sub)}sub()}
+ +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'')+(OWN?reihe()+'<div id="frg"></div>':'');
+ if(OWN){$('#add').onclick=()=>busy($('#add'),addMember());$('#nm').onkeydown=e=>{if(e.key=='Enter'&&!e.isComposing){e.preventDefault();$('#add').click()}};if(typeof frgLoad==='function')frgLoad().then(sub)}sub()}
 const reihe=()=>`<h2 id="m-reihe">Reihenfolge der Liste</h2><div class="w"><table><tr><th>Name</th><th>Verschieben</th></tr>${MEM.liste.map((n,i)=>`<tr><td>${i+1}. ${esc(n)}</td><td class="mvc"><button type="button" class="mv" data-mv="${i}" data-dir="-1" aria-label="${esc(n)} nach oben"${i?'':' disabled'}>${icon('up')}</button><button type="button" class="mv" data-mv="${i}" data-dir="1" aria-label="${esc(n)} nach unten"${i<MEM.liste.length-1?'':' disabled'}>${icon('down')}</button></td></tr>`).join('')}</table></div><p class="mu" id="m-rm" aria-live="polite"></p>`;
 let MVB=false;
 $('#mem').addEventListener('click',async e=>{

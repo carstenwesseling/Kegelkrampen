@@ -36,33 +36,9 @@ const kkUser = {
   async me() {
     await kkAuthReady;
     const u = fbAuth.currentUser;
-    if (!u) return null;
-    // Anmeldung per Handynummer: Die Nummer steht unter telefon/<nummer> mit dem Namen des Mitglieds.
-    // Ist sie keinem Mitglied zugeordnet, bleibt member leer und die Person darf nicht abstimmen.
-    let member = null;
-    if (u.phoneNumber) {
-      try { const d = await fbDb.doc("telefon/" + u.phoneNumber).get(); if (d.exists) member = (d.data() || {}).name || null; } catch (e) {}
-    }
-    return {
-      id: u.uid,
-      name: member || u.displayName || u.email || u.phoneNumber || "",
-      avatarUrl: u.photoURL || "",
-      email: u.emailVerified && u.email ? u.email.toLowerCase() : "",
-      phone: !!u.phoneNumber,
-      member
-    };
+    return u ? { id: u.uid, name: u.displayName || u.email, avatarUrl: u.photoURL || "", email: u.emailVerified && u.email ? u.email.toLowerCase() : "" } : null;
   }
 };
-
-// Handynummer in der Schreibweise +49… (E.164). „0171 1234567“ wird als +49 171 1234567 gelesen,
-// „0049…“ wie „+49…“. Liefert null, wenn die Nummer nicht passt, und „“ für eine leere Eingabe.
-function normTel(v) {
-  let s = String(v || "").trim().replace(/[\s\-\/().]/g, "");
-  if (!s) return "";
-  if (s.startsWith("00")) s = "+" + s.slice(2);
-  else if (s.startsWith("0")) s = "+49" + s.slice(1);
-  return /^\+[1-9]\d{7,14}$/.test(s) ? s : null;
-}
 
 const kkAssets = {
   // Speichert ein Bild im Ordner touren/ und gibt seinen Pfad als id zurück.
@@ -140,48 +116,5 @@ window.claude = {
         .catch(e => note("E-Mail-Anmeldung fehlgeschlagen: " + (e.message || e.code)));
     }
   }
-  // Anmeldung per Handynummer (Mitglieder, die abstimmen): Firebase schickt einen Code per SMS.
-  // Nur wer mit der Nummer in telefon/ eingetragen ist, wird in der Umfrage als Mitglied erkannt.
-  const tel = document.createElement("button");
-  tel.type = "button";
-  tel.id = "kk-tel";
-  tel.className = "mi";
-  tel.textContent = "Per Handynummer anmelden";
-  mail.insertAdjacentElement("afterend", tel);
-  const recaptchaBox = document.createElement("div");
-  recaptchaBox.id = "kk-recaptcha";
-  document.body.appendChild(recaptchaBox);
-  let telVerifier = null, telConfirm = null;
-  const telMsg = e => {
-    const c = (e && e.code) || "";
-    if (c == "auth/operation-not-allowed") return "Anmeldung per Handynummer ist noch nicht eingeschaltet. Bitte den Besitzer informieren.";
-    if (c == "auth/invalid-phone-number") return "Die Handynummer wird nicht angenommen. Bitte mit Vorwahl eingeben, z. B. 0171 1234567.";
-    if (c == "auth/invalid-verification-code") return "Der Code stimmt nicht. Bitte noch einmal per Handynummer anmelden.";
-    if (c == "auth/code-expired") return "Der Code ist abgelaufen. Bitte noch einmal per Handynummer anmelden.";
-    if (c == "auth/too-many-requests") return "Zu viele Versuche. Bitte später noch einmal probieren.";
-    return "Anmeldung fehlgeschlagen: " + ((e && e.message) || c);
-  };
-  tel.onclick = async () => {
-    const raw = prompt("Deine Handynummer (z. B. 0171 1234567 oder +49 171 1234567):");
-    if (raw === null) return;
-    const nr = normTel(raw);
-    if (!nr) return alert("Die Handynummer sieht nicht richtig aus. Bitte mit Vorwahl eingeben, z. B. 0171 1234567.");
-    try {
-      if (!telVerifier) telVerifier = new firebase.auth.RecaptchaVerifier("kk-recaptcha", { size: "invisible" });
-      telConfirm = await fbAuth.signInWithPhoneNumber(nr, telVerifier);
-    } catch (e) {
-      try { if (telVerifier) telVerifier.clear(); } catch (x) {}
-      telVerifier = null;
-      return alert(telMsg(e));
-    }
-    const code = prompt("Der Code wurde per SMS an " + nr + " geschickt. Bitte den Code eingeben:");
-    if (!code) return;
-    try { await telConfirm.confirm(code.trim()); location.reload(); }
-    catch (e) { alert(telMsg(e)); }
-  };
-  fbAuth.onAuthStateChanged(u => {
-    btn.textContent = u ? "Abmelden" : "Mit Google anmelden";
-    mail.hidden = !!u;
-    tel.hidden = !!u;
-  });
+  fbAuth.onAuthStateChanged(u => { btn.textContent = u ? "Abmelden" : "Mit Google anmelden"; mail.hidden = !!u; });
 })();
