@@ -92,7 +92,9 @@ function eingabeHinweis(){
  const t=angemeldet
   ? 'Du bist angemeldet, aber nicht zur Eingabe freigegeben. Die Eingabe ist nur für freigegebene Mitglieder und den Besitzer. Bitte den Besitzer um Freigabe deiner E-Mail-Adresse.'
   : 'Die Eingabe ist nur für freigegebene Mitglieder und den Besitzer. Bitte oben unter „Mehr“ → Konto anmelden. Die Abende siehst du weiter unter Historie und Auswertung.';
- return `<section class="note king" role="status">${icon('alert')}<p>${t}</p></section>`}
+ // Der PDF-Download bleibt für alle sichtbar (docs/anforderungen.md).
+ return `<section class="note king" role="status">${icon('alert')}<p>${t}</p></section>`
+  +`<div class="actbar" id="actbar"><div class="in"><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button></div></div>`}
 function render(){
  if(LOADED&&!EDT){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
  const W=V(),C=calc(W),L=HIST[0],hd=k=>STEP!=k?' hidden':'';

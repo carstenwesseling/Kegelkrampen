@@ -24,4 +24,5 @@ function kkPdf(){
  doc.autoTable({...base,head:[['Könige','Name','Punkte']],body:ko,startY:doc.lastAutoTable.finalY+14,tableWidth:w[2]+w[3]+w[4],margin:{left:M+w[0]+w[1],right:M},
   styles:{...base.styles,minCellHeight:20},columnStyles:{0:{cellWidth:w[2]},1:{cellWidth:w[3]},2:{cellWidth:w[4],halign:'right'}}});
  doc.save('Kegeln'+(S.date?'_'+S.date:'')+'.pdf');ms('PDF wurde heruntergeladen.')}
-document.addEventListener('click',e=>{if(e.target.id=='pdf-dl')kkPdf()});
+// closest: Der Klick trifft oft das Symbol im Knopf, nicht den Knopf selbst.
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#pdf-dl'))kkPdf()});
