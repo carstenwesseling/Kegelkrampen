@@ -33,7 +33,8 @@ async function busy(btn,p){
 
 // Zählfeld mit [−] Wert [+]. Die Knöpfe ändern das Feld und lösen ein input-Ereignis aus,
 // damit die vorhandenen Handler (onIn, onEd) wie beim Tippen rechnen und speichern.
-const stepper=(lab,attrs,val,id)=>`<div class="fld cnt"><label for="${id}">${lab}</label><div class="stp"><button type="button" class="sb" data-sb="-1" tabindex="-1" aria-label="${lab} minus 1">${icon('minus')}</button><input id="${id}" type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" ${attrs} value="${val===0||val==null?'':val}"><button type="button" class="sb" data-sb="1" tabindex="-1" aria-label="${lab} plus 1">${icon('plus')}</button></div></div>`;
+// bare: ohne sichtbare Beschriftung (Tabellenzelle), das Feld trägt dann aria-label.
+const stepper=(lab,attrs,val,id,bare)=>`<div class="fld cnt">${bare?'':`<label for="${id}">${lab}</label>`}<div class="stp"><button type="button" class="sb" data-sb="-1" tabindex="-1" aria-label="${lab} minus 1">${icon('minus')}</button><input id="${id}"${bare?` aria-label="${lab}"`:''} type="number" min="0" step="1" inputmode="numeric" enterkeyhint="next" ${attrs} value="${val===0||val==null?'':val}"><button type="button" class="sb" data-sb="1" tabindex="-1" aria-label="${lab} plus 1">${icon('plus')}</button></div></div>`;
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-sb]');if(!b)return;
  const i=b.parentElement.querySelector('input');if(!i||i.disabled)return;

@@ -217,16 +217,6 @@ body[data-page=eingabe] .dstat:not(:empty){display:inline-flex}
 .pc-h .icb{min-height:40px;width:40px;min-width:40px;border-color:var(--line)}
 .pc-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}
 .pc-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;margin-bottom:12px}
-/* Spiel: alle Anwesenden untereinander in einer Liste, je Person eine Zeile */
-.pe-list{background:var(--card);border:1px solid var(--line);border-radius:var(--r-l);box-shadow:var(--sh-1);overflow:hidden;min-width:0}
-.pe{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr);gap:10px 16px;align-items:start;padding:14px 16px;border-bottom:1px solid var(--line);min-width:0}
-.pe:last-child{border-bottom:0}
-.pe:nth-child(even){background:var(--row-b)}
-.pe-n{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;min-height:40px;min-width:0}
-.pe-n h3{flex:1 1 100%;min-width:0;margin:0;font-size:18px;line-height:1.2;overflow-wrap:anywhere}
-.pe-n .icb{min-height:40px;width:40px;min-width:40px;border-color:var(--line)}
-.pe-f{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,140px),1fr));gap:10px 12px;min-width:0}
-@media (max-width:640px){.pe{grid-template-columns:minmax(0,1fr);gap:8px}}
 .stp{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;border:1px solid var(--line-2);border-radius:var(--r-m);overflow:hidden;background:var(--card);transition:box-shadow var(--t-fast),border-color var(--t-fast)}
 .stp:focus-within{border-color:var(--ink);box-shadow:0 0 0 3px var(--lime)}
 .stp .sb{min-height:40px;height:40px;width:40px;padding:0;border:0;border-radius:0;background:var(--fill);color:var(--fg)}
@@ -398,8 +388,6 @@ details{margin:8px 0}summary{cursor:pointer;min-height:44px;display:flex;align-i
 .lst li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
 .lst li:last-child{border-bottom:0}
 .lst b{text-align:right}
-.fld>.fl{font-size:13px;font-weight:600;color:var(--mu)}
-.dsum{font:700 22px var(--f-d);line-height:48px}
 .lnk{display:block;margin-top:8px;min-height:40px;padding:0 4px;border:0;border-radius:var(--r-m);background:none;color:var(--fg);font-weight:600;text-decoration:underline;text-underline-offset:3px}
 .acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .acts.q{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}

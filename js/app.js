@@ -53,7 +53,7 @@ function side(D,ed,C,px='',altEd=0){
  return`<h2 id="${pf}-kasse">Kasse</h2><div class="w"><table class="stack"><tr class="hd"><th>Position</th><th>Betrag</th><th>Text / Grund</th></tr>${row('Gezahlt',['kg',C.gz])}${ki('Abzug Bahn','bahn')}${ki('Sonderausgabe','sonder','sonderText')}${row('Aufs Konto',['ka',C.aufs])}${ki('Abgang Konto','abgang','abgangText')}${altEd?`<tr><td>Alter Konto</td><td data-l="Betrag">${A('k',0,'alt',K.alt??'',1)}</td><td></td></tr>`:row('Alter Konto',['',K.alt])}${row('Neuer Konto',['kn',C.neu])}</table></div>${D.notiz?`<p class="mu">${D.notiz}</p>`:''}
  <h2 id="${pf}-koenige">Könige</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th></tr>${(D.koenige||[]).map((k,i)=>`<tr><td>${k.t}</td><td data-l="Name">${A('kn',i,'',k.name,ed,'text')}</td><td data-l="Punkte">${A('kp',i,'',k.pt,ed)}</td></tr>`).join('')}</table></div>`}
 // Euro-Feld mit Einheit im Feld (Eingabe-Karten, Zahlungen).
-const eIn=(a,i,k,v,id)=>`<span class="eu"><input${id?` id="${id}"`:''} type="text" inputmode="decimal" enterkeyhint="next" data-e="1" data-a="${a}" data-i="${i}" data-k="${k}" placeholder="0,00" value="${v?fx(v):''}"><span class="u">€</span></span>`;
+const eIn=(a,i,k,v,id,al)=>`<span class="eu"><input${id?` id="${id}"`:''}${al?` aria-label="${al}"`:''} type="text" inputmode="decimal" enterkeyhint="next" data-e="1" data-a="${a}" data-i="${i}" data-k="${k}" placeholder="0,00" value="${v?fx(v):''}"><span class="u">€</span></span>`;
 // Knöpfe „Zurück“ / „Weiter“ am Ende jedes Eingabe-Schritts (STEPS steht in init.js).
 const stepNav=k=>{const i=STEPS.findIndex(s=>s[0]==k),p=STEPS[i-1],n=STEPS[i+1];
  return`<div class="stepnav">${p?`<button type="button" data-step="${p[0]}">${icon('left')}${p[1]}</button>`:'<span></span>'}${n?`<button type="button" class="pri" data-step="${n[0]}">Weiter: ${n[1]}${icon('right')}</button>`:''}</div>`};
@@ -61,14 +61,22 @@ const emptyCard=(t,b)=>`<div class="empty">${icon('users')}<p>${t}</p>${b||''}</
 const chips=()=>{const n=S.rows.filter(r=>r.c&&!r.gast).length,all=S.rows.filter(r=>!r.gast).length;
  return`<h2 id="s-anw">Anwesenheit <span class="badge">${n} von ${all}</span></h2><div class="chips">${S.rows.map((r,i)=>r.gast?'':`<button type="button" class="chip${r.c?' on':''}" data-chip="${i}" aria-pressed="${!!r.c}">${r.c?icon('check'):''}${esc(r.name)}</button>`).join('')}${S.rows.map((r,i)=>r.gast?`<button type="button" class="chip on gst" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${esc(r.name)} <span class="tag">Gast</span>${icon('x')}</button>`:'').join('')}</div>
 <div class="gadd"><label for="gn">Gast hinzufügen</label><div class="row"><input type="text" id="gn" placeholder="Name des Gastes" autocomplete="off" enterkeyhint="done"><button type="button" id="gadd">${icon('plus')}Hinzufügen</button></div><p class="mu" id="gm" aria-live="polite"></p></div><div class="top"><button type="button" id="an-rs">Anwesenheit zurücksetzen</button></div>`};
-function eingabe(){
+// Summe der Spiel-Spalten einer anwesenden Person in €: Summe aus calc() ohne Beitrag und „Runde bezahlt“.
+const spSum=(W,C,i)=>C.out[i].m-W.preise.k-(+W.rows[i].l||0);
+function eingabe(W,C){
  const P=S.preise,L=k=>k=='k'?'Beitrag':COLS.find(c=>c[0]==k)[1],pr='defghik'.split(''),rows=byOrd(S.rows).filter(([r])=>r.c);
  const ptx=pr.map(k=>`${L(k)} ${eu(P[k])}`).join(' · ');
  const prices=OWN?`<details class="prices"><summary><span><b>Preise</b> <span class="mu">${esc(ptx)}</span></span>${icon('down','chev')}</summary><div class="pgrid">${pr.map(k=>`<div class="fld eur"><label for="p-${k}">${L(k)}</label>${eIn('p',0,k,P[k],'p-'+k)}</div>`).join('')}</div></details>`:`<p class="prices ro"><b>Preise</b> <span class="mu">${esc(ptx)}</span></p>`;
- const cards=rows.map(([r,i])=>{const gs=r.gast;
-  return`<div class="pe"><div class="pe-n"><h3>${esc(r.name)}</h3>${gs?`<span class="tag">Gast</span><button type="button" class="icb" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${icon('trash')}</button>`:''}</div><div class="pe-f">${(gs?'hi':'defghi').split('').map(k=>stepper(L(k),`data-a="r" data-i="${i}" data-k="${k}"`,r[k]||'',`r${i}${k}`)).join('')}<div class="fld eur"><label for="r${i}j">Lotterie</label>${eIn('r',i,'j',r.j,`r${i}j`)}</div></div></div>`}).join('');
+ // Tabelle wie bei Berg und Tal: 7 Eingabefelder (d–i als Zähler, j = Lotterie) und die Summe der Person in €
+ // (ohne Beitrag und Runde, aus calc() abgeleitet). Gäste haben nur Alle Neune, Kranz Hand und Lotterie, keine Summe.
+ const head='<tr class="hd"><th>Name</th>'+[...'defghi'].map(k=>`<th>${L(k)}</th>`).join('')+'<th>Lotterie</th><th>Summe</th></tr>';
+ const trs=rows.map(([r,i])=>{const gs=r.gast;
+  return`<tr><td>${esc(r.name)}${gs?` <span class="tag">Gast</span><button type="button" class="icb" data-rm="${i}" aria-label="Gast ${esc(r.name)} entfernen">${icon('trash')}</button>`:''}</td>`
+  +[...'defghi'].map(k=>gs&&!'hi'.includes(k)?'<td></td>':`<td data-l="${L(k)}">${stepper(L(k),`data-a="r" data-i="${i}" data-k="${k}"`,r[k]||'',`r${i}${k}`,1)}</td>`).join('')
+  +`<td data-l="Lotterie">${eIn('r',i,'j',r.j,`r${i}j`,'Lotterie')}</td>`
+  +(gs?'<td></td>':`<td class="cv" data-l="Summe"><b id="ssm${i}">${fx(spSum(W,C,i))} €</b></td>`)+'</tr>'}).join('');
  return`<h2 id="s-ein">Spiel</h2>${prices}`
-  +(rows.length?`<div class="pe-list">${cards}</div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))}
+  +(rows.length?`<div class="w"><table class="stack">${head}${trs}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))}
 function stat(W,C){
  const cv=(o,i,k,r)=>`<b id="v${i}${k}"${o[k]<0?' class="neg"':''}>${k=='k'&&!r.c?'–':fx(o[k])}</b>`;
  const cards=byOrd(W.rows).filter(([r])=>!r.gast).map(([r,i])=>{const o=C.out[i];
@@ -82,14 +90,14 @@ function render(){
  const W=V(),C=calc(W),L=HIST[0],hd=k=>STEP!=k?' hidden':'';
  $('#edit').innerHTML=`<section data-st="vor"${hd('vor')}><p class="mu lead">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}.</p>`
  +(typeof umfHtml==='function'?umfHtml():'')+chips()+stepNav('vor')+'</section>'
- +`<section data-st="spiel"${hd('spiel')}>${eingabe()}${stepNav('spiel')}</section>`
+ +`<section data-st="spiel"${hd('spiel')}>${eingabe(W,C)}${stepNav('spiel')}</section>`
  +`<section data-st="ab"${hd('ab')}>${stat(W,C)}${side(W,1,C)}${rekEdit()}${stepNav('ab')}</section>`
  +`<div class="actbar" id="actbar"><div class="in"><label class="dat"><span>Spieltag</span><input type="date" id="dat" data-a="d" value="${S.date}"></label><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button>${EDT?`<button type="button" class="pri" id="sv">${icon('save')}<span><span class="hide-xs">Abend </span>speichern</span></button>`:''}</div></div>`;
  if(EDT)$('#sv').onclick=()=>busy($('#sv'),save());if(OWN)$('#rsv').onclick=()=>busy($('#rsv'),saveRk());blatt();BTC=false;bergTal();
  if(typeof stepShow==='function')stepShow();sub();if(CUR=='#b0'&&typeof startView==='function')startView()}
 function upd(){
  const W=V(),C=calc(W);
- W.rows.forEach((r,i)=>{if(r.gast)return;for(const k of 'kmoq'){const e=$('#v'+i+k),v=C.out[i][k];if(!e)continue;e.textContent=k=='k'&&!r.c?'–':fx(v);e.classList.toggle('neg',v<0)}});
+ W.rows.forEach((r,i)=>{if(r.gast)return;const sp=$('#ssm'+i);if(sp)sp.textContent=fx(spSum(W,C,i))+' €';for(const k of 'kmoq'){const e=$('#v'+i+k),v=C.out[i][k];if(!e)continue;e.textContent=k=='k'&&!r.c?'–':fx(v);e.classList.toggle('neg',v<0)}});
  COLS.forEach(([k])=>{const e=$('#t'+k);if(e)e.textContent=k=='c'?C.t.c:fx(C.t[k])});
  $('#kg').textContent=fx(C.gz);$('#ka').textContent=fx(C.aufs);$('#kn').textContent=fx(C.neu)}
 const st=t=>$('#st').textContent=t,ms=t=>toast(t);
@@ -128,9 +136,9 @@ $('#blatt').addEventListener('input',e=>{const t=e.target;if(!t.dataset.bl)retur
  $('#bs'+t.dataset.i).textContent=n0(bsum(a));autoKoenige();draft()});
 const colNav=e=>{
  const t=e.target;if(!t.dataset||!(t.dataset.bl||t.dataset.bt)||(e.key!=='Tab'&&e.key!=='Enter')||e.ctrlKey||e.altKey||e.metaKey)return;
- const box=t.closest('.pe-list,table'),sel='input[data-bl],input[data-bt]';
- // Liste: DOM-Reihenfolge (Zeile für Zeile); Tabelle: spaltenweise
- const all=box.classList.contains('pe-list')?[...box.querySelectorAll(sel)]:[...box.querySelectorAll(sel)].sort((a,b)=>(+a.dataset.k)-(+b.dataset.k)||(+a.dataset.i)-(+b.dataset.i));
+ const box=t.closest('table'),sel='input[data-bl],input[data-bt]';
+ // Tabelle: spaltenweise, innerhalb einer Spalte in sichtbarer Zeilenreihenfolge
+ const all=[...box.querySelectorAll(sel)].map((el,x)=>({el,x})).sort((a,b)=>(+a.el.dataset.k)-(+b.el.dataset.k)||a.x-b.x).map(o=>o.el);
  const n=all[all.indexOf(t)+(e.shiftKey?-1:1)];
  if(!n)return;e.preventDefault();n.focus();if(n.select)n.select()};
 $('#blatt').addEventListener('keydown',colNav);$('#bt').addEventListener('keydown',colNav);$('#hist').addEventListener('keydown',colNav);
@@ -187,7 +195,7 @@ const bhead=()=>'<tr class="hd"><th>Name</th>'+[1,2,3,4,5,6,7].map(i=>`<th>${i} 
 function blatt(){
  const rows=byOrd(S.rows).filter(([r])=>r.c);
  $('#blatt').innerHTML='<h2 id="d-tab">Dortmunder</h2>'
- +(rows.length?`<div class="pe-list">${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<div class="pe"><div class="pe-n"><h3>${esc(r.name)}</h3>${r.gast?'<span class="tag">Gast</span>':''}</div><div class="pe-f">${[0,1,2,3,4,5,6].map(k=>`<div class="fld"><label for="bl${i}_${k}">${k+1} (×${k+1})</label><input id="bl${i}_${k}" type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}"></div>`).join('')}<div class="fld"><span class="fl">Summe</span><b class="dsum" id="bs${i}">${n0(bsum(a))}</b></div></div></div>`}).join('')}</div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
+ +(rows.length?`<div class="w"><table class="stack">${bhead()}${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<tr><td>${esc(r.name)}${r.gast?' <span class="tag">Gast</span>':''}</td>${[0,1,2,3,4,5,6].map(k=>`<td data-l="${k+1} (×${k+1})"><input id="bl${i}_${k}" type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}" aria-label="${k+1} (×${k+1})"></td>`).join('')}<td class="cv" data-l="Summe"><b id="bs${i}">${n0(bsum(a))}</b></td></tr>`}).join('')}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
  +'<p class="note king" id="d-kon"'+(dkText()?'':' hidden')+'>'+icon('crown')+'<span id="dkm">'+dkText()+'</span></p>'+stepNav('dm')}
 const DK=KL.indexOf('Dortmunder'),PK=KL.indexOf('Pumpen - König'),TK=KL.indexOf('TBTBBTB');
 const dkText=()=>S.auto&&S.auto[DK]?`Dortmunder-König (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[DK])} – ${n0(S.koenige[DK].pt)} Punkte`:'';
