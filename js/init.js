@@ -63,7 +63,7 @@ async function who(){
  $('#acct').setAttribute('aria-label',(ok?'Angemeldet als '+((ME&&ME.name)||'Mitglied'):'Nicht angemeldet')+' – Konto und weitere Seiten');
  const g=$('#gate');
  if(!db){g.hidden=false;g.textContent='Keine Datenbank verbunden. Die Seite kann nicht geladen werden; bitte später noch einmal versuchen.'}
- else if(!EDT&&w===false){g.hidden=false;g.innerHTML='';g.append('Du bist angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner E-Mail-Adresse. Abmelden kannst du unter „Mehr“ → Konto.')}
+ else if(ok&&!EDT&&w===false){g.hidden=false;g.innerHTML='';g.append('Du bist angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner E-Mail-Adresse. Abmelden kannst du unter „Mehr“ → Konto.')}
  else g.hidden=true}
 // Navigation
 const hashFor=(tab,arg)=>'#/'+RT[tab]+(arg?'/'+arg:'');
