@@ -112,4 +112,4 @@ route();
   S=d.exists?clean(d.data()):{};sync();if(typeof umfWatch==='function')umfWatch();
   st(HIST.length+' Spieltage in der Datenbank'+(OWN?' – angemeldet als Besitzer':EDT?' – angemeldet als Mitglied':''))}catch(e){st('Datenbank-Fehler: '+(e.message||e.code));toast('Datenbank-Fehler: '+(e.message||e.code),'err')}}
  else st('Keine Datenbank verbunden – Eingaben werden nicht gespeichert.');
- LOADED=true;render();who();route();if(db)dstat('ok','Entwurf geladen')})();
+ LOADED=true;render();who();route();if(db)EDT?dstat('ok','Entwurf geladen'):dstat('off','Nur Ansicht – wird nicht gesichert')})();
