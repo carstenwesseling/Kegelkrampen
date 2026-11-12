@@ -22,6 +22,8 @@ const stepDone=k=>{const R=S.rows||[];
  return R.some(r=>+r.p)};
 function sub(){
  const n=$('#sub');if(!n)return;
+ // Eingabe nur für Freigegebene: ohne Freigabe keine Schritt-Leiste.
+ if(CUR=='#b1'&&LOADED&&!EDT){n.replaceChildren();n.hidden=true;navh();return}
  if(CUR=='#b1'){
   n.classList.add('steps');n.setAttribute('aria-label','Schritte der Eingabe');
   n.innerHTML=STEPS.map(([k,l],i)=>`<button type="button" data-step="${k}"${k==STEP?' class="on" aria-current="step"':''}><span class="sn">${stepDone(k)&&k!=STEP?icon('check'):i+1}</span>${l}</button>`).join('');
@@ -44,6 +46,7 @@ addEventListener('resize',navh);
 // Eingabe: nur den Abschnitt des gewählten Schritts zeigen.
 function stepShow(){
  if(CUR!='#b1')return;
+ if(LOADED&&!EDT){$('#blatt').hidden=true;$('#bt').hidden=true;sub();return}
  document.querySelectorAll('#edit [data-st]').forEach(s=>s.hidden=s.dataset.st!=STEP);
  $('#blatt').hidden=STEP!='dm';$('#bt').hidden=STEP!='bt';
  document.body.dataset.step=STEP;sub()}

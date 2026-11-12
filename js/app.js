@@ -86,7 +86,15 @@ function stat(W,C){
  const T=k=>`<b id="t${k}">${fx(C.t[k])}</b>`;
  const sum=`<article class="pc pay tot"><header class="pc-h"><h3>Summe</h3><span class="tag"><b id="tc">${C.t.c}</b> anwesend</span><div class="due"><span>Noch zu zahlen</span><span class="amt">${T('q')} €</span></div></header><dl class="kv"><div><dt>Beitrag</dt><dd>${T('k')}</dd></div><div><dt>Runde bezahlt</dt><dd>${T('l')}</dd></div><div><dt>Summe</dt><dd>${T('m')}</dd></div><div><dt>Rest letztes Kegeln</dt><dd>${T('n')}</dd></div><div><dt>soll zahlen</dt><dd>${T('o')}</dd></div><div><dt>Hat gezahlt</dt><dd>${T('p')}</dd></div></dl></article>`;
  return`<h2 id="s-stat">Zahlungen</h2><div class="pc-list pay-list">${cards}${sum}</div>`}
+// Eingabe nur für freigegebene Mitglieder und den Besitzer. Alle anderen sehen diesen Hinweis.
+function eingabeHinweis(){
+ const angemeldet=!!(USR&&ME&&(ME.id||ME.name));
+ const t=angemeldet
+  ? 'Du bist angemeldet, aber nicht zur Eingabe freigegeben. Die Eingabe ist nur für freigegebene Mitglieder und den Besitzer. Bitte den Besitzer um Freigabe deiner E-Mail-Adresse.'
+  : 'Die Eingabe ist nur für freigegebene Mitglieder und den Besitzer. Bitte oben unter „Mehr“ → Konto anmelden. Die Abende siehst du weiter unter Historie und Auswertung.';
+ return `<section class="note king" role="status">${icon('alert')}<p>${t}</p></section>`}
 function render(){
+ if(LOADED&&!EDT){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
  const W=V(),C=calc(W),L=HIST[0],hd=k=>STEP!=k?' hidden':'';
  $('#edit').innerHTML=`<section data-st="vor"${hd('vor')}><p class="mu lead">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}.</p>`
  +(typeof umfHtml==='function'?umfHtml():'')+chips()+stepNav('vor')+'</section>'
@@ -467,7 +475,7 @@ function startView(){
  if(!LOADED){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${'<div class="card sk"></div>'.repeat(4)}</div></div>`;return}
  const card=(ic,t,body,cls)=>`<article class="card${cls?' '+cls:''}"><h3>${icon(ic)}${t}</h3>${body}</article>`;
  const pres=S.rows?S.rows.filter(r=>r.c&&!r.gast).length:0,uc=typeof umfCount=='function'?umfCount():{dabei:0,rein:0,nein:0},open=MEM.liste.length-uc.dabei-uc.rein-uc.nein;
- const next=card('cal','Nächster Abend',`<p class="big">${S.date?dd(S.date):'Datum noch offen'}</p><p class="mu">${pres?`${pres} Mitglieder als anwesend markiert.`:'Noch niemand als anwesend markiert.'}</p><p class="pills"><span class="tag ok">Dabei ${uc.dabei}</span><span class="tag">Rein ${uc.rein}</span><span class="tag">Nein ${uc.nein}</span>${open>0?`<span class="tag mu">offen ${open}</span>`:''}</p><div class="acts">${EDT?`<button type="button" class="pri" data-nav="#b1/${pres?'spiel':'vor'}">${icon('edit')}Abend erfassen</button>`:''}<button type="button" data-nav="#b1/vor">Zur Umfrage</button></div>`,'hl');
+ const next=card('cal','Nächster Abend',`<p class="big">${S.date?dd(S.date):'Datum noch offen'}</p><p class="mu">${pres?`${pres} Mitglieder als anwesend markiert.`:'Noch niemand als anwesend markiert.'}</p><p class="pills"><span class="tag ok">Dabei ${uc.dabei}</span><span class="tag">Rein ${uc.rein}</span><span class="tag">Nein ${uc.nein}</span>${open>0?`<span class="tag mu">offen ${open}</span>`:''}</p><div class="acts">${EDT?`<button type="button" class="pri" data-nav="#b1/${pres?'spiel':'vor'}">${icon('edit')}Abend erfassen</button>`:''}${EDT?'<button type="button" data-nav="#b1/vor">Zur Umfrage</button>':''}</div>`,'hl');
  if(!L){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${next}${emptyCard('Noch keine gespeicherten Abende. Nach dem ersten „Abend speichern“ erscheinen hier Kontostand, offene Beträge und Könige.')}</div></div>`;return}
  const kasse=card('wallet','Kontostand',`<p class="big">${typeof L.kasse.neu=='number'?eu(L.kasse.neu):'–'}</p><p class="mu">Stand nach dem ${dd(L.date)}${typeof L.kasse.gezahlt=='number'?` · eingezahlt ${eu(L.kasse.gezahlt)}`:''}</p>`);
  const op=L.rows.filter(r=>!isG(r)&&+r.q>.005).sort((a,b)=>b.q-a.q),os=op.reduce((a,r)=>a+(+r.q),0);
