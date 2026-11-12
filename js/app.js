@@ -377,13 +377,6 @@ function aus(){
  const kcol=ST.kc=='s'?'Gesamt':KL[+ST.kc].replace(' - König',''),eAvg=MODE=='avg',efmt=v=>fmtC(ST.ec,v,eAvg);
  const kCtl=`<div class="top"><label>Diagramm ${sel('kt',TYPES,ST.kt)}</label>${ST.kt!='none'?`<label>Spalte ${sel('kc',[['s','Gesamt'],...KL.map((k,i)=>[i,k.replace(' - König','')])],ST.kc)}</label>`:''}</div>`+(ST.kt!='none'?chart(ST.kt,Object.values(kt).map(x=>({n:x.n,v:ST.kc=='s'?x.s:x.v[+ST.kc]})),v=>iv(v),'Könige – '+kcol):'');
  const eCtl=`<div class="top"><label>Diagramm ${sel('et',TYPES,ST.et)}</label>${ST.et!='none'?`<label>Spalte ${sel('ec',[...'defghij'].map(k=>[k,COLN(k)]),ST.ec)}</label>`:''}</div>`+(ST.et!='none'?chart(ST.et,E.map(x=>({n:x.n,v:eAvg?x[ST.ec]/x.a:x[ST.ec]})),efmt,COLN(ST.ec)+(eAvg?' (Ø pro anwesendem Abend)':' (Summe)')):'');
- const dm={};let dmN=0;
- H.forEach(h=>{if(!h.blatt||!h.blatt.length)return;dmN++;h.blatt.forEach(b=>{const n=canon(b.name),o=dm[n]=dm[n]||{n,a:0,v:[0,0,0,0,0,0,0],s:0};o.a++;(b.v||[]).forEach((x,i)=>{if(i<7)o.v[i]+=+x||0});o.s+=typeof b.s=='number'?b.s:bsum(b.v)})});
- const DMr=rk(Object.values(dm).map(o=>({...o,avg:o.s/o.a})).sort((a,b)=>b.avg-a.avg||b.s-a.s||a.n.localeCompare(b.n)),'avg'),dmT=DMr.reduce((t,o)=>{t.a+=o.a;t.s+=o.s;o.v.forEach((x,i)=>t.v[i]+=x);return t},{a:0,s:0,v:[0,0,0,0,0,0,0]});
- const dmSec=`<h2 id="a-dm">Dortmunder <span class="mu">${YR?'Zeitraum '+YR:'Alle Jahre'}</span></h2>`
-  +(DMr.length?`<p class="note">Ø aller Teilnahmen: <b>${fx(dmT.s/dmT.a)}</b> Punkte (${dmT.a} Teilnahmen von ${DMr.length} Beteiligten an ${dmN} ${dmN==1?'Abend':'Abenden'}${YR?' in '+YR:''})</p><div class="top"><label>Diagramm ${sel('dt',TYPES,ST.dt)}</label></div>`+(ST.dt!='none'?chart(ST.dt,DMr.map(x=>({n:x.n,v:x.avg})),fx,'Dortmunder – Ø pro Teilnahme'+(YR?' '+YR:'')):'')
-   +T(['Name','Teilnahmen',...[1,2,3,4,5,6,7].map(i=>`${i} <span class="mu">(×${i})</span>`),'Summe','Ø pro Teilnahme'],[...DMr.map(x=>`<tr><td>${x.rang}. ${esc(x.n)}${typ(x.n)=='Gast'?' <span class="mu">(Gast)</span>':''}</td><td>${x.a}</td>${x.v.map(v=>`<td>${v?n0(v):''}</td>`).join('')}<td>${n0(x.s)}</td><td class="cv"><b>${fx(x.avg)}</b></td></tr>`),`<tr class="sum"><td><b>Alle Beteiligten</b></td><td><b>${dmT.a}</b></td>${dmT.v.map(v=>`<td><b>${v?n0(v):''}</b></td>`).join('')}<td><b>${n0(dmT.s)}</b></td><td class="cv"><b>${fx(dmT.s/dmT.a)}</b></td></tr>`])
-  :`<p class="mu">${YR?`Für ${YR} gibt es keine Abende mit Dortmunder-Werten.`:'Es gibt noch keine Abende mit Dortmunder-Werten.'}</p>`);
  const Hs=H.slice().sort((a,b)=>a.date<b.date?-1:1),who=[...new Set(H.flatMap(h=>h.rows.map(r=>r.name)))].sort((a,b)=>a.localeCompare(b));
  if(ST.vw&&!who.includes(ST.vw))ST.vw='';
  const vlab=ST.vc=='@neu'?'Kontostand (Neuer Konto)':ST.vc=='@anw'?'Anwesende (Anzahl)':COLN(ST.vc);
@@ -398,7 +391,7 @@ function aus(){
  const kSec=`<h2 id="a-kon">Könige-Rangliste</h2>${kCtl}${T(['Rang',...KL.map(k=>k.replace(' - König',''))],K.map(x=>`<tr><td>${x.rang}. ${x.n}</td>${x.v.map(v=>`<td>${v||''}</td>`).join('')}</tr>`))}`;
  const aSec=`<h2 id="a-anw">Anwesenheit</h2>${T(['Name','Typ','Abende','Quote','','zuletzt dabei'],A2.map(x=>{const q=H.length?x.a/H.length:0;return`<tr><td>${x.rang}. ${x.n}</td><td>${typ(x.n)}</td><td>${x.a}</td><td>${Math.round(q*100)} %</td><td style="text-align:left"><span class="bar" style="width:${Math.round(q*100)}px"></span></td><td>${dd(x.l)}</td></tr>`}))}`;
  const eSec=`<h2 id="a-ein">Einzelergebnisse</h2>${eCtl}${T(['Name','Abende',...'defghij'.split('').map(k=>COLS.find(c=>c[0]==k)[1])],E.map(x=>`<tr><td>${x.n}</td><td>${x.a}</td>${'defghij'.split('').map(k=>{const v=MODE=='avg'?x[k]/x.a:x[k];return`<td>${k=='j'?eu(v):MODE=='avg'?fx(v):iv(v)}</td>`}).join('')}</tr>`))}`;
- $('#aus').innerHTML=aTop+`${dmSec}${kSec}${eSec}${aSec}${vSec}${jSec}`;sortTables();compact('a-dm',[2,3,4,5,6,7,8]);compact('a-anw',[1,4]);compact('a-jahr',[3,4]);sub()}
+ $('#aus').innerHTML=aTop+`${kSec}${eSec}${aSec}${vSec}${jSec}`;sortTables();compact('a-anw',[1,4]);compact('a-jahr',[3,4]);sub()}
 $('#aus').addEventListener('change',e=>{const t=e.target;if(t.id=='yr')YR=t.value;if(t.id=='md')MODE=t.value;if(t.dataset.s)ST[t.dataset.s]=t.value;aus()});
 // Auswertung und Dortmunder: Spalten per Klick auf die Überschrift sortieren (beste/größte Werte zuerst, Rang: 1 zuerst).
 // Summenzeilen (tr.sum, z. B. „Alle Beteiligten“) werden nicht mitsortiert und bleiben am Tabellenende.
