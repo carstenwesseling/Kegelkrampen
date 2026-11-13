@@ -28,6 +28,18 @@ async function termineLaden(){
  if(typeof CUR!=='undefined'&&CUR=='#b0'&&typeof startView==='function')startView();
 }
 
+// Die nächsten drei Kegelabende: nur Wochentag, Datum und Uhrzeit, ohne Titel und Ort.
+function kegelabendeHTML(){
+ if(TERMINE_ERR)return'<p class="mu">Termine konnten nicht geladen werden.</p>';
+ if(TERMINE===null)return'<p class="mu">Termine werden geladen …</p>';
+ if(!TERMINE.length)return'<p class="mu">Keine Termine im Kalender.</p>';
+ return`<ul class="lst termine">${TERMINE.slice(0,3).map(t=>{
+  const tag=t.d.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
+  const zeit=t.ganz?'':' · '+t.d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr';
+  return`<li><b>${esc(tag+zeit)}</b></li>`;
+ }).join('')}</ul>`;
+}
+
 function termineHTML(){
  if(TERMINE_ERR)return'<p class="mu">Termine konnten nicht geladen werden.</p>';
  if(TERMINE===null)return'<p class="mu">Termine werden geladen …</p>';
