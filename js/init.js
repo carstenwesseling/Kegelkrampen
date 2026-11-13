@@ -11,7 +11,7 @@ const SUB={
  '#b2':[['h-rek','Rekorde'],['h-tage','Spieltage'],['h-tab','Tabelle'],['h-dm','Dortmunder'],['h-bt','Berg und Tal'],['hk-kasse','Kasse'],['hk-koenige','Könige']],
  '#b3':[['a-kon','Könige'],['a-ein','Einzelergebnisse'],['a-anw','Anwesenheit'],['a-ver','Verlauf'],['a-jahr','Jahre']],
  '#b8':[['dt-tab','Tabelle'],['dt-jahr','Schnitt pro Jahr'],['dt-ges','Schnitt gesamt'],['dt-mm','Max / Min'],['dt-club','Club'],['dt-rek','Rekorde'],['dt-min','Minusrekorde']],
- '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-lg','Angemeldet'],['m-frg','Freigabe']]};
+ '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-lg','Angemeldet'],['m-frg','Freigabe'],['m-satzung','Satzung']]};
 const SUBSTEP={vor:[['s-umf','Umfrage'],['s-anw','Anwesenheit']],ab:[['s-stat','Zahlungen'],['ek-kasse','Kasse'],['ek-koenige','Könige'],['s-rek','Rekorde']]};
 const navh=()=>document.documentElement.style.setProperty('--navh',($('#navs').offsetHeight||64)+'px');
 const stepDone=k=>{const R=S.rows||[];
