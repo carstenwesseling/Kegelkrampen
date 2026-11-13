@@ -9,10 +9,18 @@ service firebase.storage {
         && request.auth.token.email_verified == true;
     }
 
-    // Fotos der Kegeltouren: lesbar für alle, schreibbar nur für den Besitzer.
+    // Freigegeben: Besitzer oder Mitglied mit Eintrag in editors/<mail> (Firestore).
+    function isFreigegeben() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && (request.auth.token.email == 'carsten.wesseling@gmail.com'
+            || firestore.exists(/databases/(default)/documents/editors/$(request.auth.token.email)));
+    }
+
+    // Fotos der Kegeltouren: lesbar nur für Freigegebene, schreibbar nur für den Besitzer.
     // Die Pfade sind zufällig, sie lassen sich nicht erraten, aber über den Link abrufen.
     match /touren/{file} {
-      allow read: if true;
+      allow read: if isFreigegeben();
       allow write: if isOwner() && request.resource.size < 20 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }

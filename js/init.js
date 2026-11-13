@@ -108,7 +108,8 @@ route();
  // Angemeldete Adresse merken (logins/<mail>), damit der Besitzer sie im Tab „Mitglieder“ freigeben kann.
  if(db&&ME&&ME.email&&!OWN)db.doc('logins/'+ME.email).set({email:ME.email,name:ME.name||ME.email,last:new Date().toISOString()},{merge:true}).catch(()=>{});
  if(db){try{
-  const [s,d,c,m]=await Promise.all([db.collection('sessions').get(),db.doc('state/entwurf').get(),db.doc('state/config').get(),db.doc('state/mitglieder').get()]);
+  // Spieltage und Entwurf (Beiträge) nur für Freigegebene; Gäste bekommen leere Daten.
+  const [s,d,c,m]=await Promise.all([EDT?db.collection('sessions').get():{docs:[]},EDT?db.doc('state/entwurf').get():{exists:false},db.doc('state/config').get(),db.doc('state/mitglieder').get()]);
   HIST=s.docs.map(x=>clean(x.data())).sort((a,b)=>a.date<b.date?1:-1);
   if(c.exists)CFG=clean(c.data());RK=clean(CFG.rekorde||[]);
   if(m.exists)MEM={liste:[],gaeste:[],weitere:[],...clean(m.data())};

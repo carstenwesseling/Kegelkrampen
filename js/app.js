@@ -87,6 +87,14 @@ function stat(W,C){
  const sum=`<article class="pc pay tot"><header class="pc-h"><h3>Summe</h3><span class="tag"><b id="tc">${C.t.c}</b> anwesend</span><div class="due"><span>Noch zu zahlen</span><span class="amt">${T('q')} €</span></div></header><dl class="kv"><div><dt>Beitrag</dt><dd>${T('k')}</dd></div><div><dt>Runde bezahlt</dt><dd>${T('l')}</dd></div><div><dt>Summe</dt><dd>${T('m')}</dd></div><div><dt>Rest letztes Kegeln</dt><dd>${T('n')}</dd></div><div><dt>soll zahlen</dt><dd>${T('o')}</dd></div><div><dt>Hat gezahlt</dt><dd>${T('p')}</dd></div></dl></article>`;
  return`<h2 id="s-stat">Zahlungen</h2><div class="pc-list pay-list">${cards}${sum}</div>`}
 // Eingabe nur für freigegebene Mitglieder und den Besitzer. Alle anderen sehen diesen Hinweis.
+// Hinweise für Inhalte nur für Freigegebene (Spieltage, Kegeltouren, Kasse).
+function gateText(){
+ const angemeldet=!!(USR&&ME&&(ME.id||ME.name));
+ return angemeldet?'Noch nicht freigeschaltet. Bitte den Besitzer um Freigabe deiner E-Mail-Adresse.':'Nur für freigeschaltete Mitglieder. Bitte oben unter Mehr → Konto anmelden.';
+}
+function gateHTML(bereich){
+ return`<section class="note king" role="status">${icon('alert')}<p>${bereich}: ${gateText()}</p></section>`;
+}
 function eingabeHinweis(){
  const angemeldet=!!(USR&&ME&&(ME.id||ME.name));
  const t=angemeldet
@@ -170,6 +178,7 @@ async function save(){
 const inHY=h=>!HYR||h.date.startsWith(HYR);
 const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set([...HIST.map(h=>h.date.slice(0,4)),String(new Date().getFullYear())])].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
 function hist(sel){
+ if(!EDT){$('#hist').innerHTML=gateHTML('Historie');return}
  if(EDIT&&EDIT.date!=sel)EDIT=null;
  if(sel&&HYR&&sel.slice(0,4)!=HYR)HYR=sel.slice(0,4);
  HSEL=sel;$('#hist').innerHTML=(typeof dmImportBox==='function'?dmImportBox():'')+rekView('h-rek')+'<h2 id="h-tage">Gespeicherte Spieltage</h2>'+hyrSel()+daysRow(sel)+'<div id="hd"></div>';
@@ -383,6 +392,7 @@ function chart(type,items,fmt,title){
  const pie=it.length>8?[...it.slice(0,7),{n:'Übrige',v:it.slice(7).reduce((a,x)=>a+x.v,0),o:1}]:it;
  return`<div class="cap">${esc(title)}</div><div class="w cw">${type=='pie'?pieHtml(pie,fmt,aria):barSvg(it,fmt,aria)}</div>`}
 function aus(){
+ if(!EDT){$('#aus').innerHTML=gateHTML('Auswertung');return}
  const yrs=[...new Set(HIST.map(h=>h.date.slice(0,4)))].sort().reverse(),H=HIST.filter(h=>!YR||h.date.startsWith(YR)),N=names(),canon=n=>N.find(x=>norm(x)==norm(n))||n.trim();
  const rk=(rows,key)=>{let p=0;return rows.map((r,i)=>{if(!i||r[key]!=rows[i-1][key])p=i+1;return{...r,rang:p}})};
  const kt={};H.forEach(h=>(h.koenige||[]).forEach(k=>{const j=KL.indexOf(k.t);if(j<0)return;(k.name||'').split('/').map(canon).filter(Boolean).forEach(n=>(kt[n]=kt[n]||{n,v:[0,0,0,0,0],s:0}).v[j]++)}));
@@ -481,12 +491,13 @@ function startView(){
  const el=$('#start'),L=HIST[0];
  termineLaden();
  const hero=`<figure class="hero-img"><img src="img/willingen-2026.jpg" alt="Willingen 2026 – Tour der Kegelkrampen" width="1024" height="1536" decoding="async"></figure>`;
- const head=`<div class="st-head"><h2>Kegelclub Kegelkrampen</h2><p class="mu">${LOADED?(HIST.length?`${HIST.length} Spieltage gespeichert, zuletzt am ${dd(L.date)}.`:'Noch keine Spieltage gespeichert.'):'Daten werden geladen …'}</p></div>`;
+ const head=`<div class="st-head"><h2>Kegelclub Kegelkrampen</h2><p class="mu">${!LOADED?'Daten werden geladen …':!EDT?'':(HIST.length?`${HIST.length} Spieltage gespeichert, zuletzt am ${dd(L.date)}.`:'Noch keine Spieltage gespeichert.')}</p></div>`;
  if(!LOADED){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${'<div class="card sk"></div>'.repeat(4)}</div></div>`;return}
  const card=(ic,t,body,cls)=>`<article class="card${cls?' '+cls:''}"><h3>${icon(ic)}${t}</h3>${body}</article>`;
  const pres=S.rows?S.rows.filter(r=>r.c&&!r.gast).length:0,uc=typeof umfCount=='function'?umfCount():{dabei:0,rein:0,nein:0},open=MEM.liste.length-uc.dabei-uc.rein-uc.nein;
  const next=card('cal','Nächster Abend',`${naechsterHTML()}${pres?`<p class="mu">${pres} Mitglieder als anwesend markiert.</p>`:''}<p class="pills"><span class="tag ok">Dabei ${uc.dabei}</span><span class="tag">Rein ${uc.rein}</span><span class="tag">Nein ${uc.nein}</span>${open>0?`<span class="tag mu">offen ${open}</span>`:''}</p><div class="acts">${EDT?`<button type="button" class="pri" data-nav="#b1/${pres?'spiel':'vor'}">${icon('edit')}Abend erfassen</button>`:''}${EDT?'<button type="button" data-nav="#b1/vor">Zur Umfrage</button>':''}</div>`,'hl');
  const abende=card('cal','Nächste Kegelabende',kegelabendeHTML());
+ if(!EDT){const gq=card('right','Schnellzugriff',`<div class="acts q"><button type="button" data-tab="#b8">${icon('pin')}Dortmunder</button></div>`);el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${next}${abende}</div>${card('wallet','Kontostand',`<p class="mu">${gateText()}</p>`)}${card('alert','Offene Beträge',`<p class="mu">${gateText()}</p>`)}${card('crown','Könige',`<p class="mu">${gateText()}</p>`)}${gq}</div></div>`;return}
  if(!L){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${next}${abende}</div>${emptyCard('Noch keine gespeicherten Abende. Nach dem ersten „Abend speichern“ erscheinen hier Kontostand, offene Beträge und Könige.')}</div></div>`;return}
  const kasse=card('wallet','Kontostand',`<p class="big">${typeof L.kasse.neu=='number'?eu(L.kasse.neu):'–'}</p><p class="mu">Stand nach dem ${dd(L.date)}${typeof L.kasse.gezahlt=='number'?` · eingezahlt ${eu(L.kasse.gezahlt)}`:''}</p>`);
  const op=L.rows.filter(r=>!isG(r)&&+r.q>.005).sort((a,b)=>b.q-a.q),os=op.reduce((a,r)=>a+(+r.q),0);
