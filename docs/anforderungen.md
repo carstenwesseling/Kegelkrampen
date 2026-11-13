@@ -82,7 +82,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 ## Kegeltouren
 
-- Fotos getrennt nach Jahren, Miniaturen in der Übersicht, Originale in voller Auflösung.
+- Fotos getrennt nach Jahren: Es wird immer nur ein Jahr angezeigt, im Standard das neueste. Miniaturen in der Übersicht, Originale in voller Auflösung.
 - Einzelansicht und Diashow im Vollbild.
 - Upload, Verschieben und Löschen nur für den Besitzer.
 

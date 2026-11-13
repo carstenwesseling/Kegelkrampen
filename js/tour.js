@@ -5,7 +5,6 @@ const tsrc=id=>window.kkBlobUrl(id);
 const tSort=(a,b)=>(a.taken||0)-(b.taken||0)||String(a.name||'').localeCompare(String(b.name||''),'de',{numeric:true});
 const tYears=()=>[...new Set(TO.map(t=>+t.year))].sort((a,b)=>b-a);
 const tList=y=>TO.filter(t=>t.aid&&+t.year==+y).sort(tSort);
-const tImgN=()=>TO.filter(t=>t.aid).length;
 const tMB=b=>b>=1073741824?(b/1073741824).toLocaleString('de-DE',{maximumFractionDigits:1})+' GB':(b/1048576).toLocaleString('de-DE',{maximumFractionDigits:1})+' MB';
 async function tour(){
  const el=$('#tour');
@@ -19,13 +18,13 @@ async function tour(){
  tourView()}
 function tourView(msg){
  const el=$('#tour'),can=!!(OWN&&AS&&db),yrs=tYears().filter(y=>can||tList(y).length);
- if(TYR&&!yrs.includes(+TYR))TYR='';
+ if(!yrs.includes(+TYR))TYR=yrs.length?String(yrs[0]):'';
  [...TEY].forEach(y=>{if(!yrs.includes(y))TEY.delete(y)});[...TSEL].forEach(i=>{if(!TO.some(t=>t.id==i))TSEL.delete(i)});
- const vis=TYR?yrs.filter(y=>y==TYR):yrs;
+ const vis=yrs.filter(y=>y==TYR);
  let h='<h2 id="t-tab">Kegeltouren</h2>';
  if(!yrs.length)h+='<p class="note">Noch keine Bilder vorhanden.'+''+'</p>';
  {const cy=new Date().getFullYear();
-  if(yrs.length||can)h+=`<div class="top">${yrs.length?`<label>Jahr <select id="tyr"><option value="">Alle (${tImgN()} Bilder)</option>${yrs.map(y=>`<option value="${y}"${y==TYR?' selected':''}>${y} (${tList(y).length})</option>`).join('')}</select></label>`:''}${can?'<button type="button" data-ny>＋ Neues Jahr</button>':''}</div>`;
+  if(yrs.length||can)h+=`<div class="top">${yrs.length?`<label>Jahr <select id="tyr">${yrs.map(y=>`<option value="${y}"${y==TYR?' selected':''}>${y} (${tList(y).length})</option>`).join('')}</select></label>`:''}${can?'<button type="button" data-ny>＋ Neues Jahr</button>':''}</div>`;
   if(can&&TNY)h+=`<div class="top te"><label>Neues Jahr <input type="number" id="te-new" min="1990" max="2100" step="1" inputmode="numeric" value="${yrs.includes(cy)?Math.max(...yrs)+1:cy}"></label><button type="button" class="pri" data-nygo>Jahr anlegen</button><button type="button" data-nyc>Abbrechen</button><span class="mu">Das leere Jahr erscheint hier; Bilder lassen sich danach hinzufügen.</span></div>`}
  vis.forEach(y=>{const l=tList(y),ed=can&&TEY.has(+y),n=l.filter(t=>TSEL.has(t.id)).length;
   h+=`<section class="ty${ed?' ed':''}" data-yr="${y}"><h2 id="t-y${y}">${y} <span class="mu">${l.length} ${l.length==1?'Bild':'Bilder'}</span></h2><div class="top">${l.length?`<button type="button" class="pri" data-show="${y}">▶ Diashow ${y}</button>`:''}${can?`<button type="button" data-edit="${y}" aria-pressed="${ed}">${ed?'✓ Fertig':'✎ Jahr bearbeiten'}</button>`:''}</div>`
@@ -70,7 +69,7 @@ async function tUpload(files,year){
   }catch(e){fail.push(`${f.name} (${e&&e.code==='too_large'?'zu groß':e&&e.code==='unsupported_type'?'Format nicht unterstützt':e&&e.code==='quota_or_state'?'Speicher voll':(e&&(e.message||e.code))||'Fehler'})`)}}
   if(ok)await tUnmark(y)}
  finally{TUP=false;TNOTE=''}
- if(ok&&TYR&&+TYR!==y)TYR='';
+ if(ok)TYR=String(y);
  const msg=(ok?`${ok} ${ok==1?'Bild':'Bilder'} für ${y} hochgeladen.`:'Es wurde nichts hochgeladen.')+(fail.length?` Nicht hochgeladen: ${fail.join('; ')}.`:'');
  tourView(msg);tSay(msg)}
 function tSelUpdate(y){
@@ -104,10 +103,10 @@ function tFocus(sel){const e=$(sel);if(e){e.focus({preventScroll:true});if(e.sel
 async function tNewYear(){
  const inp=$('#te-new'),y=Math.round(+(inp&&inp.value));
  if(!(y>=1990&&y<=2100)){tSay('Bitte ein Jahr zwischen 1990 und 2100 eingeben.');return}
- if(tYears().includes(y)){TNY=false;if(TYR&&+TYR!==y)TYR='';TEY.add(y);tourView(`${y} gibt es schon.`);tSay(`${y} gibt es schon.`);tGo(y);return}
+ if(tYears().includes(y)){TNY=false;TYR=String(y);TEY.add(y);tourView(`${y} gibt es schon.`);tSay(`${y} gibt es schon.`);tGo(y);return}
  const id='y'+y,d={year:y,marker:1,ts:Date.now()};
  try{await db.doc('touren/'+id).set(d)}catch(e){tSay('Anlegen fehlgeschlagen: '+((e&&(e.message||e.code))||'Fehler'));return}
- TO.push({...d,id});TNY=false;if(TYR&&+TYR!==y)TYR='';TEY.add(y);
+ TO.push({...d,id});TNY=false;TYR=String(y);TEY.add(y);
  const msg=`${y} wurde angelegt – jetzt Bilder hinzufügen.`;tourView(msg);tSay(msg);tGo(y)}
 async function tMvGo(){
  if(!TMV)return;if(TUP){tSay('Es läuft noch ein Vorgang – bitte kurz warten.');return}
@@ -134,7 +133,6 @@ async function tMvGo(){
  finally{TUP=false}
  TMV=null;
  if(mode=='year'&&!fail.length){TEY.delete(y);TEY.add(ny);if(TYR&&+TYR==y)TYR=String(ny);if(TUY==String(y))TUY=String(ny)}
- else if(ok&&TYR&&+TYR!==ny&&+TYR!==y)TYR='';
  const msg=(ok?(mode=='year'?`Jahr ${y} heißt jetzt ${ny} (${ok} ${ok==1?'Bild':'Bilder'}).`:`${ok} ${ok==1?'Bild':'Bilder'} nach ${ny} verschoben.`):'Es wurde nichts verschoben.')+(fail.length?` Nicht verschoben: ${fail.join('; ')}.`:'');
  tourView(msg);tSay(msg);if(ok)tGo(mode=='year'&&!fail.length?ny:y)}
 //TOUR-VIEWER
