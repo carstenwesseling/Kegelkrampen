@@ -11,10 +11,3 @@ const firebaseConfig = {
 
 // Nur dieses Google-Konto darf schreiben (Speichern, Mitglieder, Fotos).
 const KK_OWNER_EMAIL = "carsten.wesseling@gmail.com";
-
-// Google-Kalender für die Startseite („Nächster Abend“). Der Kalender muss öffentlich sein.
-// GCAL_ID: Kalender-ID aus den Kalendereinstellungen.
-// GCAL_KEY: API-Schlüssel mit der Google Calendar API, im Google-Cloud-Projekt auf die Domain
-// (HTTP-Referrer) und auf die Calendar API beschränkt. Der Schlüssel ist nicht geheim.
-const GCAL_ID = "q2justmkeusf773sf4cvcsnkhc@group.calendar.google.com";
-const GCAL_KEY = "AIzaSyABMzBRARH71uYDYKPVjKMaiVJFfWg4S-s";
