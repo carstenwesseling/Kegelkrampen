@@ -75,6 +75,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 ## Mitglieder
 
 - Mitgliederliste entsteht aus allen jemals Anwesenden.
+- Spalte „Funktion im Club“ (Tabelle der Mitgliederliste, ganz rechts): freier Text je Mitglied, z. B. Kassierer. Nur der Besitzer trägt sie ein (Speichern beim Verlassen des Feldes oder mit Enter); Freigegebene und Leser sehen den Text nur. Gäste haben keine Funktion („–“). Gespeichert im Dokument `state/mitglieder` unter `funktion`.
 - Reihenfolge der Liste bestimmt die Reihenfolge der Anwesenheits-Knöpfe in der Eingabe.
 - Buggy: Burkhard und Buggy sind dieselbe Person; überall „Buggy“. Buggy hat als einzige Ausnahme keinen Anwesenheits-Knopf.
 - Trunsen: „André“/„Andre“ wird überall durch „Trunsen“ ersetzt.

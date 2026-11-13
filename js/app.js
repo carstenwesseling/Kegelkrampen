@@ -446,7 +446,7 @@ function dtSince(n){
 function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0],s:dtSince(n)}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
- $('#mem').innerHTML=`<h2 id="m-liste">Mitgliederliste (${MEM.liste.length+(MEM.weitere||[]).length} Mitglieder, ${MEM.gaeste.length} Gäste)</h2><div class="w"><table class="stack mt"><tr class="hd"><th>Name</th><th>Typ</th><th>Mitglied seit</th><th>davon ${JY}</th><th>zuletzt dabei</th></tr>${rows.map(r=>`<tr><td>${esc(r.n)}${r.t=='Gast'?' <span class="tag">Gast</span>':''}</td><td data-l="Typ">${r.t}</td><td data-l="Mitglied seit">${r.s||'–'}</td><td data-l="davon ${JY}">${r.y}</td><td data-l="zuletzt dabei">${dd(r.l)||'–'}</td></tr>`).join('')}</table></div>`
+ $('#mem').innerHTML=`<h2 id="m-liste">Mitgliederliste (${MEM.liste.length+(MEM.weitere||[]).length} Mitglieder, ${MEM.gaeste.length} Gäste)</h2><div class="w"><table class="stack mt"><tr class="hd"><th>Name</th><th>Typ</th><th>Mitglied seit</th><th>davon ${JY}</th><th>zuletzt dabei</th><th>Funktion im Club</th></tr>${rows.map(r=>`<tr><td>${esc(r.n)}${r.t=='Gast'?' <span class="tag">Gast</span>':''}</td><td data-l="Typ">${r.t}</td><td data-l="Mitglied seit">${r.s||'–'}</td><td data-l="davon ${JY}">${r.y}</td><td data-l="zuletzt dabei">${dd(r.l)||'–'}</td><td data-l="Funktion im Club">${r.t=='Gast'?'–':OWN?`<input type="text" data-fn="${esc(r.n)}" value="${esc((MEM.funktion||{})[r.n]||'')}" maxlength="60" placeholder="–" aria-label="Funktion im Club von ${esc(r.n)}">`:(esc((MEM.funktion||{})[r.n]||'')||'–')}</td></tr>`).join('')}</table></div>${OWN?'<p class="mu" id="fn-rm" aria-live="polite"></p>':''}`
  +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'')+(OWN?reihe()+'<div id="frg"></div>':'')+`<h2 id="m-satzung">Satzung</h2><div class="pdfw"><iframe src="dokumente/satzung.pdf#view=FitH" title="Satzung (PDF)" loading="lazy"></iframe></div><p class="mu">Wird das PDF nicht angezeigt? <a href="dokumente/satzung.pdf" target="_blank" rel="noopener">PDF in neuem Tab öffnen</a></p>`;
  if(OWN){$('#add').onclick=()=>busy($('#add'),addMember());$('#nm').onkeydown=e=>{if(e.key=='Enter'&&!e.isComposing){e.preventDefault();$('#add').click()}};if(typeof frgLoad==='function')frgLoad().then(sub)}sub()}
 const reihe=()=>`<h2 id="m-reihe">Reihenfolge der Liste</h2><div class="w"><table><tr><th>Name</th><th>Verschieben</th></tr>${MEM.liste.map((n,i)=>`<tr><td>${i+1}. ${esc(n)}</td><td class="mvc"><button type="button" class="mv" data-mv="${i}" data-dir="-1" aria-label="${esc(n)} nach oben"${i?'':' disabled'}>${icon('up')}</button><button type="button" class="mv" data-mv="${i}" data-dir="1" aria-label="${esc(n)} nach unten"${i<MEM.liste.length-1?'':' disabled'}>${icon('down')}</button></td></tr>`).join('')}</table></div><p class="mu" id="m-rm" aria-live="polite"></p>`;
@@ -459,6 +459,13 @@ $('#mem').addEventListener('click',async e=>{
  MVB=false;MEM.liste=L;sync();draft();render();members();
  const f=document.querySelector(`#mem [data-mv="${j}"][data-dir="${d}"]:not(:disabled)`)||document.querySelector(`#mem [data-mv="${j}"]:not(:disabled)`);if(f)f.focus({preventScroll:true});
  m(`${L[j]} steht jetzt an Position ${j+1}.`)});
+// Spalte „Funktion im Club“: nur der Besitzer trägt sie ein; gespeichert in state/mitglieder (Feld funktion).
+$('#mem').addEventListener('change',async e=>{
+ const inp=e.target.closest('[data-fn]');if(!inp||!OWN||!db)return;
+ const n=inp.dataset.fn,v=inp.value.trim(),m=t=>{const x=$('#fn-rm');if(x)x.textContent=t};
+ const F={...(MEM.funktion||{})};if(v)F[n]=v;else delete F[n];
+ try{await db.doc('state/mitglieder').set(clean({...MEM,funktion:F}))}catch(err){m('Speichern fehlgeschlagen: '+(err.message||err.code));return}
+ MEM.funktion=F;m(v?`Funktion von ${n} gespeichert.`:`Funktion von ${n} entfernt.`)});
 async function addMember(){
  const n=$('#nm').value.trim(),m=t=>$('#mm').textContent=t;
  if(!n)return m('Bitte einen Namen eingeben.');if(names().some(x=>norm(x)==norm(n)))return m('Diesen Namen gibt es schon.');
