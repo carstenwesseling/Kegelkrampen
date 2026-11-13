@@ -58,7 +58,7 @@ Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die D
 | `sessions/<YYYY-MM-DD>` | ein gespeicherter Spieltag mit Zeilen, Kasse, Könige, Dortmunder und Berg-und-Tal |
 | `state/entwurf` | aktueller Entwurf der Eingabe |
 | `state/config` | Rekorde und Einstellungen |
-| `state/mitglieder` | Mitgliederliste (Reihenfolge), Gäste, weitere Mitglieder |
+| `state/mitglieder` | Mitgliederliste (Reihenfolge), Gäste, weitere Mitglieder, Funktionen im Club (`funktion`: Name → Text) |
 | `touren/<id>` | Metadaten eines Kegeltour-Fotos (Jahr, Bild-IDs, Name) |
 
 ## Lokal ansehen
