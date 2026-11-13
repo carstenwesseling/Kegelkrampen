@@ -51,8 +51,8 @@ function kegelabendeHTML(){
  const h=terminHinweis();
  if(h)return h;
  return`<ul class="lst termine">${TERMINE.slice(0,3).map(t=>{
-  const tag=t.d.toLocaleDateString('de-DE',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
+  const datum=t.d.toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'numeric'});
   const zeit=t.ganz?'':' · '+t.d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr';
-  return`<li><b>${esc(tag+zeit)}</b></li>`;
+  return`<li><b>${esc(datum+zeit)}</b></li>`;
  }).join('')}</ul>`;
 }
