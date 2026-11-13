@@ -33,7 +33,7 @@ function tourView(msg){
  if(can)h+=`<h2 id="t-up">Bilder hinzufügen</h2><div class="dz" id="tu-dz"><p class="dzh"><b>Bilder hierher ziehen</b></p><div class="top"><label>Jahr <input type="number" id="tu-y" min="1990" max="2100" step="1" inputmode="numeric" value="${TUY||TYR||yrs[0]||new Date().getFullYear()}"></label><button type="button" class="pri" id="tu-b">Bilder auswählen und hochladen</button><input type="file" id="tu-f" accept="image/*" multiple hidden></div></div><p class="mu" id="tu-m" role="status" aria-live="polite">${msg||''}</p><p class="mu" id="tu-u"></p>`;
  if(can)h+='<input type="file" id="te-f" accept="image/*" multiple hidden>';;
  el.innerHTML=h;
- SUB['#b7']=[['t-tab','Übersicht'],...vis.map(y=>[`t-y${y}`,String(y)]),...(can?[['t-up','Hochladen']]:[])];
+ SUB['#b7']=[['t-tab','Übersicht'],...(can?[['t-up','Hochladen']]:[])];
  if(CUR=='#b7')sub();
  if(can)tUsage()}
 async function tUsage(){
