@@ -1,10 +1,11 @@
 //TOUR-START
 let TO=null,TYR='',TUY='',TUP=false,TNOTE='',TCT=0,TMV=null,TNY=false,AS;const TEY=new Set(),TSEL=new Set();
 const tT=(p,ms=10000)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
-// Fotos nur mit Anmeldung laden (Storage-Regeln: nur Freigegebene). Der Abruf liefert eine lokale Adresse.
+// Fotos nur für Freigegebene: Die Download-Adresse holt sich die App erst nach der Regelprüfung
+// (getDownloadURL). Eingebunden über <img>, ohne fetch(), daher ohne CORS-Freigabe am Bucket nötig.
 const TPH='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 const TCACHE=new Map();
-const tFetch=id=>{if(!TCACHE.has(id))TCACHE.set(id,fbStore.ref(id).getDownloadURL().then(u=>fetch(u)).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.blob()}).then(b=>URL.createObjectURL(b)).catch(e=>{TCACHE.delete(id);throw e}));return TCACHE.get(id)};
+const tFetch=id=>{if(!TCACHE.has(id))TCACHE.set(id,fbStore.ref(id).getDownloadURL().catch(e=>{TCACHE.delete(id);throw e}));return TCACHE.get(id)};
 function tHydrate(root){root.querySelectorAll('img[data-tpath]').forEach(img=>{if(img.dataset.tdone)return;img.dataset.tdone='1';tFetch(img.dataset.tpath).then(u=>{img.src=u;img.classList.remove('ld')}).catch(()=>{img.alt='Bild nicht verfügbar'})})}
 const tSort=(a,b)=>(a.taken||0)-(b.taken||0)||String(a.name||'').localeCompare(String(b.name||''),'de',{numeric:true});
 const tYears=()=>[...new Set(TO.map(t=>+t.year))].sort((a,b)=>b-a);
