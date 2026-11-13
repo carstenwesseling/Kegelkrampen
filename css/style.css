@@ -379,6 +379,9 @@ details{margin:8px 0}summary{cursor:pointer;min-height:44px;display:flex;align-i
 .st-head p{margin:4px 0 0}
 .st-cards{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));align-content:start}
 .st-cards>.st-head,.st-cards>.hl,.st-cards>.empty{grid-column:1/-1}
+.st-pair{grid-column:1/-1;display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:start}
+.termine-form .tf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.termine-form #termine-msg:empty{display:none}
 .card h3{display:flex;align-items:center;gap:8px;margin:0 0 6px;font:700 13px var(--f-b);letter-spacing:.05em;text-transform:uppercase;color:var(--mu)}
 .card h3 .ic{width:18px;height:18px}
 .card .big{font:700 30px/1.15 var(--f-d);margin:4px 0;letter-spacing:-.02em}
