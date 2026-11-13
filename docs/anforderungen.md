@@ -14,7 +14,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Navigation: Am Handy und Tablet (bis 1023 px) eine feste Tab-Leiste unten mit Icon und Text: Eingabe, Historie, Auswertung, Dortmunder, Mehr. „Mehr“ öffnet ein Bottom-Sheet mit Startseite, Mitglieder, Kegeltouren und dem Bereich „Konto“ (Anmeldestatus, Mit Google anmelden, Per Link anmelden, Abmelden). Am Desktop stehen alle Seiten in der Leiste oben; der Konto-Knopf oben rechts öffnet dasselbe Menü.
 - Oben eine schmale App-Leiste mit „KK“ (führt zur Startseite), Seitentitel und Konto-Knopf. Darunter die Sprungmarken der Seite; der gerade sichtbare Abschnitt ist markiert.
 - Jede Ansicht hat eine eigene Adresse (`#/start`, `#/eingabe/<schritt>`, `#/historie/<datum>`, `#/auswertung`, `#/dortmunder`, `#/mitglieder`, `#/touren`). Zurück-Knopf, Neu laden und Links führen zur selben Ansicht.
-- Startseite: Bild „Willingen 2026“ (`img/willingen-2026.jpg`, immer ganz und unverzerrt) und darunter (am Desktop daneben) eine Übersicht: nächster Abend mit Umfrage-Stand und Knopf „Abend erfassen“, Kontostand, offene Beträge des letzten Abends, Könige des letzten Abends, Schnellzugriff.
+- Startseite: Bild „Willingen 2026“ (`img/willingen-2026.jpg`, immer ganz und unverzerrt) und darunter (am Desktop daneben) eine Übersicht: nächster Abend mit den nächsten Terminen aus dem öffentlichen Google-Kalender (Liste, Datum und Uhrzeit), Umfrage-Stand und Knopf „Abend erfassen“, Kontostand, offene Beträge des letzten Abends, Könige des letzten Abends, Schnellzugriff.
 - Rückmeldungen (gespeichert, Fehler) erscheinen als kurze Meldung unten (Toast). Aktionen, die Daten löschen oder zurücksetzen (Gast entfernen, Umfrage zurücksetzen, Paare neu auslosen), fragen vorher nach.
 
 ## Eingabe
