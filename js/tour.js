@@ -1,13 +1,18 @@
 //TOUR-START
 let TO=null,TYR='',TUY='',TUP=false,TNOTE='',TCT=0,TMV=null,TNY=false,AS;const TEY=new Set(),TSEL=new Set();
 const tT=(p,ms=10000)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
-const tsrc=id=>window.kkBlobUrl(id);
+// Fotos nur mit Anmeldung laden (Storage-Regeln: nur Freigegebene). Der Abruf liefert eine lokale Adresse.
+const TPH='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+const TCACHE=new Map();
+const tFetch=id=>{if(!TCACHE.has(id))TCACHE.set(id,fbStore.ref(id).getDownloadURL().then(u=>fetch(u)).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.blob()}).then(b=>URL.createObjectURL(b)).catch(e=>{TCACHE.delete(id);throw e}));return TCACHE.get(id)};
+function tHydrate(root){root.querySelectorAll('img[data-tpath]').forEach(img=>{if(img.dataset.tdone)return;img.dataset.tdone='1';tFetch(img.dataset.tpath).then(u=>{img.src=u;img.classList.remove('ld')}).catch(()=>{img.alt='Bild nicht verfügbar'})})}
 const tSort=(a,b)=>(a.taken||0)-(b.taken||0)||String(a.name||'').localeCompare(String(b.name||''),'de',{numeric:true});
 const tYears=()=>[...new Set(TO.map(t=>+t.year))].sort((a,b)=>b-a);
 const tList=y=>TO.filter(t=>t.aid&&+t.year==+y).sort(tSort);
 const tMB=b=>b>=1073741824?(b/1073741824).toLocaleString('de-DE',{maximumFractionDigits:1})+' GB':(b/1048576).toLocaleString('de-DE',{maximumFractionDigits:1})+' MB';
 async function tour(){
  const el=$('#tour');
+ if(!EDT){el.innerHTML=gateHTML('Kegeltouren');return}
  if(TO===null){
   el.innerHTML='<h2 id="t-tab">Kegeltouren</h2><p class="mu">Bilder werden geladen …</p>';
   let list=null;
@@ -29,10 +34,10 @@ function tourView(msg){
  vis.forEach(y=>{const l=tList(y),ed=can&&TEY.has(+y),n=l.filter(t=>TSEL.has(t.id)).length;
   h+=`<section class="ty${ed?' ed':''}" data-yr="${y}"><h2 id="t-y${y}">${y} <span class="mu">${l.length} ${l.length==1?'Bild':'Bilder'}</span></h2><div class="top">${l.length?`<button type="button" class="pri" data-show="${y}">▶ Diashow ${y}</button>`:''}${can?`<button type="button" data-edit="${y}" aria-pressed="${ed}">${ed?'✓ Fertig':'✎ Jahr bearbeiten'}</button>`:''}</div>`
   +(ed?`<div class="top te"><button type="button" data-add="${y}">＋ Bilder hinzufügen</button><button type="button" data-all="${y}"${l.length?'':' disabled'}>${l.length&&n==l.length?'Auswahl aufheben':'Alle auswählen'}</button><button type="button" class="dng" data-del="${y}"${n?'':' disabled'}>Auswahl löschen (${n})</button></div><div class="top te"><button type="button" data-yr-edit="${y}">✎ Jahreszahl ändern</button><button type="button" data-mvsel="${y}"${n?'':' disabled'}>Auswahl verschieben (${n})</button>${l.length?'':`<button type="button" class="dng" data-rmy="${y}">Jahr entfernen</button>`}</div>`+(TMV&&TMV.y==+y?`<div class="top te mv"><label>${TMV.mode=='year'?'Neue Jahreszahl':'Verschieben nach Jahr'} <input type="number" id="te-ny" min="1990" max="2100" step="1" inputmode="numeric" value="${TMV.v==null?'':TMV.v}"></label><button type="button" class="pri" data-go>${tGoLbl()}</button><button type="button" data-cancel>Abbrechen</button><span class="mu" id="te-nh">${esc(tMvHint(y,l.length,n))}</span></div>`:'')+`<p class="mu te-h">Bilder antippen zum Auswählen, Dateien hierher ziehen zum Hinzufügen.</p>`:'')
-  +`<div class="tg">${l.map((t,i)=>ed?`<button type="button" class="tt${TSEL.has(t.id)?' sel':''}" data-sel="${esc(t.id)}" aria-pressed="${TSEL.has(t.id)}" aria-label="${y}, Bild ${i+1} von ${l.length} auswählen"><img src="${tsrc(t.tid||t.aid)}" alt="" loading="lazy" decoding="async"><span class="ck" aria-hidden="true">✓</span></button>`:`<button type="button" class="tt" data-open="${esc(t.id)}" aria-label="${y}, Bild ${i+1} von ${l.length} einzeln anzeigen"><img src="${tsrc(t.tid||t.aid)}" alt="" loading="lazy" decoding="async"></button>`).join('')}</div></section>`})
+  +`<div class="tg">${l.map((t,i)=>ed?`<button type="button" class="tt${TSEL.has(t.id)?' sel':''}" data-sel="${esc(t.id)}" aria-pressed="${TSEL.has(t.id)}" aria-label="${y}, Bild ${i+1} von ${l.length} auswählen"><img data-tpath="${esc(t.tid||t.aid)}" src="${TPH}" alt="" loading="lazy" decoding="async"><span class="ck" aria-hidden="true">✓</span></button>`:`<button type="button" class="tt" data-open="${esc(t.id)}" aria-label="${y}, Bild ${i+1} von ${l.length} einzeln anzeigen"><img data-tpath="${esc(t.tid||t.aid)}" src="${TPH}" alt="" loading="lazy" decoding="async"></button>`).join('')}</div></section>`})
  if(can)h+=`<h2 id="t-up">Bilder hinzufügen</h2><div class="dz" id="tu-dz"><p class="dzh"><b>Bilder hierher ziehen</b></p><div class="top"><label>Jahr <input type="number" id="tu-y" min="1990" max="2100" step="1" inputmode="numeric" value="${TUY||TYR||yrs[0]||new Date().getFullYear()}"></label><button type="button" class="pri" id="tu-b">Bilder auswählen und hochladen</button><input type="file" id="tu-f" accept="image/*" multiple hidden></div></div><p class="mu" id="tu-m" role="status" aria-live="polite">${msg||''}</p><p class="mu" id="tu-u"></p>`;
  if(can)h+='<input type="file" id="te-f" accept="image/*" multiple hidden>';;
- el.innerHTML=h;
+ el.innerHTML=h;tHydrate(el);
  SUB['#b7']=[['t-tab','Übersicht'],...(can?[['t-up','Hochladen']]:[])];
  if(CUR=='#b7')sub();
  if(can)tUsage()}
@@ -163,13 +168,13 @@ function tvShow(){
  const t=VW.list[VW.i],img=tv('tvi'),tok=++VW.tok;
  clearTimeout(VW.timer);tvBar(false);VW.del=false;clearTimeout(VW.delT);
  tv('tvc').textContent=`${VW.i+1} / ${VW.list.length} · ${t.year}`;
- tv('tvo').href=tsrc(t.aid);tv('tvm').textContent='';
- if(VW.mode=='single'&&t.tid){img.src=tsrc(t.tid);img.classList.remove('ld')}else img.classList.add('ld');
+ tFetch(t.aid).then(u=>{if(tok===VW.tok)tv('tvo').href=u}).catch(()=>{});tv('tvm').textContent='';
+ if(VW.mode=='single'&&t.tid){tFetch(t.tid).then(u=>{if(tok===VW.tok){img.src=u;img.classList.remove('ld')}}).catch(()=>{})}else img.classList.add('ld');
  const full=new Image();
  full.onload=()=>{if(tok!==VW.tok)return;img.src=full.src;img.alt=`Kegeltour ${t.year}, Bild ${VW.i+1} von ${VW.list.length}`;img.classList.remove('ld');tvSched(tok)};
  full.onerror=()=>{if(tok!==VW.tok)return;img.classList.remove('ld');tv('tvm').textContent='Dieses Bild konnte nicht geladen werden.';tvSched(tok)};
- full.src=tsrc(t.aid);
- if(VW.list.length>1){const n=VW.list[(VW.i+1)%VW.list.length];(new Image()).src=tsrc(n.aid)}
+ tFetch(t.aid).then(u=>{full.src=u}).catch(()=>{if(tok===VW.tok)full.onerror&&full.onerror()});
+ if(VW.list.length>1){const n=VW.list[(VW.i+1)%VW.list.length];tFetch(n.aid).catch(()=>{})}
  tvLbl()}
 function tvStep(d,auto){const n=VW.list.length;if(!n)return;VW.i=(VW.i+d+n)%n;tvShow();if(!auto)tvIdle()}
 function tvFS(on){

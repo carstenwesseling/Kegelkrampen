@@ -8,9 +8,6 @@ const fbAuth = firebase.auth();
 const fbDb = firebase.firestore();
 const fbStore = firebase.storage();
 
-// Öffentliche Adresse eines Fotos; die App baut damit die <img>-Adressen.
-const KK_STORAGE_BASE = "https://firebasestorage.googleapis.com/v0/b/" + firebaseConfig.storageBucket + "/o/";
-window.kkBlobUrl = id => KK_STORAGE_BASE + encodeURIComponent(id) + "?alt=media";
 
 // Erster Auth-Status abwarten, bevor die App fragt, ob jemand Besitzer ist.
 const kkAuthReady = new Promise(resolve => {
