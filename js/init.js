@@ -6,12 +6,13 @@ const RT={'#b0':'start','#b1':'eingabe','#b2':'historie','#b3':'auswertung','#b4
 const TTL={'#b0':'Kegelkrampen','#b1':'Eingabe','#b2':'Historie','#b3':'Auswertung','#b4':'Mitglieder','#b7':'Kegeltouren','#b8':'Dortmunder'};
 // Schritte der Eingabe; „dm“ und „bt“ zeigen die Bereiche #blatt und #bt.
 const STEPS=[['vor','Vorbereitung'],['spiel','Spiel'],['dm','Dortmunder'],['bt','Berg & Tal'],['ab','Abschluss']];
-let CUR='#b0',USR=null,ME=null,STEP='vor',LOADED=false;
+// Zugriffsstufen: ausgeloggt (nur Startseite) · VIEW = Mitglied mit Zugang (alles lesen) · EDT = darf zusätzlich speichern · OWN = Besitzer.
+let CUR='#b0',USR=null,ME=null,STEP='vor',LOADED=false,VIEW=false;
 const SUB={
  '#b2':[['h-rek','Rekorde'],['h-tage','Spieltage'],['h-tab','Tabelle'],['h-dm','Dortmunder'],['h-bt','Berg und Tal'],['hk-kasse','Kasse'],['hk-koenige','Könige']],
  '#b3':[['a-kon','Könige'],['a-ein','Einzelergebnisse'],['a-anw','Anwesenheit'],['a-ver','Verlauf'],['a-jahr','Jahre']],
  '#b8':[['dt-tab','Tabelle'],['dt-jahr','Schnitt pro Jahr'],['dt-ges','Schnitt gesamt'],['dt-mm','Max / Min'],['dt-club','Club'],['dt-rek','Rekorde'],['dt-min','Minusrekorde']],
- '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-lg','Angemeldet'],['m-frg','Freigabe'],['m-satzung','Satzung']]};
+ '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-pin','Zugang'],['m-lg','Angemeldet'],['m-frg','Freigabe'],['m-satzung','Satzung']]};
 const SUBSTEP={vor:[['s-umf','Umfrage'],['s-anw','Anwesenheit']],ab:[['s-stat','Zahlungen'],['ek-kasse','Kasse'],['ek-koenige','Könige'],['s-rek','Rekorde']]};
 const navh=()=>document.documentElement.style.setProperty('--navh',($('#navs').offsetHeight||64)+'px');
 const stepDone=k=>{const R=S.rows||[];
@@ -23,7 +24,7 @@ const stepDone=k=>{const R=S.rows||[];
 function sub(){
  const n=$('#sub');if(!n)return;
  // Eingabe nur für Freigegebene: ohne Freigabe keine Schritt-Leiste.
- if(CUR=='#b1'&&LOADED&&!EDT){n.replaceChildren();n.hidden=true;navh();return}
+ if(CUR=='#b1'&&LOADED&&!VIEW){n.replaceChildren();n.hidden=true;navh();return}
  if(CUR=='#b1'){
   n.classList.add('steps');n.setAttribute('aria-label','Schritte der Eingabe');
   n.innerHTML=STEPS.map(([k,l],i)=>`<button type="button" data-step="${k}"${k==STEP?' class="on" aria-current="step"':''}><span class="sn">${stepDone(k)&&k!=STEP?icon('check'):i+1}</span>${l}</button>`).join('');
@@ -46,7 +47,8 @@ addEventListener('resize',navh);
 // Eingabe: nur den Abschnitt des gewählten Schritts zeigen.
 function stepShow(){
  if(CUR!='#b1')return;
- if(LOADED&&!EDT){$('#blatt').hidden=true;$('#bt').hidden=true;sub();return}
+ if(LOADED&&!VIEW){$('#blatt').hidden=true;$('#bt').hidden=true;sub();return}
+ if(LOADED&&!EDT)roLock();
  document.querySelectorAll('#edit [data-st]').forEach(s=>s.hidden=s.dataset.st!=STEP);
  $('#blatt').hidden=STEP!='dm';$('#bt').hidden=STEP!='bt';
  document.body.dataset.step=STEP;sub()}
@@ -60,20 +62,26 @@ async function who(){
  $('#acdot').classList.toggle('ok',ok);
  const d=document.createElement('span');d.className='dot';e.append(d);
  const t=document.createElement('span');
- if(ok){t.append('Angemeldet als ');const b=document.createElement('b');b.textContent=(ME&&ME.name)||'Mitglied';t.append(b,OWN?' · Besitzer':(EDT?' · Mitglied (darf speichern)':' · nur Lesen'))}
+ if(ok){t.append('Angemeldet als ');const b=document.createElement('b');b.textContent=(ME&&ME.name)||'Mitglied';t.append(b,OWN?' · Besitzer':(EDT?' · Mitglied (darf speichern)':' · Mitglied (nur Lesen)'))}
  else t.textContent='Nicht angemeldet';
  e.append(t);
  $('#acct').setAttribute('aria-label',(ok?'Angemeldet als '+((ME&&ME.name)||'Mitglied'):'Nicht angemeldet')+' – Konto und weitere Seiten');
  const g=$('#gate');
  if(!db){g.hidden=false;g.textContent='Keine Datenbank verbunden. Die Seite kann nicht geladen werden; bitte später noch einmal versuchen.'}
- else if(ok&&!EDT&&w===false){g.hidden=false;g.innerHTML='';g.append('Du bist angemeldet, hast aber nur Leserechte. Abende speichern dürfen nur freigegebene Mitglieder; bitte den Besitzer um Freigabe deiner E-Mail-Adresse. Abmelden kannst du unter „Mehr“ → Konto.')}
+ else if(ok&&!VIEW){g.hidden=false;g.innerHTML='';g.append('Du bist angemeldet, hast aber keinen Zugang. Bitte unter „Mehr“ → Konto als Mitglied mit PIN anmelden oder den Besitzer um Freigabe bitten.')}
  else g.hidden=true}
 // Navigation
 const hashFor=(tab,arg)=>'#/'+RT[tab]+(arg?'/'+arg:'');
 const parseHash=()=>{const p=location.hash.replace(/^#\/?/,'').split('/'),tab=Object.keys(RT).find(k=>RT[k]==p[0])||'#b0';return[tab,decodeURIComponent(p[1]||'')]};
 const SCR={};let FOCUS=false;
 function go(tab,arg){FOCUS=true;const h=hashFor(tab,arg);if(location.hash!=h)location.hash=h;else route()}
+// Ausgeloggt (kein Zugang): nur die Startseite. Das Menü bleibt sichtbar, ist aber gesperrt; ein Klick öffnet die Anmeldung.
+function navLock(){
+ document.querySelectorAll('[data-tab]').forEach(x=>{const lock=LOADED&&!VIEW&&x.dataset.tab!='#b0';x.classList.toggle('locked',lock);lock?x.setAttribute('aria-disabled','true'):x.removeAttribute('aria-disabled')});
+ const ml=document.querySelector('#more .mlist');if(ml)ml.hidden=LOADED&&!VIEW;
+ if(typeof zugangDraw==='function')zugangDraw()}
 function route(){
+ if(LOADED&&!VIEW&&location.hash&&parseHash()[0]!='#b0'){history.replaceState(null,'','#/start')}
  const[tab,arg]=parseHash(),prev=CUR,same=prev==tab;
  SCR[prev]=scrollY;CUR=tab;
  if(tab=='#b1'&&STEPS.some(s=>s[0]==arg))STEP=arg;
@@ -96,24 +104,25 @@ const moreOpen=()=>{if(more.showModal)more.showModal();else more.setAttribute('o
 $('#acct').onclick=moreOpen;$('#tb-more').onclick=moreOpen;
 more.addEventListener('click',e=>{if(e.target==more||e.target.closest('[data-close]'))more.close()});
 document.addEventListener('click',e=>{
- const t=e.target.closest('[data-tab]');if(t){if(more.open)more.close();go(t.dataset.tab);return}
+ const t=e.target.closest('[data-tab]');if(t){if(LOADED&&!VIEW&&t.dataset.tab!='#b0'){toast('Bitte zuerst anmelden: Konto-Symbol oben rechts.','info');moreOpen();return}if(more.open)more.close();go(t.dataset.tab);return}
  const s=e.target.closest('button[data-step]');if(s){go('#b1',s.dataset.step);return} // nicht am body (trägt data-step im Eingabe-Schritt)
  const n=e.target.closest('[data-nav]');if(n){const[a,b]=n.dataset.nav.split('/');go(a,b)}});
 $('#home').onclick=()=>go('#b0');
 route();
 (async()=>{
  const T=p=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),10000))]);
- try{const c=window.claude;db=c&&await T(c.use('db'));USR=c&&await T(c.use('user'));OWN=USR?await USR.isOwner():false;EDT=OWN||(USR&&USR.isEditor?await T(USR.isEditor())===true:false)}catch(e){db=null}
+ try{const c=window.claude;db=c&&await T(c.use('db'));USR=c&&await T(c.use('user'));OWN=USR?await USR.isOwner():false;EDT=OWN||(USR&&USR.isEditor?await T(USR.isEditor())===true:false);VIEW=EDT||(USR&&USR.isMember?await T(USR.isMember())===true:false)}catch(e){db=null}
  try{ME=USR&&USR.me?await T(USR.me()):null}catch(e){ME=null}
  // Angemeldete Adresse merken (logins/<mail>), damit der Besitzer sie im Tab „Mitglieder“ freigeben kann.
  if(db&&ME&&ME.email&&!OWN)db.doc('logins/'+ME.email).set({email:ME.email,name:ME.name||ME.email,last:new Date().toISOString()},{merge:true}).catch(()=>{});
  if(db){try{
-  // Spieltage und Entwurf (Beiträge) nur für Freigegebene; Gäste bekommen leere Daten.
-  const [s,d,c,m]=await Promise.all([EDT?db.collection('sessions').get():{docs:[]},EDT?db.doc('state/entwurf').get():{exists:false},db.doc('state/config').get(),db.doc('state/mitglieder').get()]);
+  // Die Mitgliederliste (Namen für die Anmeldung) ist öffentlich; Spieltage, Entwurf und Einstellungen nur mit Zugang (VIEW).
+  const none=Promise.resolve({docs:[],exists:false});
+  const [s,d,c,m]=await Promise.all([VIEW?db.collection('sessions').get():none,VIEW?db.doc('state/entwurf').get():none,VIEW?db.doc('state/config').get():none,db.doc('state/mitglieder').get()]);
   HIST=s.docs.map(x=>clean(x.data())).sort((a,b)=>a.date<b.date?1:-1);
   if(c.exists)CFG=clean(c.data());RK=clean(CFG.rekorde||[]);
   if(m.exists)MEM={liste:[],gaeste:[],weitere:[],...clean(m.data())};
-  S=d.exists?clean(d.data()):{};sync();if(typeof umfWatch==='function')umfWatch();
-  st(HIST.length+' Spieltage in der Datenbank'+(OWN?' – angemeldet als Besitzer':EDT?' – angemeldet als Mitglied':''))}catch(e){st('Datenbank-Fehler: '+(e.message||e.code));toast('Datenbank-Fehler: '+(e.message||e.code),'err')}}
+  S=d.exists?clean(d.data()):{};sync();if(VIEW&&typeof umfWatch==='function')umfWatch();
+  st(VIEW?HIST.length+' Spieltage in der Datenbank'+(OWN?' – angemeldet als Besitzer':EDT?' – angemeldet als Mitglied (darf speichern)':' – angemeldet als Mitglied (nur Lesen)'):'Nicht angemeldet')}catch(e){st('Datenbank-Fehler: '+(e.message||e.code));toast('Datenbank-Fehler: '+(e.message||e.code),'err')}}
  else st('Keine Datenbank verbunden – Eingaben werden nicht gespeichert.');
- LOADED=true;render();who();route();if(db)EDT?dstat('ok','Entwurf geladen'):dstat('off','Nur Ansicht – wird nicht gesichert')})();
+ LOADED=true;render();who();navLock();route();if(db)EDT?dstat('ok','Entwurf geladen'):dstat('off','Nur Ansicht – wird nicht gesichert')})();

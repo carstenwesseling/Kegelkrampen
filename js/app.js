@@ -104,15 +104,19 @@ function eingabeHinweis(){
  // Der PDF-Download bleibt für alle sichtbar (docs/anforderungen.md).
  return `<section class="note king" role="status">${icon('alert')}<p>${t}</p></section>`
   +`<div class="actbar" id="actbar"><div class="in"><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button></div></div>`}
+// Nur Lesen (Mitglied mit Zugang, aber ohne Speicherrecht): alle Felder und Aktionen der Eingabe sperren; Schritt-Knöpfe und PDF bleiben.
+function roLock(){
+ document.querySelectorAll('#edit input,#edit select,#edit textarea,#edit button:not([data-step]):not(#pdf-dl),#blatt input,#blatt button:not([data-step]),#bt input,#bt button:not([data-step])').forEach(x=>{x.disabled=true});
+ $('#edit').classList.add('ro')}
 function render(){
- if(LOADED&&!EDT){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
+ if(LOADED&&!VIEW){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
  if(EDT)rundeTeilen();
  const W=V(),C=calc(W),L=HIST[0],hd=k=>STEP!=k?' hidden':'';
  $('#edit').innerHTML=`<section data-st="vor"${hd('vor')}><p class="mu lead">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}.</p>`
  +(typeof umfHtml==='function'?umfHtml():'')+chips()+stepNav('vor')+'</section>'
  +`<section data-st="spiel"${hd('spiel')}>${eingabe(W,C)}${stepNav('spiel')}</section>`
  +`<section data-st="ab"${hd('ab')}>${stat(W,C)}${side(W,1,C)}${rekEdit()}${stepNav('ab')}</section>`
- +`<div class="actbar" id="actbar"><div class="in"><label class="dat"><span>Spieltag</span><input type="date" id="dat" data-a="d" value="${S.date}"></label><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button>${EDT?`<button type="button" class="pri" id="sv">${icon('save')}<span><span class="hide-xs">Abend </span>speichern</span></button>`:''}</div></div>`;
+ +`<div class="actbar" id="actbar"><div class="in"><label class="dat"><span>Spieltag</span><input type="date" id="dat" data-a="d" value="${S.date}"${EDT?'':' disabled'}></label><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button>${EDT?`<button type="button" class="pri" id="sv">${icon('save')}<span><span class="hide-xs">Abend </span>speichern</span></button>`:''}</div></div>`;
  if(EDT)$('#sv').onclick=()=>busy($('#sv'),save());if(OWN)$('#rsv').onclick=()=>busy($('#rsv'),saveRk());blatt();BTC=false;bergTal();
  if(typeof stepShow==='function')stepShow();sub();if(CUR=='#b0'&&typeof startView==='function')startView()}
 function upd(){
@@ -188,7 +192,7 @@ async function save(){
 const inHY=h=>!HYR||h.date.startsWith(HYR);
 const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set([...HIST.map(h=>h.date.slice(0,4)),String(new Date().getFullYear())])].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
 function hist(sel){
- if(!EDT){$('#hist').innerHTML=gateHTML('Historie');return}
+ if(!VIEW){$('#hist').innerHTML=gateHTML('Historie');return}
  if(EDIT&&EDIT.date!=sel)EDIT=null;
  if(sel&&HYR&&sel.slice(0,4)!=HYR)HYR=sel.slice(0,4);
  HSEL=sel;$('#hist').innerHTML=(typeof dmImportBox==='function'?dmImportBox():'')+rekView('h-rek')+'<h2 id="h-tage">Gespeicherte Spieltage</h2>'+hyrSel()+daysRow(sel)+'<div id="hd"></div>';
@@ -402,7 +406,7 @@ function chart(type,items,fmt,title){
  const pie=it.length>8?[...it.slice(0,7),{n:'Übrige',v:it.slice(7).reduce((a,x)=>a+x.v,0),o:1}]:it;
  return`<div class="cap">${esc(title)}</div><div class="w cw">${type=='pie'?pieHtml(pie,fmt,aria):barSvg(it,fmt,aria)}</div>`}
 function aus(){
- if(!EDT){$('#aus').innerHTML=gateHTML('Auswertung');return}
+ if(!VIEW){$('#aus').innerHTML=gateHTML('Auswertung');return}
  const yrs=[...new Set(HIST.map(h=>h.date.slice(0,4)))].sort().reverse(),H=HIST.filter(h=>!YR||h.date.startsWith(YR)),N=names(),canon=n=>N.find(x=>norm(x)==norm(n))||n.trim();
  const rk=(rows,key)=>{let p=0;return rows.map((r,i)=>{if(!i||r[key]!=rows[i-1][key])p=i+1;return{...r,rang:p}})};
  const kt={};H.forEach(h=>(h.koenige||[]).forEach(k=>{const j=KL.indexOf(k.t);if(j<0)return;(k.name||'').split('/').map(canon).filter(Boolean).forEach(n=>(kt[n]=kt[n]||{n,v:[0,0,0,0,0],s:0}).v[j]++)}));
@@ -467,8 +471,8 @@ function members(){
  const JY=HIST.length?HIST[0].date.slice(0,4):'';
  const rows=names().map(n=>{const a=HIST.filter(h=>h.rows.some(r=>r.name==n&&present(r))).map(h=>h.date).sort().reverse();return{n,t:MEM.gaeste.includes(n)?'Gast':'Mitglied',a:a.length,y:a.filter(d=>d.startsWith(JY)).length,l:a[0],s:dtSince(n)}}).sort((a,b)=>(a.t=='Gast')-(b.t=='Gast')||b.a-a.a);
  $('#mem').innerHTML=`<h2 id="m-liste">Mitgliederliste (${MEM.liste.length+(MEM.weitere||[]).length} Mitglieder, ${MEM.gaeste.length} Gäste)</h2><div class="w"><table class="stack mt"><tr class="hd"><th>Name</th><th>Typ</th><th>Mitglied seit</th><th>davon ${JY}</th><th>zuletzt dabei</th><th>Funktion im Club</th></tr>${rows.map(r=>`<tr><td>${esc(r.n)}${r.t=='Gast'?' <span class="tag">Gast</span>':''}</td><td data-l="Typ">${r.t}</td><td data-l="Mitglied seit">${r.s||'–'}</td><td data-l="davon ${JY}">${r.y}</td><td data-l="zuletzt dabei">${dd(r.l)||'–'}</td><td data-l="Funktion im Club">${r.t=='Gast'?'–':OWN?`<input type="text" data-fn="${esc(r.n)}" value="${esc((MEM.funktion||{})[r.n]||'')}" maxlength="60" placeholder="–" aria-label="Funktion im Club von ${esc(r.n)}">`:(esc((MEM.funktion||{})[r.n]||'')||'–')}</td></tr>`).join('')}</table></div>${OWN?'<p class="mu" id="fn-rm" aria-live="polite"></p>':''}`
- +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'')+(OWN?reihe()+'<div id="frg"></div>':'')+`<h2 id="m-satzung">Satzung</h2><div class="pdfw"><iframe src="dokumente/satzung.pdf#view=FitH" title="Satzung (PDF)" loading="lazy"></iframe></div><p class="mu">Wird das PDF nicht angezeigt? <a href="dokumente/satzung.pdf" target="_blank" rel="noopener">PDF in neuem Tab öffnen</a></p>`;
- if(OWN){$('#add').onclick=()=>busy($('#add'),addMember());$('#nm').onkeydown=e=>{if(e.key=='Enter'&&!e.isComposing){e.preventDefault();$('#add').click()}};if(typeof frgLoad==='function')frgLoad().then(sub)}sub()}
+ +(OWN?`<div class="gadd" id="m-neu"><label for="nm">Neues Mitglied</label><div class="row"><input type="text" id="nm" placeholder="Name" autocomplete="off" enterkeyhint="done"><button class="pri" id="add">${icon('plus')}Hinzufügen</button></div><p class="mu" id="mm" aria-live="polite"></p></div>`:'')+(OWN?reihe()+'<div id="pin"></div><div id="frg"></div>':'')+`<h2 id="m-satzung">Satzung</h2><div class="pdfw"><iframe src="dokumente/satzung.pdf#view=FitH" title="Satzung (PDF)" loading="lazy"></iframe></div><p class="mu">Wird das PDF nicht angezeigt? <a href="dokumente/satzung.pdf" target="_blank" rel="noopener">PDF in neuem Tab öffnen</a></p>`;
+ if(OWN){$('#add').onclick=()=>busy($('#add'),addMember());$('#nm').onkeydown=e=>{if(e.key=='Enter'&&!e.isComposing){e.preventDefault();$('#add').click()}};if(typeof pinLoad==='function')pinLoad().then(sub);if(typeof frgLoad==='function')frgLoad().then(sub)}sub()}
 const reihe=()=>`<h2 id="m-reihe">Reihenfolge der Liste</h2><div class="w"><table><tr><th>Name</th><th>Verschieben</th></tr>${MEM.liste.map((n,i)=>`<tr><td>${i+1}. ${esc(n)}</td><td class="mvc"><button type="button" class="mv" data-mv="${i}" data-dir="-1" aria-label="${esc(n)} nach oben"${i?'':' disabled'}>${icon('up')}</button><button type="button" class="mv" data-mv="${i}" data-dir="1" aria-label="${esc(n)} nach unten"${i<MEM.liste.length-1?'':' disabled'}>${icon('down')}</button></td></tr>`).join('')}</table></div><p class="mu" id="m-rm" aria-live="polite"></p>`;
 let MVB=false;
 $('#mem').addEventListener('click',async e=>{
@@ -501,13 +505,14 @@ function startView(){
  const el=$('#start'),L=HIST[0];
  termineLaden();
  const hero=`<figure class="hero-img"><img src="img/willingen-2026.jpg" alt="Willingen 2026 – Tour der Kegelkrampen" width="1024" height="1536" decoding="async"></figure>`;
- const head=`<div class="st-head"><h2>Kegelclub Kegelkrampen</h2><p class="mu">${!LOADED?'Daten werden geladen …':!EDT?'':(HIST.length?`${HIST.length} Spieltage gespeichert, zuletzt am ${dd(L.date)}.`:'Noch keine Spieltage gespeichert.')}</p></div>`;
+ const head=`<div class="st-head"><h2>Kegelclub Kegelkrampen</h2><p class="mu">${!LOADED?'Daten werden geladen …':!VIEW?'':(HIST.length?`${HIST.length} Spieltage gespeichert, zuletzt am ${dd(L.date)}.`:'Noch keine Spieltage gespeichert.')}</p></div>`;
  if(!LOADED){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${'<div class="card sk"></div>'.repeat(4)}</div></div>`;return}
  const card=(ic,t,body,cls)=>`<article class="card${cls?' '+cls:''}"><h3>${icon(ic)}${t}</h3>${body}</article>`;
+ // Ohne Zugang (ausgeloggt): nur Bild, „Nächster Abend“ (Datum/Uhrzeit) und „Nächste Kegelabende“.
+ if(!VIEW){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${card('cal','Nächster Abend',naechsterHTML(),'hl')}${card('cal','Nächste Kegelabende',kegelabendeHTML())}</div></div></div>`;return}
  const pres=S.rows?S.rows.filter(r=>r.c&&!r.gast).length:0,uc=typeof umfCount=='function'?umfCount():{dabei:0,rein:0,nein:0},open=MEM.liste.length-uc.dabei-uc.rein-uc.nein;
  const next=card('cal','Nächster Abend',`${naechsterHTML()}${pres?`<p class="mu">${pres} Mitglieder als anwesend markiert.</p>`:''}<p class="pills"><span class="tag ok">Dabei ${uc.dabei}</span><span class="tag">Rein ${uc.rein}</span><span class="tag">Nein ${uc.nein}</span>${open>0?`<span class="tag mu">offen ${open}</span>`:''}</p><div class="acts">${EDT?`<button type="button" class="pri" data-nav="#b1/${pres?'spiel':'vor'}">${icon('edit')}Abend erfassen</button>`:''}${EDT?'<button type="button" data-nav="#b1/vor">Zur Umfrage</button>':''}</div>`,'hl');
  const abende=card('cal','Nächste Kegelabende',kegelabendeHTML());
- if(!EDT){const gq=card('right','Schnellzugriff',`<div class="acts q"><button type="button" data-tab="#b8">${icon('pin')}Dortmunder</button></div>`);el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${next}${abende}</div>${card('wallet','Kontostand',`<p class="mu">${gateText()}</p>`)}${card('alert','Offene Beträge',`<p class="mu">${gateText()}</p>`)}${card('crown','Könige',`<p class="mu">${gateText()}</p>`)}${gq}</div></div>`;return}
  if(!L){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${next}${abende}</div>${emptyCard('Noch keine gespeicherten Abende. Nach dem ersten „Abend speichern“ erscheinen hier Kontostand, offene Beträge und Könige.')}</div></div>`;return}
  const kasse=card('wallet','Kontostand',`<p class="big">${typeof L.kasse.neu=='number'?eu(L.kasse.neu):'–'}</p><p class="mu">Stand nach dem ${dd(L.date)}${typeof L.kasse.gezahlt=='number'?` · eingezahlt ${eu(L.kasse.gezahlt)}`:''}</p>`);
  const op=L.rows.filter(r=>!isG(r)&&+r.q>.005).sort((a,b)=>b.q-a.q),os=op.reduce((a,r)=>a+(+r.q),0);

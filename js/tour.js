@@ -13,7 +13,7 @@ const tList=y=>TO.filter(t=>t.aid&&+t.year==+y).sort(tSort);
 const tMB=b=>b>=1073741824?(b/1073741824).toLocaleString('de-DE',{maximumFractionDigits:1})+' GB':(b/1048576).toLocaleString('de-DE',{maximumFractionDigits:1})+' MB';
 async function tour(){
  const el=$('#tour');
- if(!EDT){el.innerHTML=gateHTML('Kegeltouren');return}
+ if(!VIEW){el.innerHTML=gateHTML('Kegeltouren');return}
  if(TO===null){
   el.innerHTML='<h2 id="t-tab">Kegeltouren</h2><p class="mu">Bilder werden geladen …</p>';
   let list=null;
