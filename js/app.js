@@ -160,7 +160,7 @@ const onIn=e=>{
  if(a=='rk'){RK[i][k]=k=='pt'?(t.value===''?null:+t.value):t.value;return}
  const v=t.dataset.e?eur(t.value):t.type=='number'?(t.value===''?0:+t.value):t.value;
  if(t.dataset.e&&e.type=='change')t.value=v?fx(v):'';
- if(a=='r')S.rows[i][k]=v;else if(a=='p'){if(!OWN)return;S.preise[k]=v}else if(a=='k')S.kasse[k]=v;else if(a=='d')S.date=v;
+ if(a=='r')S.rows[i][k]=v;else if(a=='p'){if(!OWN)return;S.preise[k]=v}else if(a=='k')S.kasse[k]=v;else if(a=='d'){const y=dtJahr();S.date=v;if(dtJahr()!=y)blatt()}
  else if(a=='kn')S.koenige[i].name=v;else if(a=='kp')S.koenige[i].pt=t.value===''?null:+t.value;
  if(a=='r'&&k=='e')autoKoenige();
  if(a=='k'&&k=='sonder')rundeTeilen();
@@ -227,11 +227,19 @@ async function saveRk(){
  try{await db.doc('state/config').set(clean({...CFG,rekorde:RK}))}catch(e){return m('Speichern fehlgeschlagen: '+(e.message||e.code))}
  CFG={...CFG,rekorde:clean(RK)};hist(HSEL);m('Rekorde gespeichert – sie stehen jetzt auch in der Historie.')}
 const bsum=a=>(a||[]).reduce((s,v,i)=>s+(+v||0)*(i+1),0),n0=v=>(+v).toLocaleString('de-DE',{maximumFractionDigits:2});
-const bhead=()=>'<tr class="hd"><th>Name</th>'+[1,2,3,4,5,6,7].map(i=>`<th>${i} <span class="mu">(×${i})</span></th>`).join('')+'<th>Summe</th></tr>';
+const bhead=x=>'<tr class="hd"><th>Name</th>'+[1,2,3,4,5,6,7].map(i=>`<th>${i} <span class="mu">(×${i})</span></th>`).join('')+`<th>Summe</th>${x?`<th>${x}</th>`:''}</tr>`;
+// Jahresschnitt je Kegler aus dem Bereich Dortmunder (dtData in js/dortmunder.js): Jahr des Spieltags, sonst das aktuelle Jahr.
+// Nur gespeicherte Abende (und Excel-Daten) zählen; nicht editierbar. Gäste und Personen ohne Ergebnis im Jahr: leer.
+const dtJahr=()=>+(S.date||'').slice(0,4)||new Date().getFullYear();
+function dtJahresSchnitt(){
+ if(typeof dtData!=='function')return{};
+ const y=dtJahr(),m={};
+ dtData().forEach(r=>{if(r.y==y){const a=m[r.n]=m[r.n]||[0,0];a[0]+=r.v;a[1]++}});
+ return m}
 function blatt(){
- const rows=byOrd(S.rows).filter(([r])=>r.c);
+ const rows=byOrd(S.rows).filter(([r])=>r.c),Y=dtJahr(),AV=dtJahresSchnitt(),L='Schnitt '+Y;
  $('#blatt').innerHTML='<h2 id="d-tab">Dortmunder</h2>'
- +(rows.length?`<div class="w"><table class="stack">${bhead()}${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<tr><td>${esc(r.name)}${r.gast?' <span class="tag">Gast</span>':''}</td>${[0,1,2,3,4,5,6].map(k=>`<td data-l="${k+1} (×${k+1})"><input id="bl${i}_${k}" type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}" aria-label="${k+1} (×${k+1})"></td>`).join('')}<td class="cv" data-l="Summe"><b id="bs${i}">${n0(bsum(a))}</b></td></tr>`}).join('')}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
+ +(rows.length?`<div class="w"><table class="stack">${bhead(L)}${rows.map(([r,i])=>{const a=S.blatt[r.name]||[];return`<tr><td>${esc(r.name)}${r.gast?' <span class="tag">Gast</span>':''}</td>${[0,1,2,3,4,5,6].map(k=>`<td data-l="${k+1} (×${k+1})"><input id="bl${i}_${k}" type="number" min="0" step="any" inputmode="decimal" enterkeyhint="next" data-bl="1" data-i="${i}" data-k="${k}" value="${a[k]||''}" aria-label="${k+1} (×${k+1})"></td>`).join('')}<td class="cv" data-l="Summe"><b id="bs${i}">${n0(bsum(a))}</b></td>${(()=>{const v=!r.gast&&AV[typeof dtName=='function'?dtName(r.name):r.name];return`<td class="ro" data-l="${L}">${v?dtN1(v[0]/v[1]):''}</td>`})()}</tr>`}).join('')}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
  +'<p class="note king" id="d-kon"'+(dkText()?'':' hidden')+'>'+icon('crown')+'<span id="dkm">'+dkText()+'</span></p>'+stepNav('dm')}
 const DK=KL.indexOf('Dortmunder'),PK=KL.indexOf('Pumpen - König'),TK=KL.indexOf('TBTBBTB');
 const dkText=()=>S.auto&&S.auto[DK]?`Dortmunder-König (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[DK])} – ${n0(S.koenige[DK].pt)} Punkte`:'';
