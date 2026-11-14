@@ -30,12 +30,10 @@ document.addEventListener('click',async e=>{
   if(!await confirmDlg('Umfrage zurücksetzen? Alle Antworten werden gelöscht.','Zurücksetzen'))return;
   try{await db.doc('state/umfrage').set({votes:{}});UMF={};umfDraw();umfMsg('Umfrage wurde zurückgesetzt.')}catch(x){umfMsg('Zurücksetzen fehlgeschlagen: '+(x.message||x.code))}}});
 // Live-Aktualisierung, damit mehrere Mitglieder gleichzeitig abstimmen können.
-// Ändert sich die Gruppe „Schmeisse einen rein“, wird der Rundenbetrag neu verteilt (nicht beim ersten Laden, damit Handeingaben bleiben).
-let UMF_REIN=null;
+// Bei jeder Änderung der Umfrage wird „Runde bezahlt“ aus „Runden (+Trinkgeld)“ neu verteilt (das Feld ist nicht editierbar).
 function umfWatch(){
  try{db.doc('state/umfrage').onSnapshot(s=>{UMF=s.exists?clean((s.data()||{}).votes||{}):{};umfDraw();
-  const key=MEM.liste.filter(n=>UMF[n]=='rein').join('|'),was=UMF_REIN;UMF_REIN=key;
-  if(was!==null&&was!==key&&EDT&&S.kasse&&+S.kasse.sonder>0&&typeof rundeTeilen==='function'){rundeTeilen();if($('#kg'))upd();draft()}},()=>{})}catch(e){}}
+  if(EDT&&typeof rundeTeilen==='function'&&rundeTeilen()){if($('#kg'))upd();draft()}},()=>{})}catch(e){}}
 
 // Freigabe: Besitzer trägt die E-Mail-Adressen der Mitglieder (Google oder andere, z. B. aol.com) ein, die Abende speichern dürfen.
 const frgHtml=l=>`<h2 id="m-frg">Freigabe zum Speichern</h2>`

@@ -81,7 +81,7 @@ function stat(W,C){
  const cv=(o,i,k,r)=>`<b id="v${i}${k}"${o[k]<0?' class="neg"':''}>${k=='k'&&!r.c?'–':fx(o[k])}</b>`;
  const cards=byOrd(W.rows).filter(([r])=>!r.gast).map(([r,i])=>{const o=C.out[i];
   return`<article class="pc pay${r.c?'':' off'}"><header class="pc-h"><h3>${esc(r.name)}</h3>${r.c?'':'<span class="tag">nicht da</span>'}<div class="due"><span>Noch zu zahlen</span><span class="amt">${cv(o,i,'q',r)} €</span></div></header>`
-  +`<div class="pc-g2"><div class="fld eur"><label for="r${i}l">Runde bezahlt</label>${eIn('r',i,'l',r.l,`r${i}l`)}</div><div class="fld eur"><label for="r${i}p">Hat gezahlt</label>${eIn('r',i,'p',r.p,`r${i}p`)}</div></div>`
+  +`<div class="pc-g2"><div class="fld eur"><label for="r${i}l">Runde bezahlt</label><span class="eu ro"><input id="r${i}l" type="text" readonly tabindex="-1" aria-readonly="true" placeholder="0,00" value="${r.l?fx(r.l):''}"><span class="u">€</span></span></div><div class="fld eur"><label for="r${i}p">Hat gezahlt</label>${eIn('r',i,'p',r.p,`r${i}p`)}</div></div>`
   +`<dl class="kv"><div><dt>Beitrag</dt><dd>${cv(o,i,'k',r)}</dd></div><div><dt>Summe</dt><dd>${cv(o,i,'m',r)}</dd></div><div><dt>Rest letztes Kegeln</dt><dd>${fx(r.n)}</dd></div><div><dt>soll zahlen</dt><dd>${cv(o,i,'o',r)}</dd></div></dl></article>`}).join('');
  const T=k=>`<b id="t${k}">${fx(C.t[k])}</b>`;
  const sum=`<article class="pc pay tot"><header class="pc-h"><h3>Summe</h3><span class="tag"><b id="tc">${C.t.c}</b> anwesend</span><div class="due"><span>Noch zu zahlen</span><span class="amt">${T('q')} €</span></div></header><dl class="kv"><div><dt>Beitrag</dt><dd>${T('k')}</dd></div><div><dt>Runde bezahlt</dt><dd>${T('l')}</dd></div><div><dt>Summe</dt><dd>${T('m')}</dd></div><div><dt>Rest letztes Kegeln</dt><dd>${T('n')}</dd></div><div><dt>soll zahlen</dt><dd>${T('o')}</dd></div><div><dt>Hat gezahlt</dt><dd>${T('p')}</dd></div></dl></article>`;
@@ -105,6 +105,7 @@ function eingabeHinweis(){
   +`<div class="actbar" id="actbar"><div class="in"><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button></div></div>`}
 function render(){
  if(LOADED&&!EDT){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
+ if(EDT)rundeTeilen();
  const W=V(),C=calc(W),L=HIST[0],hd=k=>STEP!=k?' hidden':'';
  $('#edit').innerHTML=`<section data-st="vor"${hd('vor')}><p class="mu lead">Letzter gespeicherter Spieltag: ${L?dd(L.date):'–'}.</p>`
  +(typeof umfHtml==='function'?umfHtml():'')+chips()+stepNav('vor')+'</section>'
@@ -138,12 +139,15 @@ $('#edit').addEventListener('keydown',e=>{
  const t=e.target;if(e.key!='Enter'||t.tagName!='INPUT'||e.isComposing||e.keyCode==229)return;
  if(t.id=='gn'){e.preventDefault();$('#gadd').click();return}
  const sec=t.closest('[data-st]');if(!sec||t.type=='date')return;
- const all=[...sec.querySelectorAll('input:not([type=checkbox]):not([disabled])')].filter(x=>x.offsetParent),n=all[all.indexOf(t)+1];
+ const all=[...sec.querySelectorAll('input:not([type=checkbox]):not([disabled]):not([readonly])')].filter(x=>x.offsetParent),n=all[all.indexOf(t)+1];
  e.preventDefault();if(n)n.focus();else t.blur()});
 // „Runden (+Trinkgeld)“ gleichmäßig auf alle Mitglieder verteilen, die in der Umfrage „Schmeisse einen rein“ gewählt haben (Anteil in „Runde bezahlt“).
+// „Runde bezahlt“ ist nicht editierbar und wird nur hier gefüllt. Gibt true zurück, wenn sich ein Wert geändert hat.
 function rundeTeilen(){
- const rein=MEM.liste.filter(n=>typeof UMF!=='undefined'&&UMF[n]=='rein'),x=+(S.kasse||{}).sonder||0,a=rein.length?Math.round(x/rein.length*100)/100:0;
- S.rows.forEach(r=>{if(!r.gast)r.l=rein.includes(r.name)?a:0})}
+ if(!S.rows)return false;
+ const rein=MEM.liste.filter(n=>typeof UMF!=='undefined'&&UMF[n]=='rein'),x=+(S.kasse||{}).sonder||0,a=rein.length?Math.round(x/rein.length*100)/100:0;let ch=false;
+ S.rows.forEach(r=>{if(r.gast)return;const v=rein.includes(r.name)?a:0;if((+r.l||0)!==v)ch=true;r.l=v});
+ return ch}
 const onIn=e=>{
  const t=e.target,a=t.dataset.a,i=t.dataset.i,k=t.dataset.k;if(!a)return;
  if(a=='rk'){RK[i][k]=k=='pt'?(t.value===''?null:+t.value):t.value;return}
