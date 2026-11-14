@@ -50,6 +50,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 - Eigener Tab. Teilnehmer aus der Eingabe, als Tabelle wie bei Berg und Tal: 7 Eingabespalten plus Summenspalte. Tab und Enter springen spaltenweise zum nächsten Feld.
 - Jeder Wert wird mit Multiplikator 1 bis 7 (links nach rechts) multipliziert und zur Summe addiert.
+- Ganz rechts steht als nicht editierbare Info „Schnitt <Jahr>“: der Jahresschnitt des anwesenden Mitglieds aus dem Bereich Dortmunder (Jahr des Spieltag-Datums, ohne Datum das aktuelle Jahr; gespeicherte Abende des Jahres, ohne den aktuellen Entwurf). Gäste und Mitglieder ohne Ergebnis im Jahr: leer. Die Spalte wird nicht mit dem Abend gespeichert und erscheint nicht in der Historie.
 - Werte und Summe werden mit dem Abend gespeichert und in der Historie angezeigt.
 - Der Teilnehmer mit der höchsten Summe wird automatisch als Dortmunder-König eingetragen.
 - Historie → Spieltage zeigt den Bereich „Dortmunder“ nur für Abende, deren Dortmunder über die Eingabe gespeichert wurde. Dortmunder aus dem Excel-Import (2013–2025, Abend 12.12.2025) stehen nur in der Auswertung; ändert man sie über „Bearbeiten“, erscheint der Bereich ebenfalls.
