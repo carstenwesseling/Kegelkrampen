@@ -50,7 +50,7 @@ function grid(D,C){
  return`<div class="w">${h}</div>`}
 function side(D,ed,C,px='',altEd=0){
  const pf=ed&&!px?'ek':'hk',K=D.kasse||{},row=(l,v)=>`<tr><td>${l}</td><td class="cv" data-l="Betrag"${v[0]?` id="${px}${v[0]}"`:''}>${fx(v[1])}</td><td></td></tr>`,ki=(l,k,t)=>`<tr><td>${l}</td><td data-l="Betrag">${A('k',0,k,K[k]??'',ed)}</td><td style="text-align:left" data-l="Text / Grund">${t?(ed?`<input type="text" class="wide" data-a="k" data-i="0" data-k="${t}" value="${esc(K[t])}" placeholder="Text / Grund">`:esc(K[t])):''}</td></tr>`;
- return`<h2 id="${pf}-kasse">Kasse</h2><div class="w"><table class="stack"><tr class="hd"><th>Position</th><th>Betrag</th><th>Text / Grund</th></tr>${row('Gezahlt',['kg',C.gz])}${ki('Abzug Bahn','bahn')}${ki('Sonderausgabe','sonder','sonderText')}${row('Aufs Konto',['ka',C.aufs])}${ki('Abgang Konto','abgang','abgangText')}${altEd?`<tr><td>Alter Konto</td><td data-l="Betrag">${A('k',0,'alt',K.alt??'',1)}</td><td></td></tr>`:row('Alter Konto',['',K.alt])}${row('Neuer Konto',['kn',C.neu])}</table></div>${D.notiz?`<p class="mu">${D.notiz}</p>`:''}
+ return`<h2 id="${pf}-kasse">Kasse</h2><div class="w"><table class="stack"><tr class="hd"><th>Position</th><th>Betrag</th><th>Text / Grund</th></tr>${row('Gezahlt',['kg',C.gz])}${ki('Abzug Bahn','bahn')}${ki('Runden (+Trinkgeld)','sonder','sonderText')}${row('Aufs Konto',['ka',C.aufs])}${ki('Abgang Konto','abgang','abgangText')}${altEd?`<tr><td>Alter Konto</td><td data-l="Betrag">${A('k',0,'alt',K.alt??'',1)}</td><td></td></tr>`:row('Alter Konto',['',K.alt])}${row('Neuer Konto',['kn',C.neu])}</table></div>${D.notiz?`<p class="mu">${D.notiz}</p>`:''}
  <h2 id="${pf}-koenige">Könige</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th></tr>${(D.koenige||[]).map((k,i)=>`<tr><td>${k.t}</td><td data-l="Name">${A('kn',i,'',k.name,ed,'text')}</td><td data-l="Punkte">${A('kp',i,'',k.pt,ed)}</td></tr>`).join('')}</table></div>`}
 // Euro-Feld mit Einheit im Feld (Eingabe-Karten, Zahlungen).
 const eIn=(a,i,k,v,id,al)=>`<span class="eu"><input${id?` id="${id}"`:''}${al?` aria-label="${al}"`:''} type="text" inputmode="decimal" enterkeyhint="next" data-e="1" data-a="${a}" data-i="${i}" data-k="${k}" placeholder="0,00" value="${v?fx(v):''}"><span class="u">€</span></span>`;
@@ -115,7 +115,7 @@ function render(){
  if(typeof stepShow==='function')stepShow();sub();if(CUR=='#b0'&&typeof startView==='function')startView()}
 function upd(){
  const W=V(),C=calc(W);
- W.rows.forEach((r,i)=>{if(r.gast)return;const sp=$('#ssm'+i);if(sp)sp.textContent=fx(spSum(W,C,i))+' €';for(const k of 'kmoq'){const e=$('#v'+i+k),v=C.out[i][k];if(!e)continue;e.textContent=k=='k'&&!r.c?'–':fx(v);e.classList.toggle('neg',v<0)}});
+ W.rows.forEach((r,i)=>{if(r.gast)return;const rl=$('#r'+i+'l');if(rl&&document.activeElement!==rl)rl.value=r.l?fx(r.l):'';const sp=$('#ssm'+i);if(sp)sp.textContent=fx(spSum(W,C,i))+' €';for(const k of 'kmoq'){const e=$('#v'+i+k),v=C.out[i][k];if(!e)continue;e.textContent=k=='k'&&!r.c?'–':fx(v);e.classList.toggle('neg',v<0)}});
  COLS.forEach(([k])=>{const e=$('#t'+k);if(e)e.textContent=k=='c'?C.t.c:fx(C.t[k])});
  $('#kg').textContent=fx(C.gz);$('#ka').textContent=fx(C.aufs);$('#kn').textContent=fx(C.neu)}
 const st=t=>$('#st').textContent=t,ms=t=>toast(t);
@@ -140,6 +140,10 @@ $('#edit').addEventListener('keydown',e=>{
  const sec=t.closest('[data-st]');if(!sec||t.type=='date')return;
  const all=[...sec.querySelectorAll('input:not([type=checkbox]):not([disabled])')].filter(x=>x.offsetParent),n=all[all.indexOf(t)+1];
  e.preventDefault();if(n)n.focus();else t.blur()});
+// „Runden (+Trinkgeld)“ gleichmäßig auf alle Mitglieder verteilen, die in der Umfrage „Schmeisse einen rein“ gewählt haben (Anteil in „Runde bezahlt“).
+function rundeTeilen(){
+ const rein=MEM.liste.filter(n=>typeof UMF!=='undefined'&&UMF[n]=='rein'),x=+(S.kasse||{}).sonder||0,a=rein.length?Math.round(x/rein.length*100)/100:0;
+ S.rows.forEach(r=>{if(!r.gast)r.l=rein.includes(r.name)?a:0})}
 const onIn=e=>{
  const t=e.target,a=t.dataset.a,i=t.dataset.i,k=t.dataset.k;if(!a)return;
  if(a=='rk'){RK[i][k]=k=='pt'?(t.value===''?null:+t.value):t.value;return}
@@ -148,6 +152,7 @@ const onIn=e=>{
  if(a=='r')S.rows[i][k]=v;else if(a=='p'){if(!OWN)return;S.preise[k]=v}else if(a=='k')S.kasse[k]=v;else if(a=='d')S.date=v;
  else if(a=='kn')S.koenige[i].name=v;else if(a=='kp')S.koenige[i].pt=t.value===''?null:+t.value;
  if(a=='r'&&k=='e')autoKoenige();
+ if(a=='k'&&k=='sonder')rundeTeilen();
  upd();draft()};
 $('#edit').addEventListener('input',onIn);$('#edit').addEventListener('change',onIn);
 $('#blatt').addEventListener('input',e=>{const t=e.target;if(!t.dataset.bl)return;const r=S.rows[t.dataset.i];if(!r)return;

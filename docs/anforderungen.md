@@ -32,7 +32,8 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Werte vom gespeicherten Vorabend werden immer übernommen („Rest letztes Kegeln“, „Alter Konto“).
 - „Noch zu zahlen“ des letzten Spieltags wird immer in „Rest letztes Kegeln“ übernommen.
 - Gäste werden namentlich in Tabelle, Mitgliederliste und Statistik geführt, nicht in der Auswahl für neue Abende. Neue Gäste werden manuell angelegt und nach dem Speichern in die Mitgliederliste übernommen.
-- Kasse: hinter „Sonderausgabe“ und „Abgang Konto“ je ein Textfeld. Der Text wird mit dem Wert ausgegeben (auch in der Historie) und mit dem Abend gespeichert.
+- Kasse: hinter „Runden (+Trinkgeld)“ und „Abgang Konto“ je ein Textfeld. Der Text wird mit dem Wert ausgegeben (auch in der Historie) und mit dem Abend gespeichert.
+- „Runden (+Trinkgeld)“ wird automatisch zu gleichen Teilen (auf Cent gerundet) auf alle Mitglieder verteilt, die in der Umfrage „Schmeisse einen rein“ gewählt haben (auch ohne Anwesenheit), und in deren „Runde bezahlt“ eingetragen. Alle anderen Mitglieder bekommen 0. Die Verteilung wird bei jeder Änderung des Betrags und der „Rein“-Auswahl neu berechnet; „Runde bezahlt“ lässt sich danach von Hand ändern.
 - Rekorde sind in der Eingabe änderbar und speicherbar und erscheinen zusätzlich als erster Bereich unter Historie.
 
 ## Dortmunder
