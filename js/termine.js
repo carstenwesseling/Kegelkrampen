@@ -85,6 +85,32 @@ async function termineSpeichern(form){
  }
 }
 
+// Zweiter Freitag eines Monats (Monat 0–11) als „YYYY-MM-DD“.
+function zweiterFreitag(jahr,monat){
+ const erster=new Date(Date.UTC(jahr,monat,1)).getUTCDay(); // 0 = Sonntag
+ const tag=1+(5-erster+7)%7+7;
+ return new Date(Date.UTC(jahr,monat,tag)).toISOString().slice(0,10);
+}
+
+// Nach dem Speichern eines Abends (nur Besitzer, siehe firestore.rules): alle Termine bis einschließlich dieses Spieltags
+// entfernen und die Liste wieder auf drei Termine auffüllen. Neuer Termin = zweiter Freitag des Monats nach dem letzten
+// Termin der Liste (ohne Termin: nach dem Spieltag), 19:00 Uhr. Der erste Termin der Liste ist dann „Nächster Abend“.
+async function termineNachSpeichern(spieltag){
+ if(!OWN||!db)return;
+ let liste;
+ if(TERMINE===null){
+  const s=await db.doc('state/termine').get();
+  liste=s.exists&&Array.isArray((s.data()||{}).liste)?s.data().liste:[];
+ }else liste=TERMINE_ROH;
+ liste=liste.filter(e=>e.datum&&e.datum>spieltag);
+ while(liste.length<3){
+  const [j,m]=(liste.length?liste[liste.length-1].datum:spieltag).split('-').map(Number);
+  liste.push({datum:zweiterFreitag(m==12?j+1:j,m%12),zeit:'19:00'}); // m ist 1-basiert, also m = Folgemonat (0-basiert)
+ }
+ await db.doc('state/termine').set({liste});
+ TERMINE_ROH=liste;TERMINE=terminAusListe(liste);TERMINE_EDIT=false;
+}
+
 // Klicks und Absenden für Bearbeiten, Abbrechen und Speichern.
 document.addEventListener('click',e=>{
  if(e.target.closest('#termine-bearbeiten')){TERMINE_EDIT=true;startView();return}

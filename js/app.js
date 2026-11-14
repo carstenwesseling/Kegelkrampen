@@ -190,7 +190,12 @@ async function save(){
  const neu=S.rows.filter(r=>r.gast&&!MEM.gaeste.some(x=>norm(x)==norm(r.name))).map(r=>r.name);
  try{await db.doc('sessions/'+S.date).set(doc);if(neu.length){MEM.gaeste=[...MEM.gaeste,...neu];await db.doc('state/mitglieder').set(clean(MEM))}}
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
- HIST=[doc,...HIST];S={};sync();draft();if(typeof UMF!=='undefined'&&Object.keys(UMF).length)db.doc('state/umfrage').set({votes:{}}).catch(()=>{});render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.')}
+ HIST=[doc,...HIST];S={};sync();draft();
+ // Nach dem Speichern: Anwesenheit (S={} oben) und Umfrage komplett zurücksetzen, Terminliste fortschreiben.
+ let fehl='';
+ if(typeof UMF!=='undefined'){UMF={};try{await db.doc('state/umfrage').set({votes:{}})}catch(e){fehl+=' Die Umfrage konnte nicht zurückgesetzt werden.'}}
+ if(OWN&&typeof termineNachSpeichern=='function'){try{await termineNachSpeichern(doc.date)}catch(e){fehl+=' Die Termine konnten nicht aktualisiert werden.'}}
+ render();hist(doc.date);ms('Abend gespeichert – Reste und Konto sind für den nächsten Abend übernommen.'+fehl)}
 const inHY=h=>!HYR||h.date.startsWith(HYR);
 const hyrSel=()=>`<div class="top"><label>Jahr <select id="hyr"><option value="">Alle (${HIST.length} Spieltage)</option>${[...new Set([...HIST.map(h=>h.date.slice(0,4)),String(new Date().getFullYear())])].sort().reverse().map(y=>`<option value="${y}"${y==HYR?' selected':''}>${y} (${HIST.filter(h=>h.date.startsWith(y)).length})</option>`).join('')}</select></label></div>`;
 function hist(sel){
