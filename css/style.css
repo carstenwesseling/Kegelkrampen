@@ -253,6 +253,13 @@ body[data-page=eingabe] .dstat:not(:empty){display:inline-flex}
 .seg button.on.dabei{background:var(--ok-bg);color:var(--ok)}
 .seg button.on.rein{background:var(--warn-bg);color:var(--warn)}
 .seg button.on.nein{background:var(--neg-bg);color:var(--neg)}
+.umf-me{margin:4px 0 12px}
+.umf-me p{display:flex;gap:8px;align-items:flex-start;margin:0 0 8px;font-size:15px}
+.umf-me p .ic{width:18px;height:18px;margin-top:2px;flex:none}
+.umf-me.open{background:var(--warn-bg);border-radius:var(--r-m);padding:10px 12px}
+.umf-me.open p{color:var(--warn)}
+.umf-me .seg{max-width:100%}
+.umf-me .seg button{flex:1 1 0}
 .seg .ls{display:none}
 @media (max-width:640px){.seg .lf{display:none}.seg .ls{display:inline}.seg button{padding:0 10px;min-width:56px}}
 

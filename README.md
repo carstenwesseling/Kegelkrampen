@@ -35,7 +35,7 @@ Die Reihenfolge der Skripte in `index.html` ist wichtig: `ui.js`, `app.js`, `dor
 
 Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Anmeldung per Google oder E-Mail-Link. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
 
-- Lesen: Ausgeloggte sehen nur Mitgliedernamen und Termine (Startseite). Spieltage, Touren, Entwurf, Umfrage und Fotos lesen Besitzer, Freigegebene und Mitglieder mit PIN-Zugang. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>` oder PIN-Zugang mit Stufe „Speichern“, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules,storage`.
+- Lesen: Ausgeloggte sehen nur Mitgliedernamen, Termine und den Stand der Umfrage (Startseite). Spieltage, Touren, Entwurf, Umfrage und Fotos lesen Besitzer, Freigegebene und Mitglieder mit PIN-Zugang. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; jedes Mitglied mit PIN-Zugang nur die eigene Umfrage-Antwort; freigegebene Mitglieder (Dokumente `editors/<google-mail>` oder PIN-Zugang mit Stufe „Speichern“, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules,storage`.
 - Der Datenimport aus dem Artifact ist noch offen. Solange er fehlt, ist die Datenbank leer.
 
 ### Einrichtung (einmalig)

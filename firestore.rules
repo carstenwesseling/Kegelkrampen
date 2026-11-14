@@ -74,14 +74,26 @@ service cloud.firestore {
       allow update, delete: if isOwner();
     }
 
+    // Umfrage: Jedes Mitglied mit PIN-Zugang (auch Stufe „Lesen“) darf nur die eigene Antwort setzen oder löschen
+    // (votes.<eigener Name>: 'dabei' | 'rein' | 'nein' | null). Alle anderen Einträge bleiben unverändert.
+    function umfrageEigeneAntwort() {
+      return isMember()
+        && request.resource.data.keys().hasOnly(['votes'])
+        && (resource == null
+          ? request.resource.data.votes.keys().hasOnly([accessDoc().name])
+          : request.resource.data.votes.diff(resource.data.votes).affectedKeys().hasOnly([accessDoc().name]))
+        && request.resource.data.votes.get(accessDoc().name, null) in [null, 'dabei', 'rein', 'nein'];
+    }
+
     // Zustand: Entwurf und Umfrage dürfen Freigegebene schreiben; die Mitgliederliste nur so,
     // dass Reihenfolge (liste) und weitere Mitglieder unverändert bleiben (neue Gäste beim Speichern).
     match /state/{id} {
-      // Öffentlich lesbar sind nur die Mitgliederliste (Namen für die Anmeldung) und die Termine der Startseite.
-      // Entwurf, Umfrage und Einstellungen sehen nur Mitglieder mit Zugang.
-      allow read: if id == 'mitglieder' || id == 'termine' || isViewer();
+      // Öffentlich lesbar sind nur die Mitgliederliste (Namen für die Anmeldung), die Termine und der Stand der Umfrage
+      // (Startseite, auch ausgeloggt). Entwurf und Einstellungen sehen nur Mitglieder mit Zugang.
+      allow read: if id == 'mitglieder' || id == 'termine' || id == 'umfrage' || isViewer();
       allow write: if isOwner()
         || (isEditor() && (id == 'entwurf' || id == 'umfrage'));
+      allow create, update: if id == 'umfrage' && umfrageEigeneAntwort();
       allow update: if isEditor() && id == 'mitglieder'
         && request.resource.data.liste == resource.data.liste
         && request.resource.data.get('weitere', []) == resource.data.get('weitere', []);

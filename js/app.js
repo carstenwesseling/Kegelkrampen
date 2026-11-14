@@ -108,7 +108,7 @@ function eingabeHinweis(){
   +`<div class="actbar" id="actbar"><div class="in"><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button></div></div>`}
 // Nur Lesen (Mitglied mit Zugang, aber ohne Speicherrecht): alle Felder und Aktionen der Eingabe sperren; Schritt-Knöpfe und PDF bleiben.
 function roLock(){
- document.querySelectorAll('#edit input,#edit select,#edit textarea,#edit button:not([data-step]):not(#pdf-dl),#blatt input,#blatt button:not([data-step]),#bt input,#bt button:not([data-step])').forEach(x=>{x.disabled=true});
+ document.querySelectorAll('#edit input,#edit select,#edit textarea,#edit button:not([data-step]):not(#pdf-dl):not([data-um]),#blatt input,#blatt button:not([data-step]),#bt input,#bt button:not([data-step])').forEach(x=>{x.disabled=true});
  $('#edit').classList.add('ro')}
 function render(){
  if(LOADED&&!VIEW){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
@@ -524,9 +524,9 @@ function startView(){
  if(!LOADED){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}${'<div class="card sk"></div>'.repeat(4)}</div></div>`;return}
  const card=(ic,t,body,cls)=>`<article class="card${cls?' '+cls:''}"><h3>${icon(ic)}${t}</h3>${body}</article>`;
  // Ohne Zugang (ausgeloggt): nur Bild, „Nächster Abend“ (Datum/Uhrzeit) und „Nächste Kegelabende“.
- if(!VIEW){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${card('cal','Nächster Abend',naechsterHTML(),'hl')}${card('cal','Nächste Kegelabende',kegelabendeHTML())}</div></div></div>`;return}
- const pres=S.rows?S.rows.filter(r=>r.c&&!r.gast).length:0,uc=typeof umfCount=='function'?umfCount():{dabei:0,rein:0,nein:0},open=MEM.liste.length-uc.dabei-uc.rein-uc.nein;
- const next=card('cal','Nächster Abend',`${naechsterHTML()}${pres?`<p class="mu">${pres} Mitglieder als anwesend markiert.</p>`:''}<p class="pills"><span class="tag ok">Dabei ${uc.dabei}</span><span class="tag">Rein ${uc.rein}</span><span class="tag">Nein ${uc.nein}</span>${open>0?`<span class="tag mu">offen ${open}</span>`:''}</p><div class="acts">${EDT?`<button type="button" class="pri" data-nav="#b1/${pres?'spiel':'vor'}">${icon('edit')}Abend erfassen</button>`:''}${EDT?'<button type="button" data-nav="#b1/vor">Zur Umfrage</button>':''}</div>`,'hl');
+ if(!VIEW){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${card('cal','Nächster Abend',naechsterHTML()+(TERMINE&&TERMINE.length?umfPills():''),'hl')}${card('cal','Nächste Kegelabende',kegelabendeHTML())}</div></div></div>`;return}
+ const pres=S.rows?S.rows.filter(r=>r.c&&!r.gast).length:0;
+ const next=card('cal','Nächster Abend',`${naechsterHTML()}${TERMINE&&TERMINE.length?umfPills():''}${umfMeHtml()}${pres?`<p class="mu">${pres} Mitglieder als anwesend markiert.</p>`:''}<div class="acts">${EDT?`<button type="button" class="pri" data-nav="#b1/${pres?'spiel':'vor'}">${icon('edit')}Abend erfassen</button>`:''}${EDT?'<button type="button" data-nav="#b1/vor">Zur Umfrage</button>':''}</div>`,'hl');
  const abende=card('cal','Nächste Kegelabende',kegelabendeHTML());
  if(!L){el.innerHTML=`<div class="st-grid">${hero}<div class="st-cards">${head}<div class="st-pair">${next}${abende}</div>${emptyCard('Noch keine gespeicherten Abende. Nach dem ersten „Abend speichern“ erscheinen hier Kontostand, offene Beträge und Könige.')}</div></div>`;return}
  const kasse=card('wallet','Kontostand',`<p class="big">${typeof L.kasse.neu=='number'?eu(L.kasse.neu):'–'}</p><p class="mu">Stand nach dem ${dd(L.date)}${typeof L.kasse.gezahlt=='number'?` · eingezahlt ${eu(L.kasse.gezahlt)}`:''}</p>`);
