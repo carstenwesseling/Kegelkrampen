@@ -10,16 +10,54 @@ service cloud.firestore {
         && request.auth.token.email_verified == true;
     }
 
-    // Freigegebene Mitglieder: Dokument editors/<google-mail> (nur der Besitzer legt es an).
-    function isEditor() {
+    // PIN-Zugang: Der Besitzer legt je Mitglied pins/<Name> = {pin, level} an (nur er kann lesen/schreiben).
+    // Das Mitglied meldet sich anonym an und schreibt access/<uid> = {name, pin, level}; das erlaubt die Regel
+    // unten nur, wenn pin und level zu pins/<Name> passen. Der Abgleich gilt live: ändert oder löscht der Besitzer
+    // die PIN, ist der Zugang sofort ungültig.
+    function accessDoc() {
+      return get(/databases/$(database)/documents/access/$(request.auth.uid)).data;
+    }
+    function pinDoc() {
+      return get(/databases/$(database)/documents/pins/$(accessDoc().name)).data;
+    }
+    function isMember() {
       return request.auth != null
-        && request.auth.token.email_verified == true
-        && exists(/databases/$(database)/documents/editors/$(request.auth.token.email));
+        && exists(/databases/$(database)/documents/access/$(request.auth.uid))
+        && pinDoc().pin == accessDoc().pin;
     }
 
-    // Freigegeben: Besitzer oder freigegebenes Mitglied (siehe isEditor). Nur sie sehen Spieltage, Kegeltouren und den Entwurf.
+    // Freigegebene Mitglieder: Dokument editors/<google-mail> (nur der Besitzer legt es an)
+    // oder PIN-Zugang mit der Stufe „speichern“.
+    function isEditor() {
+      return (request.auth != null
+        && request.auth.token.email_verified == true
+        && exists(/databases/$(database)/documents/editors/$(request.auth.token.email)))
+        || (isMember() && pinDoc().level == 'speichern');
+    }
+
+    // Freigegeben: Besitzer oder freigegebenes Mitglied (siehe isEditor). Nur sie dürfen Abende speichern.
     function isFreigegeben() {
       return isOwner() || isEditor();
+    }
+
+    // Lesen dürfen Besitzer, Freigegebene und Mitglieder mit gültiger PIN (Stufe „lesen“ oder „speichern“).
+    function isViewer() {
+      return isFreigegeben() || isMember();
+    }
+
+    // PINs und Stufen: nur der Besitzer.
+    match /pins/{name} {
+      allow read, write: if isOwner();
+    }
+
+    // Zugang je Browser (anonymer Benutzer). Anlegen nur mit richtiger PIN und passender Stufe.
+    match /access/{uid} {
+      allow create, update: if request.auth != null
+        && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'pin', 'level'])
+        && get(/databases/$(database)/documents/pins/$(request.resource.data.name)).data.pin == request.resource.data.pin
+        && get(/databases/$(database)/documents/pins/$(request.resource.data.name)).data.level == request.resource.data.level;
+      allow read, delete: if isOwner() || (request.auth != null && request.auth.uid == uid);
     }
 
     // Freigabeliste: nicht öffentlich. Jeder sieht nur den eigenen Eintrag, der Besitzer alle.
@@ -28,10 +66,10 @@ service cloud.firestore {
       allow write: if isOwner();
     }
 
-    // Spieltage: lesen alle; neue Abende speichern Besitzer und Freigegebene;
+    // Spieltage: lesen Mitglieder mit Zugang (Besitzer, Freigegebene, PIN); neue Abende speichern Besitzer und Freigegebene;
     // vorhandene Abende ändern oder löschen nur der Besitzer.
     match /sessions/{id} {
-      allow read: if isFreigegeben();
+      allow read: if isViewer();
       allow create: if isOwner() || isEditor();
       allow update, delete: if isOwner();
     }
@@ -39,8 +77,9 @@ service cloud.firestore {
     // Zustand: Entwurf und Umfrage dürfen Freigegebene schreiben; die Mitgliederliste nur so,
     // dass Reihenfolge (liste) und weitere Mitglieder unverändert bleiben (neue Gäste beim Speichern).
     match /state/{id} {
-      // Der Entwurf enthält Beiträge der laufenden Eingabe und ist nur für Freigegebene lesbar.
-      allow read: if id != 'entwurf' || isFreigegeben();
+      // Öffentlich lesbar sind nur die Mitgliederliste (Namen für die Anmeldung) und die Termine der Startseite.
+      // Entwurf, Umfrage und Einstellungen sehen nur Mitglieder mit Zugang.
+      allow read: if id == 'mitglieder' || id == 'termine' || isViewer();
       allow write: if isOwner()
         || (isEditor() && (id == 'entwurf' || id == 'umfrage'));
       allow update: if isEditor() && id == 'mitglieder'
@@ -60,7 +99,7 @@ service cloud.firestore {
 
     // Kegeltouren (Fotos-Metadaten): lesen alle, schreiben nur der Besitzer.
     match /touren/{id} {
-      allow read: if isFreigegeben();
+      allow read: if isViewer();
       allow write: if isOwner();
     }
   }

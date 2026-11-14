@@ -29,17 +29,18 @@ Webseite zur Verwaltung der Kegelabende: Eingabe der Anwesenden und Ergebnisse, 
 └── README.md
 ```
 
-Die Reihenfolge der Skripte in `index.html` ist wichtig: `ui.js`, `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `umfrage.js`, `tour.js`, `init.js`.
+Die Reihenfolge der Skripte in `index.html` ist wichtig: `ui.js`, `app.js`, `dortmunder-import-data.js`, `dortmunder-import.js`, `umfrage.js`, `tour.js`, `zugang.js`, `init.js`.
 
 ## Status
 
 Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die Daten, Storage für die Fotos, Anmeldung per Google oder E-Mail-Link. `js/backend.js` stellt dieselbe Schnittstelle bereit, die die App bisher über claude.ai nutzte (`window.claude.use(...)`), damit die übrige App unverändert bleibt.
 
-- Lesen: für alle. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>`, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules`.
+- Lesen: Ausgeloggte sehen nur Mitgliedernamen und Termine (Startseite). Spieltage, Touren, Entwurf, Umfrage und Fotos lesen Besitzer, Freigegebene und Mitglieder mit PIN-Zugang. Schreiben: Besitzer `carsten.wesseling@gmail.com` alles; freigegebene Mitglieder (Dokumente `editors/<google-mail>` oder PIN-Zugang mit Stufe „Speichern“, gepflegt im Tab „Mitglieder“) nur neue Abende, Entwurf und Umfrage. Nach Änderungen an `firestore.rules` neu veröffentlichen: `firebase deploy --only firestore:rules,storage`.
 - Der Datenimport aus dem Artifact ist noch offen. Solange er fehlt, ist die Datenbank leer.
 
 ### Einrichtung (einmalig)
 
+0a. Authentication → Anmeldemethode: „Anonym“ aktivieren (für die PIN-Anmeldung der Mitglieder).
 0. Authentication → Anmeldemethode: „E-Mail/Passwort“ aktivieren und dort „E-Mail-Link (Anmeldung ohne Passwort)“ einschalten (für Mitglieder ohne Google-Konto).
 1. In der Firebase-Konsole unter Authentication → Settings → „Autorisierte Domains“ die Domain eintragen, auf der die Seite läuft (z. B. `localhost` und später `<nutzer>.github.io`).
 2. Regeln veröffentlichen: `firebase deploy --only firestore:rules,storage` (Firebase CLI nötig, Login mit `firebase login`).
@@ -59,6 +60,8 @@ Die App läuft mit Firebase (Projekt `kegelkrampen-67e7f`): Firestore für die D
 | `state/entwurf` | aktueller Entwurf der Eingabe |
 | `state/config` | Rekorde und Einstellungen |
 | `state/mitglieder` | Mitgliederliste (Reihenfolge), Gäste, weitere Mitglieder, Funktionen im Club (`funktion`: Name → Text) |
+| `pins/<Name>` | PIN (4 Ziffern) und Stufe (`lesen`/`speichern`) je Mitglied, nur Besitzer |
+| `access/<uid>` | Zugang eines Browsers (`name`, `pin`, `level`), nur mit passender PIN anlegbar |
 | `touren/<id>` | Metadaten eines Kegeltour-Fotos (Jahr, Bild-IDs, Name) |
 
 ## Lokal ansehen

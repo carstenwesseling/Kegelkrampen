@@ -462,3 +462,14 @@ details{margin:8px 0}summary{cursor:pointer;min-height:44px;display:flex;align-i
 .tt.sel{outline:4px solid #000;outline-offset:-4px}
 .tt.sel img{opacity:.7}
 .tt.sel .ck{background:var(--lime);color:#000}
+
+/* Zugriffsstufen: gesperrtes Menü (ausgeloggt), Nur-Lesen-Eingabe, Mitglieder-Anmeldung */
+[data-tab].locked,[data-tab][aria-disabled=true]{opacity:.42;cursor:not-allowed}
+#edit.ro input:disabled,#blatt input:disabled,#bt input:disabled,#edit.ro select:disabled{background:var(--fill);color:var(--fg);-webkit-text-fill-color:var(--fg);opacity:1;cursor:default}
+#edit.ro button:disabled{opacity:.45;cursor:not-allowed}
+.zg-f{display:grid;gap:8px;margin:8px 0 12px}
+.zg-f label{font-size:13px;font-weight:600;color:var(--mu)}
+.zg-f select,.zg-f input{width:100%;text-align:left;min-height:48px}
+.zg-f select{border-radius:var(--r-m)}
+.zg-f input#zg-p{letter-spacing:.35em}
+.zg-f .mu{margin:0;min-height:1.2em}

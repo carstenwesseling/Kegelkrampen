@@ -17,6 +17,15 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 - Startseite: Bild „Willingen 2026“ (`img/willingen-2026.jpg`, immer ganz und unverzerrt) und darunter (am Desktop daneben) eine Übersicht: Karten „Nächster Abend“ (Datum und Uhrzeit des nächsten Termins) und „Nächste Kegelabende“ (drei Termine, Datum und Uhrzeit) nebeneinander; der Besitzer trägt die Termine über „Termine bearbeiten“ mit Kalenderauswahl ein. Dazu Umfrage-Stand und Knopf „Abend erfassen“, Kontostand, offene Beträge des letzten Abends, Könige des letzten Abends, Schnellzugriff.
 - Rückmeldungen (gespeichert, Fehler) erscheinen als kurze Meldung unten (Toast). Aktionen, die Daten löschen oder zurücksetzen (Gast entfernen, Umfrage zurücksetzen, Paare neu auslosen), fragen vorher nach.
 
+## Zugriffsstufen und Anmeldung
+
+- Stufe 0 (ausgeloggt): Es gibt nur die Startseite mit dem Bild, „Nächster Abend“ (nur Datum und Uhrzeit) und „Nächste Kegelabende“. Alle anderen Karten werden nicht gezeigt. Die Menüleiste ist sichtbar, aber gesperrt: Ein Klick auf einen Menüpunkt (oder ein direkter Link auf eine andere Seite) führt nicht dorthin, sondern öffnet die Anmeldung bzw. die Startseite.
+- Stufe 1 „Lesen“: Mitglieder, die sich mit Namen und 4-stelliger PIN angemeldet haben, sehen alle Menüpunkte und Seiten (auch Eingabe mit dem aktuellen Entwurf), können aber nichts ändern: Felder und Aktionen der Eingabe sind gesperrt, es gibt keinen Speichern-Knopf.
+- Stufe 2 „Speichern“: Wie Stufe 1, dazu die bisherigen Speicherrechte (neue Abende, Entwurf, Umfrage). Besitzer und per E-Mail Freigegebene (Google / E-Mail-Link, siehe „Freigabe“) haben diese Stufe weiterhin.
+- Anmeldung der Mitglieder: Im Konto-Menü (Symbol oben rechts) den Namen aus der Mitgliederliste wählen und die PIN eingeben. Intern meldet sich der Browser anonym bei Firebase an und legt `access/<uid>` = `{name, pin, level}` an; die Firestore-Regeln lassen das nur zu, wenn PIN und Stufe zu `pins/<Name>` passen. Alle Leserechte (Spieltage, Touren, Entwurf, Umfrage, Fotos) hängen live an diesem Abgleich. Öffentlich lesbar sind nur die Mitgliederliste (Namen) und die Termine der Startseite.
+- PIN-Verwaltung (nur Besitzer, Tab „Mitglieder“, Abschnitt „Zugang per PIN“): je Mitglied PIN (4 Ziffern, Knopf „Zufällige PIN“) und Stufe „Lesen“ / „Speichern“. Gespeichert in `pins/<Name>`. Wird die PIN geändert oder gelöscht, ist der Zugang des Mitglieds sofort ungültig.
+- Einrichtung einmalig: Firebase-Konsole → Authentication → Anmeldemethode → „Anonym“ aktivieren; danach die Regeln neu veröffentlichen.
+
 ## Eingabe
 
 - Die Eingabe ist in fünf Schritte gegliedert (Leiste oben, „Weiter“/„Zurück“ am Ende jedes Schritts): 1 Vorbereitung (Umfrage, Anwesenheit, Gäste), 2 Spiel (Zählwerte), 3 Dortmunder, 4 Berg & Tal, 5 Abschluss (Zahlungen, Kasse, Könige, Rekorde). Unten steht eine feste Leiste mit Spieltag-Datum, PDF und „Abend speichern“; der Stand des Entwurfs steht in der Kopfzeile.

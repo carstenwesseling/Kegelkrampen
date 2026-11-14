@@ -17,10 +17,18 @@ service firebase.storage {
             || firestore.exists(/databases/(default)/documents/editors/$(request.auth.token.email)));
     }
 
-    // Fotos der Kegeltouren: lesbar nur für Freigegebene, schreibbar nur für den Besitzer.
+    // Mitglied mit gültigem PIN-Zugang (Firestore: access/<uid> passt zu pins/<Name>, siehe firestore.rules).
+    function isPinMember() {
+      return request.auth != null
+        && firestore.exists(/databases/(default)/documents/access/$(request.auth.uid))
+        && firestore.get(/databases/(default)/documents/pins/$(firestore.get(/databases/(default)/documents/access/$(request.auth.uid)).data.name)).data.pin
+           == firestore.get(/databases/(default)/documents/access/$(request.auth.uid)).data.pin;
+    }
+
+    // Fotos der Kegeltouren: lesbar für Freigegebene und Mitglieder mit PIN-Zugang, schreibbar nur für den Besitzer.
     // Die Pfade sind zufällig, sie lassen sich nicht erraten, aber über den Link abrufen.
     match /touren/{file} {
-      allow read: if isFreigegeben();
+      allow read: if isFreigegeben() || isPinMember();
       allow write: if isOwner() && request.resource.size < 20 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
     }

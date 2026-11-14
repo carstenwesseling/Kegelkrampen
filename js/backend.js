@@ -19,20 +19,76 @@ const kkIsOwner = () => {
   return !!(u && u.email === KK_OWNER_EMAIL && u.emailVerified);
 };
 
+// PIN-Zugang für Mitglieder: Der Besitzer legt je Mitglied pins/<Name> = {pin, level:'lesen'|'speichern'} an.
+// Das Mitglied meldet sich anonym an und schreibt access/<uid> = {name, pin, level}. Die Firestore-Regeln lassen
+// das nur bei passender PIN und Stufe zu und prüfen den Abgleich bei jedem Zugriff erneut (siehe firestore.rules).
+let kkMember = null;        // {name, level} des angemeldeten PIN-Mitglieds, sonst null
+let kkMemberP = null;       // laufende/abgeschlossene Prüfung des vorhandenen Zugangs
+const kkLevels = ["speichern", "lesen"];
+const kkAnon = () => { const u = fbAuth.currentUser; return !!(u && u.isAnonymous); };
+
+// Vorhandenen Zugang prüfen und die Stufe erneuern (der Besitzer kann PIN oder Stufe geändert haben).
+function kkMemberCheck() {
+  if (!kkMemberP) kkMemberP = (async () => {
+    await kkAuthReady;
+    const u = fbAuth.currentUser;
+    kkMember = null;
+    if (!u || !u.isAnonymous) return null;
+    let d = null;
+    try { const s = await fbDb.doc("access/" + u.uid).get(); d = s.exists ? s.data() : null; } catch (e) { d = null; }
+    if (!d) return null;
+    for (const level of [d.level, ...kkLevels.filter(l => l !== d.level)]) {
+      try { await fbDb.doc("access/" + u.uid).set({ name: d.name, pin: d.pin, level }); kkMember = { name: d.name, level }; return kkMember; } catch (e) {}
+    }
+    // PIN oder Name gibt es nicht mehr: Zugang beenden.
+    try { await fbDb.doc("access/" + u.uid).delete(); } catch (e) {}
+    return null;
+  })();
+  return kkMemberP;
+}
+
 const kkUser = {
   async can(perm) { await kkAuthReady; return perm === "data.write" ? kkIsOwner() : false; },
   async isOwner() { await kkAuthReady; return kkIsOwner(); },
-  // Freigegebene Mitglieder: Dokument editors/<google-mail> (siehe firestore.rules). Der Besitzer zählt immer.
+  // Freigegebene Mitglieder: Dokument editors/<google-mail> (siehe firestore.rules) oder PIN-Zugang mit Stufe „speichern“.
+  // Der Besitzer zählt immer.
   async isEditor() {
     await kkAuthReady;
     if (kkIsOwner()) return true;
     const u = fbAuth.currentUser;
+    if (u && u.isAnonymous) { const m = await kkMemberCheck(); return !!(m && m.level === "speichern"); }
     if (!u || !u.emailVerified || !u.email) return false;
     try { return (await fbDb.doc("editors/" + u.email.toLowerCase()).get()).exists; } catch (e) { return false; }
+  },
+  // Mitglied mit gültigem PIN-Zugang (Stufe „lesen“ oder „speichern“).
+  async isMember() { await kkAuthReady; return !!(await kkMemberCheck()); },
+  async memberLevel() { await kkMemberCheck(); return kkMember ? kkMember.level : null; },
+  async memberLogin(name, pin) {
+    await kkAuthReady;
+    let created = false;
+    if (!fbAuth.currentUser) {
+      try { await fbAuth.signInAnonymously(); created = true; }
+      catch (e) { throw new Error(e && e.code === "auth/operation-not-allowed" ? "Die Mitglieder-Anmeldung ist noch nicht eingerichtet (anonyme Anmeldung in Firebase aktivieren)." : "Anmeldung fehlgeschlagen: " + (e.message || e.code)); }
+    } else if (!fbAuth.currentUser.isAnonymous) throw new Error("Bitte zuerst abmelden.");
+    const u = fbAuth.currentUser;
+    for (const level of kkLevels) {
+      try { await fbDb.doc("access/" + u.uid).set({ name, pin, level }); kkMember = { name, level }; kkMemberP = Promise.resolve(kkMember); return kkMember; } catch (e) {}
+    }
+    if (created) { try { await u.delete(); } catch (e) { try { await fbAuth.signOut(); } catch (x) {} } }
+    throw new Error("Name oder PIN falsch.");
+  },
+  async memberLogout() {
+    const u = fbAuth.currentUser;
+    if (u && u.isAnonymous) {
+      try { await fbDb.doc("access/" + u.uid).delete(); } catch (e) {}
+      try { await u.delete(); } catch (e) { await fbAuth.signOut(); }
+    } else await fbAuth.signOut();
+    kkMember = null; kkMemberP = null;
   },
   async me() {
     await kkAuthReady;
     const u = fbAuth.currentUser;
+    if (u && u.isAnonymous) { const m = await kkMemberCheck(); return m ? { id: u.uid, name: m.name, avatarUrl: "", email: "" } : null; }
     return u ? { id: u.uid, name: u.displayName || u.email, avatarUrl: u.photoURL || "", email: u.emailVerified && u.email ? u.email.toLowerCase() : "" } : null;
   }
 };
@@ -80,7 +136,7 @@ window.claude = {
   btn.className = "mi";
   if (box) box.appendChild(btn);
   btn.onclick = async () => {
-    if (fbAuth.currentUser) { await fbAuth.signOut(); }
+    if (fbAuth.currentUser) { await kkUser.memberLogout(); }
     else { await fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
     location.reload();
   };
