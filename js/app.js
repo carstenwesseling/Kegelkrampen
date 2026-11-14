@@ -15,7 +15,8 @@ function calc(S){
  for(const k of 'defg')t[k]=sum(pl,r=>g(r,k))*P[k];
  t.h=sum(A,r=>(sH-g(r,'h'))*P.h);t.i=sum(A,r=>(sI-g(r,'i'))*P.i);
  t.j=sum(pl,r=>g(r,'j'))+sum(G,r=>g(r,'j'));t.k=cnt*P.k;
- const share=cnt?sum('defghijk'.split(''),k=>t[k])/cnt:0;
+ // Abwesende zahlen den Schnitt der „Summe“ der Anwesenden: Spiel-Summen (wie bisher) plus der Schnitt der „Runde bezahlt“ der Anwesenden.
+ const share=cnt?(sum('defghijk'.split(''),k=>t[k])+sum(A,r=>g(r,'l')))/cnt:0;
  const out=R.map(r=>{if(isG(r))return{};const m=(r.c?g(r,'d')*P.d+g(r,'e')*P.e+g(r,'f')*P.f+g(r,'g')*P.g+(sH-g(r,'h'))*P.h+(sI-g(r,'i'))*P.i+g(r,'j')+P.k:share)+g(r,'l'),o=g(r,'n')+m;return{k:r.c?P.k:null,m,o,q:o-g(r,'p')}});
  const po=out.filter(o=>o.m!=null);
  for(const k of 'lnp')t[k]=sum(pl,r=>g(r,k));
