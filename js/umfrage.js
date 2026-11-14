@@ -1,20 +1,38 @@
 // Umfrage vor dem Abend (über „Anwesenheit“ in der Eingabe) und Freigabeliste für Bearbeiter.
-// Umfrage: Dokument state/umfrage = {votes:{<Name>:'dabei'|'rein'|'nein'}}. Schreiben dürfen Bearbeiter (EDT).
+// Umfrage: Dokument state/umfrage = {votes:{<Name>:'dabei'|'rein'|'nein'}}. Lesen darf jeder (Stand auf der Startseite, auch ausgeloggt).
+// Schreiben: jedes angemeldete Mitglied die eigene Antwort, Bearbeiter (EDT) die Antworten aller – bis der Abend gespeichert wird
+// (dann wird die Umfrage zurückgesetzt). Siehe firestore.rules.
 // Freigabe: Dokumente editors/<google-mail>; nur der Besitzer pflegt sie (Mitglieder-Tab), siehe firestore.rules.
 const UMF_COLS=[['dabei','Dabei'],['rein','Schmeisse einen rein'],['nein','Kann leider nicht']];
-let UMF={};
+let UMF={},UMF_OK=false,UMF_HINT=false; // UMF_OK: Umfrage wurde gelesen; UMF_HINT: Hinweis „noch nicht ausgefüllt“ wurde schon als Meldung gezeigt
+// Eigener Eintrag des angemeldeten Mitglieds in der Mitgliederliste (null: nicht angemeldet oder Name nicht in der Liste).
+const umfMe=()=>{if(!VIEW||!ME||!ME.name)return null;return MEM.liste.find(n=>norm(n)==norm(ME.name))||null};
+const umfOpenMe=()=>{const n=umfMe();return !!n&&UMF_OK&&!UMF[n]};
+const umfCan=n=>!!db&&!!n&&(EDT||n===umfMe());
 const umfCount=()=>{const c={dabei:0,rein:0,nein:0};MEM.liste.forEach(n=>{if(c[UMF[n]]!=null)c[UMF[n]]++});return c};
 const UMF_SH={dabei:'Dabei',rein:'Rein',nein:'Nein'};
 function umfInner(){
  const c=umfCount(),open=MEM.liste.length-c.dabei-c.rein-c.nein;
  return `<p class="pills"><span class="tag ok">Dabei ${c.dabei}</span><span class="tag">Schmeisse einen rein ${c.rein}</span><span class="tag">Kann leider nicht ${c.nein}</span>${open>0?`<span class="tag mu">noch offen ${open}</span>`:''}</p>`
- +`<ul class="umf-l">${MEM.liste.map((n,i)=>`<li><span class="umn">${esc(n)}</span>${EDT?`<span class="seg" role="group" aria-label="${esc(n)}">${UMF_COLS.map(([k,l])=>`<button type="button" class="${k}${UMF[n]==k?' on':''}" data-um="${i}" data-v="${k}" aria-pressed="${UMF[n]==k}" title="${l}">${UMF[n]==k?icon('check'):''}<span class="lf">${l}</span><span class="ls">${UMF_SH[k]}</span></button>`).join('')}</span>`:`<span class="tag${UMF[n]=='dabei'?' ok':''}">${UMF[n]?UMF_COLS.find(x=>x[0]==UMF[n])[1]:'keine Antwort'}</span>`}</li>`).join('')}</ul>`
+ +`<ul class="umf-l">${MEM.liste.map((n,i)=>`<li><span class="umn">${esc(n)}${n===umfMe()?' <span class="tag">du</span>':''}</span>${umfCan(n)?`<span class="seg" role="group" aria-label="${esc(n)}">${UMF_COLS.map(([k,l])=>`<button type="button" class="${k}${UMF[n]==k?' on':''}" data-um="${i}" data-v="${k}" aria-pressed="${UMF[n]==k}" title="${l}">${UMF[n]==k?icon('check'):''}<span class="lf">${l}</span><span class="ls">${UMF_SH[k]}</span></button>`).join('')}</span>`:`<span class="tag${UMF[n]=='dabei'?' ok':''}">${UMF[n]?UMF_COLS.find(x=>x[0]==UMF[n])[1]:'keine Antwort'}</span>`}</li>`).join('')}</ul>`
  +(EDT?`<div class="top"><button type="button" class="pri" id="um-an">${icon('check')}Alle „Dabei“ als anwesend markieren</button><button type="button" id="um-rs">Umfrage zurücksetzen</button><span class="mu" id="um-ms"></span></div>`:'')}
+// Stand der Umfrage als Kurzzeilen (Startseite, auch ausgeloggt). Leer, solange die Umfrage nicht gelesen werden konnte.
+function umfPills(){
+ if(!UMF_OK)return'';
+ const c=umfCount(),open=MEM.liste.length-c.dabei-c.rein-c.nein;
+ return`<p class="pills" aria-label="Stand der Umfrage"><span class="tag ok">Dabei ${c.dabei}</span><span class="tag">Rein ${c.rein}</span><span class="tag">Nein ${c.nein}</span>${open>0?`<span class="tag mu">offen ${open}</span>`:''}</p>`}
+// Eigene Antwort des angemeldeten Mitglieds (Startseite, Karte „Nächster Abend“); ohne Antwort mit Hinweis.
+function umfMeHtml(){
+ const n=umfMe();if(!n||!UMF_OK)return'';
+ const i=MEM.liste.indexOf(n),v=UMF[n],o=!v;
+ return`<div class="umf-me${o?' open':''}" role="group" aria-label="Deine Antwort zur Umfrage">`
+  +`<p>${o?`${icon('alert')}<span><b>Du hast die Umfrage noch nicht ausgefüllt.</b> Bist du beim nächsten Kegeln dabei?</span>`:'<span>Deine Antwort:</span>'}</p>`
+  +`<span class="seg">${UMF_COLS.map(([k,l])=>`<button type="button" class="${k}${v==k?' on':''}" data-um="${i}" data-v="${k}" aria-pressed="${v==k}" title="${l}">${v==k?icon('check'):''}<span class="lf">${l}</span><span class="ls">${UMF_SH[k]}</span></button>`).join('')}</span></div>`}
 const umfHtml=()=>`<h2 id="s-umf">Umfrage</h2><div id="umf">${umfInner()}</div>`;
-const umfDraw=()=>{const e=$('#umf');if(e)e.innerHTML=umfInner();if(typeof CUR!='undefined'&&CUR=='#b0'&&typeof startView=='function')startView()};
+const umfDraw=()=>{const e=$('#umf');if(e)e.innerHTML=umfInner();if(typeof CUR!='undefined'&&CUR=='#b0'&&!(typeof TERMINE_EDIT!='undefined'&&TERMINE_EDIT)&&typeof startView=='function')startView()};
 const umfMsg=t=>toast(t);
 async function umfSet(n,v){
- if(!EDT||!db)return;
+ if(!umfCan(n))return;
  const was=UMF[n];UMF[n]=v;umfDraw();
  try{await db.doc('state/umfrage').set({votes:{[n]:v}},{merge:true})}
  catch(e){UMF[n]=was;umfDraw();umfMsg('Speichern fehlgeschlagen: '+(e.message||e.code))}}
@@ -32,7 +50,9 @@ document.addEventListener('click',async e=>{
 // Live-Aktualisierung, damit mehrere Mitglieder gleichzeitig abstimmen können.
 // Bei jeder Änderung der Umfrage wird „Runde bezahlt“ aus „Runden (+Trinkgeld)“ neu verteilt (das Feld ist nicht editierbar).
 function umfWatch(){
- try{db.doc('state/umfrage').onSnapshot(s=>{UMF=s.exists?clean((s.data()||{}).votes||{}):{};umfDraw();
+ try{db.doc('state/umfrage').onSnapshot(s=>{UMF=s.exists?clean((s.data()||{}).votes||{}):{};UMF_OK=true;umfDraw();
+  // Nach der Anmeldung einmal auf die offene Umfrage hinweisen (zusätzlich zum Hinweis in der Karte „Nächster Abend“).
+  if(!UMF_HINT&&umfOpenMe()){UMF_HINT=true;toast('Du hast die Umfrage für das nächste Kegeln noch nicht ausgefüllt. Du findest sie auf der Startseite.','info')}
   if(EDT&&typeof rundeTeilen==='function'&&rundeTeilen()){if($('#kg'))upd();draft()}},()=>{})}catch(e){}}
 
 // Freigabe: Besitzer trägt die E-Mail-Adressen der Mitglieder (Google oder andere, z. B. aol.com) ein, die Abende speichern dürfen.

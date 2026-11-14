@@ -122,7 +122,7 @@ route();
   HIST=s.docs.map(x=>clean(x.data())).sort((a,b)=>a.date<b.date?1:-1);
   if(c.exists)CFG=clean(c.data());RK=clean(CFG.rekorde||[]);
   if(m.exists)MEM={liste:[],gaeste:[],weitere:[],...clean(m.data())};
-  S=d.exists?clean(d.data()):{};sync();if(VIEW&&typeof umfWatch==='function')umfWatch();
+  S=d.exists?clean(d.data()):{};sync();if(typeof umfWatch==='function')umfWatch();
   st(VIEW?HIST.length+' Spieltage in der Datenbank'+(OWN?' – angemeldet als Besitzer':EDT?' – angemeldet als Mitglied (darf speichern)':' – angemeldet als Mitglied (nur Lesen)'):'Nicht angemeldet')}catch(e){st('Datenbank-Fehler: '+(e.message||e.code));toast('Datenbank-Fehler: '+(e.message||e.code),'err')}}
  else st('Keine Datenbank verbunden – Eingaben werden nicht gespeichert.');
  LOADED=true;render();who();navLock();route();if(db)EDT?dstat('ok','Entwurf geladen'):dstat('off','Nur Ansicht – wird nicht gesichert')})();
