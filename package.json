@@ -1,0 +1,14 @@
+{
+  "name": "kegelkrampen",
+  "version": "1.0.0",
+  "description": "Kegelclub-App: Eingabe, Historie, Auswertung und Dortmunder (statische Seite, Firebase als Backend)",
+  "private": true,
+  "license": "UNLICENSED",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
