@@ -186,7 +186,7 @@ async function save(){
  if(L&&S.date<=L.date)return ms('Das Datum muss nach dem letzten gespeicherten Spieltag ('+dd(L.date)+') liegen.');
  if(!C.t.c)return ms('Bitte mindestens ein anwesendes Mitglied auswählen.');
  const doc=clean({date:S.date,preise:S.preise,notiz:'',koenige:S.koenige,blatt:S.rows.filter(r=>r.c).map(r=>{const a=Array.from({length:7},(_,k)=>+((S.blatt[r.name]||[])[k])||0);return{name:r.name,...(r.gast?{gast:1}:{}),v:a,s:bsum(a)}}),
-  ...(btShow().length?{bt:btSave()}:{}),
+  ...(btShow().length?{bt:btSave()}:{}),...(konSave().length?{kon:konSave()}:{}),
   kasse:{alt:W.kasse.alt,bahn:S.kasse.bahn||0,sonder:S.kasse.sonder||0,abgang:S.kasse.abgang||0,sonderText:(S.kasse.sonderText||'').trim(),abgangText:(S.kasse.abgangText||'').trim(),gezahlt:C.gz,aufs:C.aufs,neu:C.neu},
   rows:W.rows.filter(r=>r.c||!r.gast).map(r=>{const i=W.rows.indexOf(r),o=C.out[i];return r.gast?{name:r.name,gast:1,c:1,h:r.h,i:r.i,j:r.j}:{...r,ord:undefined,k:o.k,m:o.m,o:o.o,q:o.q}})});
  const neu=S.rows.filter(r=>r.gast&&!MEM.gaeste.some(x=>norm(x)==norm(r.name))).map(r=>r.name);
@@ -214,7 +214,7 @@ function hist(sel){
  const C=calc(D);D.rows.forEach((r,i)=>{if(r.m!=null)C.out[i]={k:r.k,m:r.m,o:r.o,q:r.q}});
  {const po=C.out.filter(o=>o.m!=null),has=k=>D.rows.some(r=>!isG(r)&&r[k]!=null);C.t.m=po.reduce((s,o)=>s+o.m,0);C.t.o=po.reduce((s,o)=>s+(+o.o||0),0);C.t.q=has('q')?po.reduce((s,o)=>s+(+o.q||0),0):null;if(!has('p'))C.t.p=null}
  const KN=D.kasse.alt==null;
- $('#hd').innerHTML=`<h2 id="h-tab">Spieltag ${dd(D.date)}</h2>`+(OWN?`<div class="top"><button class="pri" id="ebtn">${icon('edit')}Bearbeiten</button><span class="mu" id="em"></span></div>`:'')+grid(D,C)+blattView(D)+btView(D)+side(D,0,{gz:D.kasse.gezahlt??(KN?null:C.gz),aufs:D.kasse.aufs??(KN?null:C.aufs),neu:D.kasse.neu??(KN?null:C.neu)});compact('h-tab',[2,3,4,5,6,7,8,9,10,12]);sub()}
+ $('#hd').innerHTML=`<h2 id="h-tab">Spieltag ${dd(D.date)}</h2>`+(OWN?`<div class="top"><button class="pri" id="ebtn">${icon('edit')}Bearbeiten</button><span class="mu" id="em"></span></div>`:'')+grid(D,C)+blattView(D)+btView(D)+konView(D)+side(D,0,{gz:D.kasse.gezahlt??(KN?null:C.gz),aufs:D.kasse.aufs??(KN?null:C.aufs),neu:D.kasse.neu??(KN?null:C.neu)});compact('h-tab',[2,3,4,5,6,7,8,9,10,12]);sub()}
 // Spieltage eines Jahres: seitlich scrollbare Zeile, Pfeile für älter / neuer.
 function daysRow(sel){
  const L=HIST.filter(inHY),ix=L.findIndex(h=>h.date==sel),pv=L[ix+1],nx=ix>0?L[ix-1]:null;
@@ -331,6 +331,9 @@ $('#bt').addEventListener('input',e=>{const t=e.target;if(!t.dataset.bt)return;c
  q.v=btV(q);q.v[+t.dataset.k]=t.value===''?0:(+t.value||0);
  const el=$('#bts'+t.dataset.i);if(el)el.textContent=n0(btsum(q.v));autoKoenige();draft()});
 const btView=D=>D.bt&&D.bt.length?`<h2 id="h-bt">Berg und Tal</h2><div class="w"><table class="stack">${btHead()}${D.bt.map(q=>`<tr><td>${btName(q.p)}</td>${btV(q).map((v,k)=>`<td data-l="${k+1}. ${BTH[k]}">${v?n0(v):''}</td>`).join('')}<td class="cv" data-l="Summe"><b>${n0(q.s)}</b></td></tr>`).join('')}</table></div>`:'';
+// König (Eingabe-Schritt „König“): Ergebnisse der Anwesenden mit eingetragenem Wert, werden mit dem Abend gespeichert und in der Historie gezeigt.
+const konSave=()=>S.rows.filter(r=>r.c&&S.kon&&S.kon[r.name]!=null&&S.kon[r.name]!==''&&!isNaN(S.kon[r.name])).map(r=>({name:r.name,...(r.gast?{gast:1}:{}),v:+S.kon[r.name]}));
+const konView=D=>D.kon&&D.kon.length?`<h2 id="h-kon">König</h2><div class="w"><table class="stack"><tr class="hd"><th>Name</th><th>König</th></tr>${D.kon.map(k=>`<tr><td>${esc(k.name)}${k.gast?' <span class="mu">(Gast)</span>':''}</td><td class="cv" data-l="König"><b>${n0(k.v)}</b></td></tr>`).join('')}</table></div>`:'';
 //EDIT-START
 let EDIT=null;
 const linkedWith=(P,D)=>{if(!P||!P.kasse||!D.kasse)return false;if(Math.abs((+D.kasse.alt||0)-(+P.kasse.neu||0))>.005)return false;

@@ -62,7 +62,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 
 - Eigener Schritt zwischen Berg & Tal und Abschluss. Tabelle im selben Aufbau und Design wie Dortmunder: je anwesender Person (inkl. Gäste) eine Zeile mit dem Namen und einer Eingabespalte „König“ (Ergebnis).
 - Die anwesende Person mit dem höchsten Ergebnis wird automatisch mit Namen und Ergebnis unter Abschluss → Könige bei „Gross - König“ eingetragen, die mit dem niedrigsten bei „Klein - König“. Bei gleichem Ergebnis stehen die Namen mit „ / “ getrennt. Es zählen nur Anwesende mit eingetragenem Ergebnis; „Klein - König“ gibt es erst ab zwei Ergebnissen. Ein von Hand geänderter Eintrag wird beim nächsten Eintragen in der Tabelle überschrieben.
-- Die Werte der Tabelle werden nicht mit dem Abend gespeichert (nur die Könige) und mit „Abend speichern“ wie Dortmunder und Berg & Tal gelöscht.
+- Die Ergebnisse der Tabelle werden mit dem Abend gespeichert (`kon`: Name, Ergebnis; nur Anwesende mit eingetragenem Wert) und in der Historie als Bereich „König“ nach Berg und Tal angezeigt. Die Eingabetabelle selbst wird mit „Abend speichern“ wie Dortmunder und Berg & Tal geleert.
 
 ## Berg und Tal
 

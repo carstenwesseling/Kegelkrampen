@@ -9,7 +9,7 @@ const STEPS=[['vor','Vorbereitung'],['spiel','Spiel'],['dm','Dortmunder'],['bt',
 // Zugriffsstufen: ausgeloggt (nur Startseite) · VIEW = Mitglied mit Zugang (alles lesen) · EDT = darf zusätzlich speichern · OWN = Besitzer.
 let CUR='#b0',USR=null,ME=null,STEP='vor',LOADED=false,VIEW=false;
 const SUB={
- '#b2':[['h-rek','Rekorde'],['h-tage','Spieltage'],['h-tab','Tabelle'],['h-dm','Dortmunder'],['h-bt','Berg und Tal'],['hk-kasse','Kasse'],['hk-koenige','Könige']],
+ '#b2':[['h-rek','Rekorde'],['h-tage','Spieltage'],['h-tab','Tabelle'],['h-dm','Dortmunder'],['h-bt','Berg und Tal'],['h-kon','König'],['hk-kasse','Kasse'],['hk-koenige','Könige']],
  '#b3':[['a-kon','Könige'],['a-ein','Einzelergebnisse'],['a-anw','Anwesenheit'],['a-ver','Verlauf'],['a-jahr','Jahre']],
  '#b8':[['dt-tab','Tabelle'],['dt-jahr','Schnitt pro Jahr'],['dt-ges','Schnitt gesamt'],['dt-mm','Max / Min'],['dt-club','Club'],['dt-rek','Rekorde'],['dt-min','Minusrekorde']],
  '#b4':[['m-liste','Mitglieder'],['m-neu','Neues Mitglied'],['m-reihe','Reihenfolge'],['m-pin','Zugang'],['m-lg','Angemeldet'],['m-frg','Freigabe'],['m-satzung','Satzung']]};
