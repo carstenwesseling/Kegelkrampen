@@ -4,8 +4,8 @@ const TABS=[['#b0','#start'],['#b1','#edit'],['#b2','#hist'],['#b3','#aus'],['#b
 // Adresse je Ansicht: #/eingabe/<schritt>, #/historie/<datum> usw. Damit funktionieren Zurück-Knopf, Neu laden und Links.
 const RT={'#b0':'start','#b1':'eingabe','#b2':'historie','#b3':'auswertung','#b4':'mitglieder','#b7':'touren','#b8':'dortmunder'};
 const TTL={'#b0':'Kegelkrampen','#b1':'Eingabe','#b2':'Historie','#b3':'Auswertung','#b4':'Mitglieder','#b7':'Kegeltouren','#b8':'Dortmunder'};
-// Schritte der Eingabe; „dm“ und „bt“ zeigen die Bereiche #blatt und #bt.
-const STEPS=[['vor','Vorbereitung'],['spiel','Spiel'],['dm','Dortmunder'],['bt','Berg & Tal'],['ab','Abschluss']];
+// Schritte der Eingabe; „dm“, „bt“ und „ko“ zeigen die Bereiche #blatt, #bt und #kon.
+const STEPS=[['vor','Vorbereitung'],['spiel','Spiel'],['dm','Dortmunder'],['bt','Berg & Tal'],['ko','König'],['ab','Abschluss']];
 // Zugriffsstufen: ausgeloggt (nur Startseite) · VIEW = Mitglied mit Zugang (alles lesen) · EDT = darf zusätzlich speichern · OWN = Besitzer.
 let CUR='#b0',USR=null,ME=null,STEP='vor',LOADED=false,VIEW=false;
 const SUB={
@@ -20,6 +20,7 @@ const stepDone=k=>{const R=S.rows||[];
  if(k=='spiel')return R.some(r=>r.c&&'defghi'.split('').some(x=>+r[x]));
  if(k=='dm')return Object.values(S.blatt||{}).some(a=>(a||[]).some(Boolean));
  if(k=='bt')return(S.bt||[]).some(q=>(q.v||[]).some(Boolean));
+ if(k=='ko')return Object.values(S.kon||{}).some(v=>v!=null&&v!=='');
  return R.some(r=>+r.p)};
 function sub(){
  const n=$('#sub');if(!n)return;
@@ -47,10 +48,10 @@ addEventListener('resize',navh);
 // Eingabe: nur den Abschnitt des gewählten Schritts zeigen.
 function stepShow(){
  if(CUR!='#b1')return;
- if(LOADED&&!VIEW){$('#blatt').hidden=true;$('#bt').hidden=true;sub();return}
+ if(LOADED&&!VIEW){$('#blatt').hidden=true;$('#bt').hidden=true;$('#kon').hidden=true;sub();return}
  if(LOADED&&!EDT)roLock();
  document.querySelectorAll('#edit [data-st]').forEach(s=>s.hidden=s.dataset.st!=STEP);
- $('#blatt').hidden=STEP!='dm';$('#bt').hidden=STEP!='bt';
+ $('#blatt').hidden=STEP!='dm';$('#bt').hidden=STEP!='bt';$('#kon').hidden=STEP!='ko';
  document.body.dataset.step=STEP;sub()}
 async function who(){
  const e=$('#who');if(!e)return;let w=null;
@@ -86,7 +87,7 @@ function route(){
  SCR[prev]=scrollY;CUR=tab;
  if(tab=='#b1'&&STEPS.some(s=>s[0]==arg))STEP=arg;
  TABS.forEach(([b,v])=>$(v).hidden=b!=tab);
- if(tab!='#b1'){$('#blatt').hidden=true;$('#bt').hidden=true}
+ if(tab!='#b1'){$('#blatt').hidden=true;$('#bt').hidden=true;$('#kon').hidden=true}
  document.querySelectorAll('[data-tab]').forEach(x=>{const on=x.dataset.tab==tab;x.classList.toggle('on',on);on?x.setAttribute('aria-current','page'):x.removeAttribute('aria-current')});
  $('#tb-more').classList.toggle('on',['#b4','#b7'].includes(tab));
  $('#ptitle').textContent=TTL[tab];document.title=(tab=='#b0'?'':TTL[tab]+' – ')+'Kegelclub – Kegelkrampen';
