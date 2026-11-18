@@ -193,8 +193,8 @@ async function save(){
  try{await db.doc('sessions/'+S.date).set(doc);if(neu.length){MEM.gaeste=[...MEM.gaeste,...neu];await db.doc('state/mitglieder').set(clean(MEM))}}
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
  HIST=[doc,...HIST];S={};sync();
- // Zahlungen (Abschluss) zurücksetzen: „Hat gezahlt“ und „Runde bezahlt“ aller Mitglieder auf 0; den leeren Entwurf sofort sichern (nicht erst nach der Verzögerung).
- S.rows.forEach(r=>{r.p=0;r.l=0});draft(1);
+ // Tabelle Spiel (verl. Spiele bis Lotterie) und Zahlungen (Abschluss: „Hat gezahlt“, „Runde bezahlt“) aller Mitglieder auf 0; den leeren Entwurf sofort sichern (nicht erst nach der Verzögerung).
+ S.rows.forEach(r=>{for(const k of 'defghijlp')r[k]=0});draft(1);
  // Nach dem Speichern: Anwesenheit (S={} oben) und Umfrage komplett zurücksetzen, Terminliste fortschreiben.
  let fehl='';
  if(typeof UMF!=='undefined'){UMF={};try{await db.doc('state/umfrage').set({votes:{}})}catch(e){fehl+=' Die Umfrage konnte nicht zurückgesetzt werden.'}}
