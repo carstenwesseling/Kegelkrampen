@@ -132,7 +132,7 @@ const st=t=>$('#st').textContent=t,ms=t=>toast(t);
 // Status des Entwurfs in der Kopfzeile der Eingabe (gespeichert / wird gespeichert / Fehler).
 const dstat=(s,t)=>{const e=$('#dstat');if(!e)return;e.dataset.s=s;e.innerHTML=(s=='ok'?icon('cloud'):s=='err'?icon('alert'):s=='off'?icon('user'):'<span class="spin" aria-hidden="true"></span>')+'<span>'+t+'</span>'};
 // Der Entwurf wird nur für Besitzer und Freigegebene gesichert (firestore.rules: state/entwurf). Alle anderen sehen die Eingabe nur zur Ansicht.
-function draft(){clearTimeout(tm);if(!db)return dstat('err','Ohne Datenbank – nicht gesichert');if(!EDT)return dstat('off','Nur Ansicht – wird nicht gesichert');dstat('wait','Wird gesichert …');tm=setTimeout(()=>db.doc('state/entwurf').set(clean(S)).then(()=>{st('Entwurf gespeichert');dstat('ok','Entwurf gesichert '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}))}).catch(e=>{st('Entwurf konnte nicht gespeichert werden: '+(e.message||e.code));dstat('err','Entwurf nicht gesichert');toast('Entwurf konnte nicht gespeichert werden: '+(e.message||e.code),'err')}),800)}
+function draft(now){clearTimeout(tm);if(!db)return dstat('err','Ohne Datenbank – nicht gesichert');if(!EDT)return dstat('off','Nur Ansicht – wird nicht gesichert');dstat('wait','Wird gesichert …');tm=setTimeout(()=>db.doc('state/entwurf').set(clean(S)).then(()=>{st('Entwurf gespeichert');dstat('ok','Entwurf gesichert '+new Date().toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}))}).catch(e=>{st('Entwurf konnte nicht gespeichert werden: '+(e.message||e.code));dstat('err','Entwurf nicht gesichert');toast('Entwurf konnte nicht gespeichert werden: '+(e.message||e.code),'err')}),now?0:800)}
 $('#edit').addEventListener('click',e=>{
  const b=e.target.closest('[data-chip]');if(b){const r=S.rows[b.dataset.chip];r.c=r.c?0:1;if(r.c)r.ord=S.seq=(S.seq||0)+1;else delete r.ord;autoKoenige();render();draft();return}
  if(e.target.closest('#an-rs')){confirmDlg('Anwesenheit zurücksetzen? Alle Mitglieder werden wieder auf nicht anwesend gesetzt.','Zurücksetzen').then(ok=>{if(!ok)return;S.rows.forEach(r=>{if(!r.gast){r.c=0;delete r.ord}});autoKoenige();render();draft();toast('Anwesenheit wurde zurückgesetzt.')});return}
@@ -192,7 +192,9 @@ async function save(){
  const neu=S.rows.filter(r=>r.gast&&!MEM.gaeste.some(x=>norm(x)==norm(r.name))).map(r=>r.name);
  try{await db.doc('sessions/'+S.date).set(doc);if(neu.length){MEM.gaeste=[...MEM.gaeste,...neu];await db.doc('state/mitglieder').set(clean(MEM))}}
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
- HIST=[doc,...HIST];S={};sync();draft();
+ HIST=[doc,...HIST];S={};sync();
+ // Zahlungen (Abschluss) zurücksetzen: „Hat gezahlt“ und „Runde bezahlt“ aller Mitglieder auf 0; den leeren Entwurf sofort sichern (nicht erst nach der Verzögerung).
+ S.rows.forEach(r=>{r.p=0;r.l=0});draft(1);
  // Nach dem Speichern: Anwesenheit (S={} oben) und Umfrage komplett zurücksetzen, Terminliste fortschreiben.
  let fehl='';
  if(typeof UMF!=='undefined'){UMF={};try{await db.doc('state/umfrage').set({votes:{}})}catch(e){fehl+=' Die Umfrage konnte nicht zurückgesetzt werden.'}}
