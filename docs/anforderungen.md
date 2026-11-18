@@ -73,7 +73,7 @@ Stand: aus den bisherigen Absprachen übernommen. Die Liste ist der fachliche Be
 ## Historie und Bearbeitung
 
 - Gespeicherte Abende sind nicht mehr änderbar, außer über „Bearbeiten“ durch den Besitzer.
-- Anzeige: Ergebnisse (verl. Spiele bis Kranz Hand) als ganze Zahlen; nur Preis, Summe und Lotterie in Euro; übrige Geldspalten mit Cent.
+- Anzeige: Die Punkte der Könige stehen ohne Komma (ganze Zahlen). Ergebnisse (verl. Spiele bis Kranz Hand) als ganze Zahlen; nur Preis, Summe und Lotterie in Euro; übrige Geldspalten mit Cent.
 - Eingabe und Statistik: Die Preise (Preiszeile, auch „Beitrag“ in der Statistik) kann nur der Besitzer ändern; für alle anderen wird sie nur angezeigt.
 
 ## Auswertung
