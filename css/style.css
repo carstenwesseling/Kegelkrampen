@@ -303,17 +303,17 @@ th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
 /* Gestapelte Tabellen (Kasse, Könige, Rekorde, Dortmunder, Berg und Tal, Mitglieder):
    Eingabe-Tabellen ab Tablet-Breite als Karten mit 4 Spalten, alle übrigen am Handy mit 2 Spalten. */
 @media (max-width:1023px){
- :is(#edit,#blatt,#bt) table.stack,:is(#edit,#blatt,#bt) table.stack tbody{display:block}
- :is(#edit,#blatt,#bt) table.stack tr.hd{display:none}
- :is(#edit,#blatt,#bt) table.stack tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
- :is(#edit,#blatt,#bt) table.stack tr:nth-child(odd){background:var(--row-b)}
- :is(#edit,#blatt,#bt) table.stack td{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:0;border:0;text-align:left;position:static;min-width:0;white-space:normal;background:transparent}
- :is(#edit,#blatt,#bt) table.stack td:empty,:is(#edit,#blatt,#bt) table.stack td[colspan]{display:none}
- :is(#edit,#blatt,#bt) table.stack td:first-child{grid-column:1/-1;font:700 18px/1.2 var(--f-d)}
- :is(#edit,#blatt,#bt) table.stack td::before{content:attr(data-l);font-size:13px;font-weight:600;color:var(--mu)}
- :is(#edit,#blatt,#bt) table.stack td:first-child::before{content:none}
- :is(#edit,#blatt,#bt) table.stack input{min-width:0}
- :is(#edit,#blatt,#bt) table.stack td.cv{justify-content:flex-end;font-size:18px}
+ :is(#edit,#blatt,#bt,#kon) table.stack,:is(#edit,#blatt,#bt,#kon) table.stack tbody{display:block}
+ :is(#edit,#blatt,#bt,#kon) table.stack tr.hd{display:none}
+ :is(#edit,#blatt,#bt,#kon) table.stack tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+ :is(#edit,#blatt,#bt,#kon) table.stack tr:nth-child(odd){background:var(--row-b)}
+ :is(#edit,#blatt,#bt,#kon) table.stack td{display:flex;flex-direction:column;align-items:stretch;gap:4px;padding:0;border:0;text-align:left;position:static;min-width:0;white-space:normal;background:transparent}
+ :is(#edit,#blatt,#bt,#kon) table.stack td:empty,:is(#edit,#blatt,#bt,#kon) table.stack td[colspan]{display:none}
+ :is(#edit,#blatt,#bt,#kon) table.stack td:first-child{grid-column:1/-1;font:700 18px/1.2 var(--f-d)}
+ :is(#edit,#blatt,#bt,#kon) table.stack td::before{content:attr(data-l);font-size:13px;font-weight:600;color:var(--mu)}
+ :is(#edit,#blatt,#bt,#kon) table.stack td:first-child::before{content:none}
+ :is(#edit,#blatt,#bt,#kon) table.stack input{min-width:0}
+ :is(#edit,#blatt,#bt,#kon) table.stack td.cv{justify-content:flex-end;font-size:18px}
  :is(#edit) table.stack td[data-l="Text / Grund"]{grid-column:span 2}
 }
 @media (max-width:900px){
@@ -343,7 +343,7 @@ th.srt[aria-sort=descending]::after{content:" ▼";font-size:.8em}
  table.stack td::before{content:attr(data-l);font-size:12px;font-weight:600;color:var(--mu)}
  table.stack td:first-child::before{content:none}
  table.stack input{min-width:0}
- table.stack tr,table.stack.t tr,:is(#edit,#blatt,#bt) table.stack tr{grid-template-columns:repeat(2,minmax(0,1fr))}
+ table.stack tr,table.stack.t tr,:is(#edit,#blatt,#bt,#kon) table.stack tr{grid-template-columns:repeat(2,minmax(0,1fr))}
  :is(#edit) table.stack td[data-l="Text / Grund"]{grid-column:1/-1}
  input[type=date]{flex:1}
  input.wide{min-width:0}
@@ -472,7 +472,7 @@ details{margin:8px 0}summary{cursor:pointer;min-height:44px;display:flex;align-i
 
 /* Zugriffsstufen: gesperrtes Menü (ausgeloggt), Nur-Lesen-Eingabe, Mitglieder-Anmeldung */
 [data-tab].locked,[data-tab][aria-disabled=true]{opacity:.42;cursor:not-allowed}
-#edit.ro input:disabled,#blatt input:disabled,#bt input:disabled,#edit.ro select:disabled{background:var(--fill);color:var(--fg);-webkit-text-fill-color:var(--fg);opacity:1;cursor:default}
+#edit.ro input:disabled,#blatt input:disabled,#bt input:disabled,#kon input:disabled,#edit.ro select:disabled{background:var(--fill);color:var(--fg);-webkit-text-fill-color:var(--fg);opacity:1;cursor:default}
 #edit.ro button:disabled{opacity:.45;cursor:not-allowed}
 .zg-f{display:grid;gap:8px;margin:8px 0 12px}
 .zg-f label{font-size:13px;font-weight:600;color:var(--mu)}

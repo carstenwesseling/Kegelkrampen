@@ -35,7 +35,7 @@ function sync(){
  S.preise=S.preise||{...(HIST[0]?HIST[0].preise:{d:.5,e:.25,f:.5,g:.5,h:1.25,i:2.5,k:30})};
  const old=S.rows||[];
  S.rows=[...MEM.liste.map(n=>old.find(r=>r.name==n&&!r.gast)||blank(n)),...old.filter(r=>r.gast&&r.name&&r.name!='Gast')];
- S.kasse=S.kasse||{};S.date=S.date||'';S.blatt=S.blatt||{};S.bt=S.bt||[];
+ S.kasse=S.kasse||{};S.date=S.date||'';S.blatt=S.blatt||{};S.bt=S.bt||[];S.kon=S.kon||{};
  S.rows.forEach(r=>{if(r.c&&r.ord==null)r.ord=S.seq=(S.seq||0)+1});
  S.koenige=KL.map((t,i)=>(S.koenige||[])[i]||{t,name:'',pt:null})}
 function V(){const L=HIST[0],q={};L&&L.rows.forEach(r=>q[r.name]=r.q);
@@ -110,7 +110,7 @@ function eingabeHinweis(){
   +`<div class="actbar" id="actbar"><div class="in"><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button></div></div>`}
 // Nur Lesen (Mitglied mit Zugang, aber ohne Speicherrecht): alle Felder und Aktionen der Eingabe sperren; Schritt-Knöpfe und PDF bleiben.
 function roLock(){
- document.querySelectorAll('#edit input,#edit select,#edit textarea,#edit button:not([data-step]):not(#pdf-dl):not([data-um]),#blatt input,#blatt button:not([data-step]),#bt input,#bt button:not([data-step])').forEach(x=>{x.disabled=true});
+ document.querySelectorAll('#edit input,#edit select,#edit textarea,#edit button:not([data-step]):not(#pdf-dl):not([data-um]),#blatt input,#blatt button:not([data-step]),#bt input,#bt button:not([data-step]),#kon input,#kon button:not([data-step])').forEach(x=>{x.disabled=true});
  $('#edit').classList.add('ro')}
 function render(){
  if(LOADED&&!VIEW){$('#edit').innerHTML=eingabeHinweis();$('#blatt').hidden=true;$('#bt').hidden=true;sub();if(CUR=='#b0'&&typeof startView==='function')startView();return}
@@ -121,7 +121,7 @@ function render(){
  +`<section data-st="spiel"${hd('spiel')}>${eingabe(W,C)}${stepNav('spiel')}</section>`
  +`<section data-st="ab"${hd('ab')}>${stat(W,C)}${side(W,1,C)}${rekEdit()}${stepNav('ab')}</section>`
  +`<div class="actbar" id="actbar"><div class="in"><label class="dat"><span>Spieltag</span><input type="date" id="dat" data-a="d" value="${S.date}"${EDT?'':' disabled'}></label><span class="sp"></span><button type="button" class="icb ghost" id="pdf-dl" aria-label="PDF herunterladen" title="PDF herunterladen">${icon('file')}</button>${EDT?`<button type="button" class="pri" id="sv">${icon('save')}<span><span class="hide-xs">Abend </span>speichern</span></button>`:''}</div></div>`;
- if(EDT)$('#sv').onclick=()=>busy($('#sv'),save());if(OWN)$('#rsv').onclick=()=>busy($('#rsv'),saveRk());blatt();BTC=false;bergTal();
+ if(EDT)$('#sv').onclick=()=>busy($('#sv'),save());if(OWN)$('#rsv').onclick=()=>busy($('#rsv'),saveRk());blatt();BTC=false;bergTal();koenigTab();
  if(typeof stepShow==='function')stepShow();sub();if(CUR=='#b0'&&typeof startView==='function')startView()}
 function upd(){
  const W=V(),C=calc(W);
@@ -172,13 +172,13 @@ $('#blatt').addEventListener('input',e=>{const t=e.target;if(!t.dataset.bl)retur
  const a=S.blatt[r.name]=S.blatt[r.name]||Array(7).fill(0);a[+t.dataset.k]=t.value===''?0:Math.max(0,+t.value||0);
  $('#bs'+t.dataset.i).textContent=n0(bsum(a));autoKoenige();draft()});
 const colNav=e=>{
- const t=e.target;if(!t.dataset||!(t.dataset.bl||t.dataset.bt)||(e.key!=='Tab'&&e.key!=='Enter')||e.ctrlKey||e.altKey||e.metaKey)return;
- const box=t.closest('table'),sel='input[data-bl],input[data-bt]';
+ const t=e.target;if(!t.dataset||!(t.dataset.bl||t.dataset.bt||t.dataset.ko)||(e.key!=='Tab'&&e.key!=='Enter')||e.ctrlKey||e.altKey||e.metaKey)return;
+ const box=t.closest('table'),sel='input[data-bl],input[data-bt],input[data-ko]';
  // Tabelle: spaltenweise, innerhalb einer Spalte in sichtbarer Zeilenreihenfolge
  const all=[...box.querySelectorAll(sel)].map((el,x)=>({el,x})).sort((a,b)=>(+a.el.dataset.k)-(+b.el.dataset.k)||a.x-b.x).map(o=>o.el);
  const n=all[all.indexOf(t)+(e.shiftKey?-1:1)];
  if(!n)return;e.preventDefault();n.focus();if(n.select)n.select()};
-$('#blatt').addEventListener('keydown',colNav);$('#bt').addEventListener('keydown',colNav);$('#hist').addEventListener('keydown',colNav);
+$('#blatt').addEventListener('keydown',colNav);$('#bt').addEventListener('keydown',colNav);$('#kon').addEventListener('keydown',colNav);$('#hist').addEventListener('keydown',colNav);
 async function save(){
  const L=HIST[0],W=V(),C=calc(W);
  if(!EDT||!db)return ms('Speichern ist nur freigegebenen Mitgliedern möglich.');
@@ -186,7 +186,7 @@ async function save(){
  if(L&&S.date<=L.date)return ms('Das Datum muss nach dem letzten gespeicherten Spieltag ('+dd(L.date)+') liegen.');
  if(!C.t.c)return ms('Bitte mindestens ein anwesendes Mitglied auswählen.');
  const doc=clean({date:S.date,preise:S.preise,notiz:'',koenige:S.koenige,blatt:S.rows.filter(r=>r.c).map(r=>{const a=Array.from({length:7},(_,k)=>+((S.blatt[r.name]||[])[k])||0);return{name:r.name,...(r.gast?{gast:1}:{}),v:a,s:bsum(a)}}),
-  ...(btShow().length?{bt:btSave()}:{}),
+  ...(btShow().length?{bt:btSave()}:{}),...(konSave().length?{kon:konSave()}:{}),
   kasse:{alt:W.kasse.alt,bahn:S.kasse.bahn||0,sonder:S.kasse.sonder||0,abgang:S.kasse.abgang||0,sonderText:(S.kasse.sonderText||'').trim(),abgangText:(S.kasse.abgangText||'').trim(),gezahlt:C.gz,aufs:C.aufs,neu:C.neu},
   rows:W.rows.filter(r=>r.c||!r.gast).map(r=>{const i=W.rows.indexOf(r),o=C.out[i];return r.gast?{name:r.name,gast:1,c:1,h:r.h,i:r.i,j:r.j}:{...r,ord:undefined,k:o.k,m:o.m,o:o.o,q:o.q}})});
  const neu=S.rows.filter(r=>r.gast&&!MEM.gaeste.some(x=>norm(x)==norm(r.name))).map(r=>r.name);
@@ -214,7 +214,7 @@ function hist(sel){
  const C=calc(D);D.rows.forEach((r,i)=>{if(r.m!=null)C.out[i]={k:r.k,m:r.m,o:r.o,q:r.q}});
  {const po=C.out.filter(o=>o.m!=null),has=k=>D.rows.some(r=>!isG(r)&&r[k]!=null);C.t.m=po.reduce((s,o)=>s+o.m,0);C.t.o=po.reduce((s,o)=>s+(+o.o||0),0);C.t.q=has('q')?po.reduce((s,o)=>s+(+o.q||0),0):null;if(!has('p'))C.t.p=null}
  const KN=D.kasse.alt==null;
- $('#hd').innerHTML=`<h2 id="h-tab">Spieltag ${dd(D.date)}</h2>`+(OWN?`<div class="top"><button class="pri" id="ebtn">${icon('edit')}Bearbeiten</button><span class="mu" id="em"></span></div>`:'')+grid(D,C)+blattView(D)+btView(D)+side(D,0,{gz:D.kasse.gezahlt??(KN?null:C.gz),aufs:D.kasse.aufs??(KN?null:C.aufs),neu:D.kasse.neu??(KN?null:C.neu)});compact('h-tab',[2,3,4,5,6,7,8,9,10,12]);sub()}
+ $('#hd').innerHTML=`<h2 id="h-tab">Spieltag ${dd(D.date)}</h2>`+(OWN?`<div class="top"><button class="pri" id="ebtn">${icon('edit')}Bearbeiten</button><span class="mu" id="em"></span></div>`:'')+grid(D,C)+blattView(D)+btView(D)+konView(D)+side(D,0,{gz:D.kasse.gezahlt??(KN?null:C.gz),aufs:D.kasse.aufs??(KN?null:C.aufs),neu:D.kasse.neu??(KN?null:C.neu)});compact('h-tab',[2,3,4,5,6,7,8,9,10,12]);sub()}
 // Spieltage eines Jahres: seitlich scrollbare Zeile, Pfeile für älter / neuer.
 function daysRow(sel){
  const L=HIST.filter(inHY),ix=L.findIndex(h=>h.date==sel),pv=L[ix+1],nx=ix>0?L[ix-1]:null;
@@ -252,16 +252,38 @@ function blatt(){
  +'<p class="note king" id="d-kon"'+(dkText()?'':' hidden')+'>'+icon('crown')+'<span id="dkm">'+dkText()+'</span></p>'+stepNav('dm')}
 const DK=KL.indexOf('Dortmunder'),PK=KL.indexOf('Pumpen - König'),TK=KL.indexOf('TBTBBTB');
 const dkText=()=>S.auto&&S.auto[DK]?`Dortmunder-König (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[DK])} – ${n0(S.koenige[DK].pt)} Punkte`:'';
+// König i automatisch setzen (nm = Name(n), pt = Punkte). Ohne Namen wird ein zuvor automatisch gesetzter Eintrag wieder geleert.
+function autoSet(i,nm,pt){
+ const k=S.koenige[i];S.auto=S.auto||{};
+ if(nm){k.name=nm;k.pt=pt}else if(S.auto[i]&&k.name===S.auto[i]){k.name='';k.pt=null}
+ S.auto[i]=nm;
+ const en=$('#edit input[data-a="kn"][data-i="'+i+'"]'),ep=$('#edit input[data-a="kp"][data-i="'+i+'"]');
+ if(en)en.value=k.name||'';if(ep)ep.value=k.pt??''}
 function autoK(i,sc){
  let mx=0,best=[];
  S.rows.forEach(r=>{if(!r.c)return;const s=sc(r);if(s>mx+1e-9){mx=s;best=[r.name]}else if(s>0&&Math.abs(s-mx)<1e-9)best.push(r.name)});
- const k=S.koenige[i],nm=best.join(' / ');S.auto=S.auto||{};
- if(mx>0){k.name=nm;k.pt=+mx.toFixed(2)}else if(S.auto[i]&&k.name===S.auto[i]){k.name='';k.pt=null}
- S.auto[i]=mx>0?nm:'';
- const en=$('#edit input[data-a="kn"][data-i="'+i+'"]'),ep=$('#edit input[data-a="kp"][data-i="'+i+'"]');
- if(en)en.value=k.name||'';if(ep)ep.value=k.pt??''}
+ autoSet(i,mx>0?best.join(' / '):'',+mx.toFixed(2))}
+// Tabelle „König“ (Eingabe): höchstes Ergebnis → Gross - König, niedrigstes → Klein - König; bei Gleichstand Namen mit „ / “ getrennt.
+// Nur Anwesende mit eingetragenem Ergebnis zählen; Klein - König gibt es erst ab zwei Ergebnissen.
+const GK=KL.indexOf('Gross - König'),KK=KL.indexOf('Klein - König');
+function autoKK(){
+ const e=S.rows.filter(r=>r.c).map(r=>[r.name,(S.kon||{})[r.name]]).filter(([,v])=>v!=null&&v!==''&&!isNaN(v)).map(([n,v])=>[n,+v]);
+ if(!e.length){autoSet(GK,'');autoSet(KK,'');return}
+ const mx=Math.max(...e.map(x=>x[1])),mn=Math.min(...e.map(x=>x[1])),nm=v=>e.filter(x=>Math.abs(x[1]-v)<1e-9).map(x=>x[0]).join(' / ');
+ autoSet(GK,nm(mx),+mx.toFixed(2));
+ if(e.length>1)autoSet(KK,nm(mn),+mn.toFixed(2));else autoSet(KK,'')}
+const kkText=()=>['Gross - König','Klein - König'].map(t=>{const i=KL.indexOf(t);return S.auto&&S.auto[i]?`${t}: ${esc(S.auto[i])} – ${n0(S.koenige[i].pt)} Punkte`:''}).filter(Boolean).join(' · ');
+function koenigTab(){
+ const rows=byOrd(S.rows).filter(([r])=>r.c);
+ $('#kon').innerHTML='<h2 id="k-tab">König</h2>'
+ +(rows.length?`<div class="w"><table class="stack"><tr class="hd"><th>Name</th><th>König</th></tr>${rows.map(([r,i])=>`<tr><td>${esc(r.name)}${r.gast?' <span class="tag">Gast</span>':''}</td><td data-l="König"><input type="number" step="any" inputmode="decimal" enterkeyhint="next" data-ko="1" data-i="${i}" data-k="0" value="${(S.kon||{})[r.name]??''}" aria-label="König ${esc(r.name)}"></td></tr>`).join('')}</table></div>`:emptyCard('Noch niemand ausgewählt.','<button type="button" class="pri" data-step="vor">Zur Anwesenheit</button>'))
+ +'<p class="note king" id="kk-kon"'+(kkText()?'':' hidden')+'>'+icon('crown')+'<span id="kkm">'+kkText()+'</span></p>'+stepNav('ko')}
+$('#kon').addEventListener('input',e=>{const t=e.target;if(!t.dataset.ko)return;const r=S.rows[t.dataset.i];if(!r)return;
+ if(t.value==='')delete S.kon[r.name];else S.kon[r.name]=+t.value;
+ autoKoenige();draft()});
 function autoKoenige(){
- autoK(DK,r=>bsum(S.blatt[r.name]));autoK(PK,r=>+r.e||0);autoK(TK,r=>btPS(r.name));
+ autoK(DK,r=>bsum(S.blatt[r.name]));autoK(PK,r=>+r.e||0);autoK(TK,r=>btPS(r.name));autoKK();
+ const kk=$('#kkm');if(kk){kk.textContent=kkText();kk.parentElement.hidden=!kkText()}
  const m=$('#dkm');if(m){m.textContent=dkText();m.parentElement.hidden=!dkText()}const t=$('#btk');if(t){t.textContent=btkText();t.parentElement.hidden=!btkText()}}
 const btPS=n=>{const x=btShow().find(x=>x.p.some(y=>y.name==n));return x?btsum(btV(x.q)):0};
 const btkText=()=>S.auto&&S.auto[TK]?`König „TBTBBTB“ (automatisch in der Eingabe unter Könige eingetragen): ${esc(S.auto[TK])} – ${n0(S.koenige[TK].pt)} Punkte`:'';
@@ -309,6 +331,9 @@ $('#bt').addEventListener('input',e=>{const t=e.target;if(!t.dataset.bt)return;c
  q.v=btV(q);q.v[+t.dataset.k]=t.value===''?0:(+t.value||0);
  const el=$('#bts'+t.dataset.i);if(el)el.textContent=n0(btsum(q.v));autoKoenige();draft()});
 const btView=D=>D.bt&&D.bt.length?`<h2 id="h-bt">Berg und Tal</h2><div class="w"><table class="stack">${btHead()}${D.bt.map(q=>`<tr><td>${btName(q.p)}</td>${btV(q).map((v,k)=>`<td data-l="${k+1}. ${BTH[k]}">${v?n0(v):''}</td>`).join('')}<td class="cv" data-l="Summe"><b>${n0(q.s)}</b></td></tr>`).join('')}</table></div>`:'';
+// König (Eingabe-Schritt „König“): Ergebnisse der Anwesenden mit eingetragenem Wert, werden mit dem Abend gespeichert und in der Historie gezeigt.
+const konSave=()=>S.rows.filter(r=>r.c&&S.kon&&S.kon[r.name]!=null&&S.kon[r.name]!==''&&!isNaN(S.kon[r.name])).map(r=>({name:r.name,...(r.gast?{gast:1}:{}),v:+S.kon[r.name]}));
+const konView=D=>D.kon&&D.kon.length?`<h2 id="h-kon">König</h2><div class="w"><table class="stack"><tr class="hd"><th>Name</th><th>König</th></tr>${D.kon.map(k=>`<tr><td>${esc(k.name)}${k.gast?' <span class="mu">(Gast)</span>':''}</td><td class="cv" data-l="König"><b>${n0(k.v)}</b></td></tr>`).join('')}</table></div>`:'';
 //EDIT-START
 let EDIT=null;
 const linkedWith=(P,D)=>{if(!P||!P.kasse||!D.kasse)return false;if(Math.abs((+D.kasse.alt||0)-(+P.kasse.neu||0))>.005)return false;
