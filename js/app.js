@@ -17,9 +17,11 @@ function calc(S){
  t.j=sum(pl,r=>g(r,'j'))+sum(G,r=>g(r,'j'));t.k=cnt*P.k;
  // „Summe“ einer anwesenden Person (inkl. Beitrag und Runde bezahlt). Abwesende zahlen den Schnitt:
  // Summe der Felder „Summe“ aller anwesenden Mitglieder geteilt durch deren Anzahl (Gäste zählen nicht mit).
+ // Hat ein Abwesender „Schmeisse einen rein“ gewählt, kommt sein eigener Rundenanteil („Runde bezahlt“) zusätzlich zum Schnitt dazu
+ // (wie im Google Sheet und in der Historie), sonst wäre die Runde aus der Kasse von niemandem bezahlt.
  const own=r=>g(r,'d')*P.d+g(r,'e')*P.e+g(r,'f')*P.f+g(r,'g')*P.g+(sH-g(r,'h'))*P.h+(sI-g(r,'i'))*P.i+g(r,'j')+P.k+g(r,'l');
  const share=cnt?sum(A,own)/cnt:0;
- const out=R.map(r=>{if(isG(r))return{};const m=r.c?own(r):share,o=g(r,'n')+m;return{k:r.c?P.k:null,m,o,q:o-g(r,'p')}});
+ const out=R.map(r=>{if(isG(r))return{};const m=r.c?own(r):share+g(r,'l'),o=g(r,'n')+m;return{k:r.c?P.k:null,m,o,q:o-g(r,'p')}});
  const po=out.filter(o=>o.m!=null);
  for(const k of 'lnp')t[k]=sum(pl,r=>g(r,k));
  t.m=sum(po,o=>o.m);t.o=sum(po,o=>o.o);t.q=sum(po,o=>o.q);
