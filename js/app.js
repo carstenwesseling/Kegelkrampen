@@ -56,7 +56,7 @@ function grid(D,C){
 function side(D,ed,C,px='',altEd=0){
  const pf=ed&&!px?'ek':'hk',K=D.kasse||{},row=(l,v)=>`<tr><td>${l}</td><td class="cv" data-l="Betrag"${v[0]?` id="${px}${v[0]}"`:''}>${fx(v[1])}</td><td></td></tr>`,ki=(l,k,t)=>`<tr><td>${l}</td><td data-l="Betrag">${A('k',0,k,K[k]??'',ed)}</td><td style="text-align:left" data-l="Text / Grund">${t?(ed?`<input type="text" class="wide" data-a="k" data-i="0" data-k="${t}" value="${esc(K[t])}" placeholder="Text / Grund">`:esc(K[t])):''}</td></tr>`;
  return`<h2 id="${pf}-kasse">Kasse</h2><div class="w"><table class="stack"><tr class="hd"><th>Position</th><th>Betrag</th><th>Text / Grund</th></tr>${row('Gezahlt',['kg',C.gz])}${ki('Abzug Bahn','bahn')}${ki('Runden (+Trinkgeld)','sonder','sonderText')}${row('Aufs Konto',['ka',C.aufs])}${ki('Abgang Konto','abgang','abgangText')}${altEd?`<tr><td>Alter Konto</td><td data-l="Betrag">${A('k',0,'alt',K.alt??'',1)}</td><td></td></tr>`:row('Alter Konto',['',K.alt])}${row('Neuer Konto',['kn',C.neu])}</table></div>${D.notiz?`<p class="mu">${D.notiz}</p>`:''}
- <h2 id="${pf}-koenige">Könige</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th></tr>${(D.koenige||[]).map((k,i)=>`<tr><td>${k.t}</td><td data-l="Name">${A('kn',i,'',k.name,ed,'text')}</td><td data-l="Punkte">${A('kp',i,'',k.pt,ed)}</td></tr>`).join('')}</table></div>`}
+ <h2 id="${pf}-koenige">Könige</h2><div class="w"><table class="stack"><tr class="hd"><th>Kategorie</th><th>Name</th><th>Punkte</th></tr>${(D.koenige||[]).map((k,i)=>`<tr><td>${k.t}</td><td data-l="Name">${A('kn',i,'',k.name,ed,'text')}</td><td data-l="Punkte">${ed?A('kp',i,'',k.pt,ed):iv(k.pt)}</td></tr>`).join('')}</table></div>`}
 // Euro-Feld mit Einheit im Feld (Eingabe-Karten, Zahlungen).
 const eIn=(a,i,k,v,id,al)=>`<span class="eu"><input${id?` id="${id}"`:''}${al?` aria-label="${al}"`:''} type="text" inputmode="decimal" enterkeyhint="next" data-e="1" data-a="${a}" data-i="${i}" data-k="${k}" placeholder="0,00" value="${v?fx(v):''}"><span class="u">€</span></span>`;
 // Knöpfe „Zurück“ / „Weiter“ am Ende jedes Eingabe-Schritts (STEPS steht in init.js).
@@ -193,8 +193,8 @@ async function save(){
  try{await db.doc('sessions/'+S.date).set(doc);if(neu.length){MEM.gaeste=[...MEM.gaeste,...neu];await db.doc('state/mitglieder').set(clean(MEM))}}
  catch(e){return ms('Speichern fehlgeschlagen: '+(e.message||e.code))}
  HIST=[doc,...HIST];S={};sync();
- // Zahlungen (Abschluss) zurücksetzen: „Hat gezahlt“ und „Runde bezahlt“ aller Mitglieder auf 0; den leeren Entwurf sofort sichern (nicht erst nach der Verzögerung).
- S.rows.forEach(r=>{r.p=0;r.l=0});draft(1);
+ // Tabelle Spiel (verl. Spiele bis Lotterie) und Zahlungen (Abschluss: „Hat gezahlt“, „Runde bezahlt“) aller Mitglieder auf 0; den leeren Entwurf sofort sichern (nicht erst nach der Verzögerung).
+ S.rows.forEach(r=>{for(const k of 'defghijlp')r[k]=0});draft(1);
  // Nach dem Speichern: Anwesenheit (S={} oben) und Umfrage komplett zurücksetzen, Terminliste fortschreiben.
  let fehl='';
  if(typeof UMF!=='undefined'){UMF={};try{await db.doc('state/umfrage').set({votes:{}})}catch(e){fehl+=' Die Umfrage konnte nicht zurückgesetzt werden.'}}
