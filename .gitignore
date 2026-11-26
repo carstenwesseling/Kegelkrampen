@@ -16,3 +16,7 @@ Thumbs.db
 
 # Export aus dem Artifact (enthält Vereinsdaten)
 kegelkrampen-daten.json
+
+# Build-Ausgabe
+dist/
+node_modules/

@@ -5,10 +5,15 @@
   "private": true,
   "license": "UNLICENSED",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node server.js"
+    "start": "vite build",
+    "serve": "node server.js"
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "vite": "^8.4.0"
   }
 }
